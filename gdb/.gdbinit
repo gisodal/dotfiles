@@ -152,8 +152,14 @@ set print vtbl on
 set print demangle on
 set demangle-style auto
 set print sevenbit-strings off
-
 set auto-solib-add off
+
+set print address off
+set print symbol off
+set print entry-values no
+set print type methods off
+set print type typedefs off
+
 
 define vgdb
     target remote | vgdb
