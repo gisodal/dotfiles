@@ -104,9 +104,9 @@ OS=$(if [ "$(uname -m)" == "x86_64" ]; then echo "64"; else echo "32"; fi)
 
 # keep in mind color codes without surrounding [ and ] will screw up history lookup
 if [ "$OS" == "32" ]; then
-    PS1="\n\[${PROMPT_COLOR}\]\$HOSTNAME\[${RS}\] \[${FRED}\]32-bit\[${RS}\]:\$(git_info)\$(last_two_dirs)\n\[\${RETURN_COLOR}\] ${PROMPT_PRIMARY} \[${RS}\]"
+    PS1="\n\[${PROMPT_COLOR}\]\$HOSTNAME\[${RS}\] \[${FRED}\]32-bit\[${RS}\]:\$(git_info)\$(last_two_dirs)\n \[\${RETURN_COLOR}\]${PROMPT_PRIMARY}\[${RS}\] "
 else
-    PS1="\n\[${PROMPT_COLOR}\]\$HOSTNAME\[${RS}\]:\$(git_info)\$(last_two_dirs)\n\[\${RETURN_COLOR}\] ${PROMPT_PRIMARY} \[${RS}\]"
+    PS1="\n\[${PROMPT_COLOR}\]\$HOSTNAME\[${RS}\]:\$(git_info)\$(last_two_dirs)\n \[\${RETURN_COLOR}\]${PROMPT_PRIMARY}\[${RS}\] "
 fi
 PS2=" \[\${RETURN_COLOR}\]${PROMPT_SECONDARY}\[${RS}\] "
 

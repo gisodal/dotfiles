@@ -53,7 +53,7 @@ echo -n '\documentclass{article}
 \end{document}' >> $TEX
 
 # compile tex to pdf
-pdflatex -halt-on-error -file-line-error -interaction=nonstopmode -output-directory="$TMPDIR" $TEX 1>/dev/null
+pdflatex -halt-on-error -file-line-error -interaction=nonstopmode -aux-directory="$TMPDIR" $TEX
 if [ $? -ne 0 ]; then
     echo "pdflatex could not create '$PDF'" 1>&2
     rm -rf $TMPDIR
