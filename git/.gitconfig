@@ -42,7 +42,7 @@
             printf \"%${timelength}s    %s %s %s\n\" \"$time\" \"$hash\" \"$branch\" \"\";          \
         done < <(git logx && echo);"'
     log7 = log --all --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %C(auto)%d%C(reset)\n         %C(black)[%cr]%C(reset)  %x09%C(black)%an: %s %C(reset)'
-    log8 = log --all --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %C(auto)%d%C(reset)%x09%C(bold black)%an %x09%C(reset)%s\n%x09%x09%C(black)[%ar on %cd]%C(reset)' --date=format:'%A %d %B %H:%M:%S'
+    log8 = log --all --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %x09%C(auto)%d%C(reset) %<(16,trunc)%C(bold black)%an%C(reset) %s\n%x09%x09%C(black) [%ar on %cd]%C(reset)' --date=format:'%A %d %B %Y %H:%M:%S'
     vtree = !bash -c '"                                                         \
         echo;                                                                   \
         git log5;                                                               \
