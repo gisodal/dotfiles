@@ -125,20 +125,22 @@
             echo \"There are local changes!\" 1>&2;                             \
         fi;"'
 
-    delete-all = !bash -c '"                                                    \
-        git checkout --orphan latest_branch;                                    \
-        git add -A;                                                             \
-        git commit -am \"rebased\";                                             \
-        git branch -D master;                                                   \
-        git branch -m master;                                                   \
-        git push -f origin master;"'
-
     print-tags = !bash -c '"                                                    \
         for f in $(git tag -l); do                                              \
             git print-tag $f | fold -s -w 80;                                   \
             echo -en \"========================================\";              \
             echo -en \"========================================\n\n\";          \
         done;"'
+
+    delete-branch = !bash -c '"                                                 \
+        read -n1 -r -p \"Delete local branch \\\"$0\\\" (N/y)? \" response;     \
+        echo; if [[ ${response,,} =~ y$ ]]; then                                \
+            git branch -d $0;                                                   \
+        fi;                                                                     \
+        read -n1 -r -p \"Delete remote branch \\\"$0\\\" (N/y)? \" response;    \
+        echo; if [[ ${response,,} =~ y$ ]]; then                                \
+            git push origin --delete $0;                                        \
+        fi"'
 
     branchname = rev-parse --abbrev-ref HEAD
     count = rev-list --count HEAD
