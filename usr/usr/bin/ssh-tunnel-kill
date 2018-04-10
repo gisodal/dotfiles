@@ -1,0 +1,7 @@
+#!/bin/bash
+
+TUNNELS=$(./ssh-tunnel-list | cut -d' ' -f1)
+for TUNNEL in $TUNNELS; do
+    echo "killing tunnel '${TUNNEL}'"
+    kill ${TUNNEL}
+done
