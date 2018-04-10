@@ -1,0 +1,6 @@
+#!/bin/bash
+
+PORT=22222
+SERVER=lilo
+./ssh-tunnel-reverse 22222 lilo
+

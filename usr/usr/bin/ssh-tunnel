@@ -5,10 +5,11 @@ if [ $# -eq 3 ]; then
     PORT_IN=$2
     SERVER="${3##*@}"
     SSH_USER="${3%@*}"
+    SSH_OP="-o ExitOnForwardFailure=yes -o ServerAliveInterval=60"
     if [ "$SSH_USER" == "$SERVER" ]; then
-        ssh -f ${SERVER} -L ${PORT_OUT}:${SERVER}:${PORT_IN} -N
+        ssh ${SSH_OP} -f ${SERVER} -L ${PORT_OUT}:${SERVER}:${PORT_IN} -N
     else
-        ssh -f ${SSH_USER}@${SERVER} -L ${PORT_OUT}:${SERVER}:${PORT_IN} -N
+        ssh ${SSH_OP} -f ${SSH_USER}@${SERVER} -L ${PORT_OUT}:${SERVER}:${PORT_IN} -N
     fi
 else
     echo "Usage: ssh-tunnel <port out> <port in> <server>" 1>&2
