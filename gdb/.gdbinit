@@ -154,7 +154,7 @@ set demangle-style auto
 set print sevenbit-strings off
 set auto-solib-add off
 
-set print address off
+set print address on
 set print symbol off
 set print entry-values no
 set print type methods off
