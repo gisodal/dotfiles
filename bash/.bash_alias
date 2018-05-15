@@ -38,6 +38,7 @@ alias swapcaps='setxkbmap -option; setxkbmap -layout us; setxkbmap -option ctrl:
 alias disable-mouseacceleration='xset m 00'
 alias kd='disable-mouseacceleration; swapcaps'
 alias scrfix='xrandr --output VGA-1 --right-of HDMI-1'
+alias cmaked='cmake -DCMAKE_BUILD_TYPE=Debug'
 
 [ -n "$(which htop 2>/dev/null)" ] && alias top='(TERM=xterm-256color; htop)'
 [ "$XDG_CURRENT_DESKTOP" == "GNOME" ] && alias open='gnome-open 2>/dev/null';
