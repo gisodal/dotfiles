@@ -79,6 +79,7 @@ function __prompt_command(){
     echo -ne "\033]0;\007";
     RETURN_COLOR="$([ $RETURN_VALUE -eq 0 ] && echo -en "$PROMPT_COLOR" || echo -en "$COLOR_RED")";
 }
+export PROMPT_COMMAND=__prompt_command
 
 function stderred(){
     export COLOR_RED="$(tput setaf 1)"
