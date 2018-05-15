@@ -73,6 +73,7 @@ esac
 # color stderr red
 # -----------------------------------------------------------------------------
 
+export COLOR_RED="$(tput setaf 1)"
 function __prompt_command(){
     RETURN_VALUE=$?;
     history -a;
