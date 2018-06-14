@@ -433,6 +433,10 @@ imap <Esc>[Z <S-Tab>
 vmap <Esc>[Z <S-Tab>
 nmap  <Esc>[Z <S-Tab>
 
+" navigate previous changes
+nnoremap <C-n> g;
+nnoremap <C-m> g,
+
 " fix tabing (only shift-tab in insert mode not working)
 vnoremap <C-t> >gv
 vnoremap <C-d> <gv
