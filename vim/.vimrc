@@ -233,7 +233,7 @@ augroup end
 
 autocmd FileType tcc,c,cpp,cc,sh setlocal cindent nowrap | syntax keyword cTodo NOTE
 autocmd FileType make setlocal noexpandtab shiftwidth=4
-autocmd FileType tex,txt setlocal wrap linebreak
+autocmd FileType tex,txt setlocal wrap linebreak noai nocin nosi inde=
 autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o " disable auto commenting
 
 " -----------------------------------------------------------------------------

@@ -142,6 +142,8 @@
             git push origin --delete $0;                                        \
         fi"'
 
+    pull-submodules = submodule foreach git pull
+    status-submodules = submodule foreach git status -uno
     branchname = rev-parse --abbrev-ref HEAD
     count = rev-list --count HEAD
     print-tag = !sh -c 'git rev-parse $1 | xargs git cat-file -p' -
