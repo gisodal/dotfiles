@@ -170,6 +170,7 @@ if filereadable(expand("~/.vim/bundle/Vundle.vim/autoload/vundle.vim"))
     Plugin 'chrisbra/Recover.vim'
     Plugin 'altercation/vim-colors-solarized'
     Plugin 'jezcope/vim-breakindent'
+    Plugin 'derekwyatt/vim-scala'
 
     " Git plugin not hosted on GitHub
     "Plugin 'git://<url>/<repository>'
