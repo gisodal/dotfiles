@@ -166,3 +166,5 @@
 	driver = true
 [status]
 	submoduleSummary = true
+[http]
+	postBuffer = 524288000
