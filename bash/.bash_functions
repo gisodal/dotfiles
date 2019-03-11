@@ -8,7 +8,7 @@
 function detach(){
     COMMAND=$1
     if [[ -n "$(command -v "$COMMAND")" ]]; then
-        (nohup $@ </dev/null >/dev/null 2>&1 &)
+        (nohup env -i DISPLAY=$DISPLAY $@ </dev/null >/dev/null 2>&1 &)
     else
         echo "Command '$COMMAND' does not exist" 1>&2
     fi
