@@ -33,14 +33,9 @@ alias blank='sleep 1; xset dpms force off'
 alias cc='clang'
 alias previous-command='fc -s'
 alias k='previous-command'
-alias swapalt='setxkbmap -option; setxkbmap -layout us; setxkbmap -option altwin:ctrl_win -option terminate:ctrl_alt_bksp'
-alias swapcaps='setxkbmap -option; setxkbmap -layout us; setxkbmap -option ctrl:swapcaps -option terminate:ctrl_alt_bksp'
-alias disable-mouseacceleration='xset m 00'
-alias kd='disable-mouseacceleration; swapcaps'
 alias scrfix='xrandr --output VGA-1 --right-of HDMI-1'
 alias cmaked='cmake -DCMAKE_BUILD_TYPE=Debug'
 alias d='nautilus . 1>/dev/null 2>/dev/null'
-
 
 [ -n "$(which htop 2>/dev/null)" ] && alias top='(TERM=xterm-256color; htop)'
 [ "$XDG_CURRENT_DESKTOP" == "GNOME" ] && alias open='gnome-open 2>/dev/null';

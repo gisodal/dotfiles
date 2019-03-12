@@ -1,65 +1,29 @@
 #!/bin/bash
 
 # -----------------------------------------------------------------------------
-# change keyboard settings
+# Key mapping
 # -----------------------------------------------------------------------------
 
-# if not an ssh connection
-if  [ -z "$SSH_TTY" ]           && \
-    [ -z "$SSH_CONNECTION" ]    && \
-    [ -z "$SSH_CLIENT" ]        && \
-    [ -n "$DISPLAY" ]; then
-
-    MAP=$(setxkbmap -query)
-
-    # set layout
-    if [[ "$(echo "$MAP" | grep "layout" | awk '{print $2}')" != "us" ]]; then
-        setxkbmap -layout us
-    fi
-
-    # map keys
-    case $(hostname) in
-        silveru)  XKBOPTION="altwin:ctrl_win";;    # right alt is control (freestyle2 keyboard)
-        *)      XKBOPTION="ctrl:swapcaps";;      # swap ctrl and caps
-    esac
-
-    if [[ "$(echo "$MAP" | grep "options" | awk '{print $2}')" =~ (altwin:ctrl_win|ctrl:swapcaps) ]]; then
-        setxkbmap -option $XKBOPTION
-    fi
-
-    # -------------------------------------------------------------------------
-    # Method 2
-    # -------------------------------------------------------------------------
-
-    # -- this can also be done by '.Xkbmap' file:--
-    # XKB="$HOME/.Xkbmap"
-    # if [ ! -f "$XKB" ]; then
-    #     setxkbmap -layout us        # no dead keys
-    #     setxkbmap -option altwin:ctrl_win 2>/dev/null
-    #     [ "$HOSTNAME" != "silveru" ] && \
-    #         setxkbmap -option ctrl:swapcaps 2>/dev/null # swap ctrl and caps
-    #
-    #     # permanently store settings
-    #     echo "-layout us" >> $XKB
-    #     echo "-option altwin:ctrl_win" >> $XKB
-    #     [ "$HOSTNAME" != "silveru" ] && \
-    #         echo "-option ctrl:swapcaps" >> $XKB
-    # fi
+alias swapcaps='setxkbmap -option; setxkbmap -layout us; setxkbmap -option ctrl:swapcaps -option terminate:ctrl_alt_bksp'
+alias freestyle='xkbcomp -w0 -I"$HOME/.xkb" "$HOME/.xkb/keymap/myfreestylekbd" "$DISPLAY"'
+alias swapcaps='xkbcomp -w0 -I"$HOME/.xkb" "$HOME/.xkb/keymap/mykbd" "$DISPLAY"'
+alias disable-mouseacceleration='xset m 00'
+alias kd='disable-mouseacceleration; kbd'
 
 
-    # -------------------------------------------------------------------------
-    # Method 3
-    # -------------------------------------------------------------------------
+# reset keymap:
+# > setxkbmap -option
 
-    # -- alternative: use xmodmap (determine key code with 'xev'): --
-    #    RIGHT_ALT="Alt_R"
-    #    if [ "$(xmodmap 2>/dev/null | grep "$RIGHT_ALT" | grep "control" )" == "" ]; then
-    #        MODIFIER=$(xmodmap 2>/dev/null | grep "Alt_R" | grep -oE "^[^\ ]*")
-    #        if [ "$MODIFIER" != "" ]; then
-    #            xmodmap -e "remove $MODIFIER = $RIGHT_ALT" 2>/dev/null
-    #        fi
-    #        xmodmap -e "add control = $RIGHT_ALT" 2>/dev/null
-    #    fi
+# create custom layout:
+# 1) create layout with setxkbmap, e.g.:
+#    > setxkbmap -layout us -option ctrl:swapcaps -option terminate:ctrl_alt_bksp
+# 2) make keymap file from current layout:
+#    > mkdir -p $HOME/.xkb/keymap
+#    > setxkbmap -print > $HOME/.xkb/keymap/<filename>
+# 3) load custom keymap file:
+#    > xkbcomp -w0 -I"$HOME/.xkb" "$HOME/.xkb/keymap/<filename>" "$DISPLAY"
 
-fi
-
+# create custom options:
+# 1) create symbol file .xkb/symbols/<symbolfile>
+# 2) example symbol file at /usr/share/X11/xkb/symbols
+# 3) add to xkb_symbols field +<symbolfile>(<xkb_symbols name>)

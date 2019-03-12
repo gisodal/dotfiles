@@ -1,0 +1,5 @@
+partial modifier_keys
+xkb_symbols "map_super_to_ctrl" {
+    key <RWIN> { [ Control_R ] };
+    modifier_map Control {  <RWIN> };
+};
