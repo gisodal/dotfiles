@@ -142,6 +142,13 @@
             git push origin --delete $0;                                        \
         fi"'
 
+    pull-all = !"                                                               \
+        CURRENT=$(git symbolic-ref --short HEAD);\
+        for b in $(git for-each-ref refs/heads --format='%(refname)') ; do      \
+            git checkout ${b#refs/heads/} && git pull --ff-only ;               \
+        done;\
+        git checkout --quiet $CURRENT"
+
     pull-submodules = submodule foreach git pull
     status-submodules = submodule foreach git status -uno
     branchname = rev-parse --abbrev-ref HEAD
