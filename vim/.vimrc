@@ -506,10 +506,15 @@ function! SpellCheck()
         setlocal nospell
     else
         let b:enableSpellCheck=1
+        setlocal spellfile+=~/.vim/spell/en.utf-8.add
+        setlocal spellfile+=oneoff.utf-8.add
         setlocal spell spelllang=en_us
         nnoremap gn ]s
         nnoremap gp [s
         nnoremap gf z=
+        nnoremap gA 1zg
+        nnoremap ga 2zg
+        nnoremap gi zG
     endif
 endfunction
 
@@ -531,9 +536,9 @@ let g:grammarous#hooks = {}
 function! g:grammarous#hooks.on_check(errs) abort
     nmap <buffer>gn <Plug>(grammarous-move-to-next-error)
     nmap <buffer>gp <Plug>(grammarous-move-to-previous-error)
-    nmap <buffer>gas f <Plug>(grammarous-move-to-info-window)f
-    nmap <buffer>gi <Plug>(grammarous-move-to-info-window)r
-    nmap <buffer>gI <Plug>(grammarous-move-to-info-window)R
+    nmap <buffer>gf <Plug>(grammarous-fixit)
+    nmap <buffer>gi <Plug>(grammarous-remove-error)
+    nmap <buffer>gI <Plug>(grammarous-disable-rule)
 endfunction
 function! g:grammarous#hooks.on_reset(errs) abort
     nunmap <buffer>gn
