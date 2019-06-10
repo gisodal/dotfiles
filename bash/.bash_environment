@@ -98,6 +98,8 @@ if [ -z "$BASH_CUSTOM_ENVIRONMENT" ]; then
     export CORES=$(grep -c ^processor /proc/cpuinfo)
     export TEXMFHOME="${HOME}/.texmf"
 
+    add-prefix-path CLASSPATH .             # scala path
+
     if [[ -n $CORES ]] && [ $CORES -gt 1 ]; then
         export MAKEFLAGS="-j$CORES"             # gnu make run parallel
     fi
