@@ -167,6 +167,8 @@ if filereadable(expand("~/.vim/bundle/Vundle.vim/autoload/vundle.vim"))
     call vundle#begin()
     Plugin 'VundleVim/Vundle.vim'
 
+
+    Plugin 'rhysd/vim-grammarous'
     Plugin 'vim-scripts/VisIncr'
     Plugin 'vim-scripts/Syntastic'
     Plugin 'kien/rainbow_parentheses.vim'
@@ -199,7 +201,6 @@ if filereadable(expand("~/.vim/bundle/Vundle.vim/autoload/vundle.vim"))
     " plugin: ctrl-P
     " let g:ctrlp_map = '<c-p>'
 endif
-
 
 " -----------------------------------------------------------------------------
 " Show filename of currently focussed file in the tmux statusbar
@@ -247,26 +248,6 @@ autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o "
 
 " quickly ROT13 your buffer:
 nmap <C-w>X ggg?G``
-
-" check spelling toggle
-nnoremap <C-w>s :call SpellCheck()<CR>
-let b:enableSpellCheck=0
-"set spellfile=~/.vim/spell/techspeak.utf-8.add
-function! SpellCheck()
-    if exists('b:enableSpellCheck') && b:enableSpellCheck == 1
-        let b:enableSpellCheck=0
-        setlocal nospell
-        nnoremap n n
-        nnoremap N N
-        nnoremap <C-m> <C-m>
-    else
-        let b:enableSpellCheck=1
-        setlocal spell spelllang=en_us
-        nnoremap n ]s
-        nnoremap N [s
-        nnoremap <C-m> z=
-    endif
-endfunction
 
 " resize windows on terminal resize
 autocmd VimResized * :wincmd =
@@ -512,3 +493,63 @@ endfunction
 nnoremap <F8> :call Color_toggle()<cr>
 
 execute Color_toggle()
+
+" -----------------------------------------------------------------------------
+" spell and grammar check
+" -----------------------------------------------------------------------------
+
+
+
+command Spell call SpellCheck()
+nnoremap <C-w><C-s> :Spell<CR>
+"set spellfile=~/.vim/spell/techspeak.utf-8.add
+let b:enableSpellCheck=0
+function! SpellCheck()
+    if exists('b:enableSpellCheck') && b:enableSpellCheck == 1
+        let b:enableSpellCheck=0
+        setlocal nospell
+    else
+        let b:enableSpellCheck=1
+        setlocal spellfile+=~/.vim/spell/en.utf-8.add
+        setlocal spellfile+=oneoff.utf-8.add
+        setlocal spell spelllang=en_us
+        nnoremap gn ]s
+        nnoremap gp [s
+        nnoremap gf z=
+        nnoremap gA 1zg
+        nnoremap ga 2zg
+        nnoremap gi zG
+    endif
+endfunction
+
+
+command Grammar call GrammarCheck()
+nnoremap <C-w><C-g> :Grammar<CR>
+let b:enableSpellCheck=0
+function! GrammarCheck()
+    if exists('b:enableGrammarCheck') && b:enableGrammarCheck == 1
+        let b:enableSpellCheck=0
+        GrammarousReset
+    else
+        let b:enableSpellCheck=1
+        GrammarousCheck
+    endif
+endfunction
+
+let g:grammarous#hooks = {}
+function! g:grammarous#hooks.on_check(errs) abort
+    nmap <buffer>gn <Plug>(grammarous-move-to-next-error)
+    nmap <buffer>gp <Plug>(grammarous-move-to-previous-error)
+    nmap <buffer>gf <Plug>(grammarous-fixit)
+    nmap <buffer>gi <Plug>(grammarous-remove-error)
+    nmap <buffer>gI <Plug>(grammarous-disable-rule)
+endfunction
+function! g:grammarous#hooks.on_reset(errs) abort
+    nunmap <buffer>gn
+    nunmap <buffer>gp
+    nunmap <buffer>gf
+    nunmap <buffer>gi
+    nunmap <buffer>gI
+endfunction
+
+
