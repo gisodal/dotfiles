@@ -540,12 +540,14 @@ let g:grammarous#hooks = {}
 function! g:grammarous#hooks.on_check(errs) abort
     nmap <buffer>gn <Plug>(grammarous-move-to-next-error)
     nmap <buffer>gp <Plug>(grammarous-move-to-previous-error)
+    nmap <buffer>gw <Plug>(grammarous-open-info-window)
     nmap <buffer>gf <Plug>(grammarous-fixit)
     nmap <buffer>gi <Plug>(grammarous-remove-error)
     nmap <buffer>gI <Plug>(grammarous-disable-rule)
 endfunction
 function! g:grammarous#hooks.on_reset(errs) abort
     nunmap <buffer>gn
+    nunmap <buffer>gw
     nunmap <buffer>gp
     nunmap <buffer>gf
     nunmap <buffer>gi
