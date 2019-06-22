@@ -7,7 +7,7 @@
 	default = matching
 [merge]
 	defaultToUpstream = true
-	tool = vim -d -c 'norm ]c[c'
+    tool = vimdiff
 	conflictstyle = diff3
 [color]
     diff = always

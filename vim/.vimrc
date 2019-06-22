@@ -73,6 +73,10 @@ set ttyfast                         " smooth redrawing on fast terminals
 set lazyredraw                      " fix slow scrolling on some files
 autocmd VimEnter * redraw!          " redraw is necessary because of startup bug with 'set lazyredraw'
 
+if &diff
+    autocmd VimResized * wincmd =
+endif
+
 " better encryption, activate with :X<CR>
 set cryptmethod=blowfish
 
