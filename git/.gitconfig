@@ -43,6 +43,8 @@
         done < <(git logx && echo);"'
     log7 = log --all --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %C(auto)%d%C(reset)\n         %C(black)[%cr]%C(reset)  %x09%C(black)%an: %s %C(reset)'
     log8 = log --all --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %x09%C(auto)%d%C(reset) %<(16,trunc)%C(bold black)%an%C(reset) %s\n%x09%x09%C(black) [%ar on %cd]%C(reset)' --date=format:'%A %d %B %Y %H:%M:%S'
+    timelogcvs = log --all --no-color --format=format:'%cd, %an, \"%s\"'  --date=local
+    timelog = !bash -c '"git timelogcvs | column -t -s,"'
     vtree = !bash -c '"                                                         \
         echo;                                                                   \
         git log5;                                                               \
