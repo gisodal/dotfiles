@@ -2,5 +2,14 @@
 
 source environment
 
-${STOW} -t $TARGET -S $DIRS
+
+if [ $# -gt 0 ]; then
+    PACKAGES=$@
+
+    for PACKAGE in $PACKAGES; do
+        ${STOW} -d $STOWDIR -t $TARGET -S $PACKAGE
+    done
+else
+    ${STOW} -d $STOWDIR -t $TARGET -S $PACKAGES
+fi
 
