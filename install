@@ -2,7 +2,6 @@
 
 source environment
 
-
 if [ $# -gt 0 ]; then
     PACKAGES=$@
 

@@ -8,3 +8,7 @@ if [ -f "$HOME/.bashrc" ]; then
     . "$HOME/.bashrc"
 fi
 
+if [ -f "$HOME/.git-completion.bash" ]; then
+    . "$HOME/.git-completion.bash"
+fi
+

@@ -2,9 +2,10 @@
 
 case "$-" in
     *i*) # shell is interactive
-        BASH_COMPLETION="$HOME/.bash-completion/bash_completion"
-        [[ $PS1 && -f "$BASH_COMPLETION" ]] && \
-            source $BASH_COMPLETION;
+
+        test -f "$HOME/.bash-completion/bash_completion" && . $_
+
+        test -f "$HOME/.git-completion.bash" && . $_
 
         source $HOME/.bash_map
 
