@@ -1,9 +1,15 @@
 " clear any existing autocommands:
 autocmd!
 
-" position cursor anywhere
 set nocompatible
+
+" position cursor anywhere
 set virtualedit=all
+
+" no bell (visual or sound)
+set belloff=all
+set noerrorbells
+set visualbell t_vb=
 
 " -----------------------------------------------------------------------------
 " User functions and trics
@@ -18,8 +24,8 @@ inoremap <C-h> <Left>
 inoremap <C-j> <Down>
 inoremap <C-k> <Up>
 inoremap <C-l> <Right>
-inoremap <C-r> <End>
-inoremap <C-e> <Home>
+inoremap <C-r> <Esc>g_a
+inoremap <C-e> <Esc>^i
 inoremap <C-u> <BS>
 inoremap <C-o> <Del>
 inoremap <C-f> <Esc>
@@ -28,17 +34,21 @@ nnoremap <C-h> <Left>
 nnoremap <C-j> <Down>
 nnoremap <C-k> <Up>
 nnoremap <C-l> <Right>
-nnoremap <C-r> <Home>
-nnoremap <C-e> <End>
+nnoremap <C-r> g_
+nnoremap <C-e> ^
 nnoremap <C-u> <Nop>
 nnoremap <C-o> <Nop>
+nnoremap H h
+nnoremap J j
+nnoremap K k
+nnoremap L l
 
 vnoremap <C-h> <Left>
 vnoremap <C-j> <Down>
 vnoremap <C-k> <Up>
 vnoremap <C-l> <Right>
-vnoremap <C-r> <Home>
-vnoremap <C-e> <End>
+vnoremap <C-r> <End>
+vnoremap <C-e> <Home>
 vnoremap <C-f> <Esc>
 
 cnoremap <C-h> <Left>
@@ -58,6 +68,14 @@ nmap <C-f> f
 nnoremap dd "_dd
 vnoremap <Esc> "_<Esc>
 
+" redo
+nnoremap <r> <C-r>
+
+
+" indent / unindent
+nnoremap <C-d> <<
+nnoremap <C-t> >>
+
 " -----------------------------------------------------------------------------
 " copy-pasting
 " -----------------------------------------------------------------------------
@@ -66,12 +84,13 @@ vnoremap d "_d
 vnoremap c c<Esc>
 vnoremap P "_dp
 vnoremap p "_dP
-nnoremap p P
-nnoremap P p
+nmap p P
+"nnoremap P p
 
 vnoremap <C-y> y
 vnoremap <C-c> c
 nnoremap <C-p> p
 vnoremap <C-p> p
 
+inoremap <C-p> <Esc><Right>Pi
 

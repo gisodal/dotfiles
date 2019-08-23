@@ -15,6 +15,7 @@
     decorate = short
 [mergetool]
 	prompt = false
+	keepBackup = false
 [difftool]
     prompt = false
 [difftool "diffpdf"]
