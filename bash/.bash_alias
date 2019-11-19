@@ -30,6 +30,7 @@ alias lock='lxlock' # sudo apt-get install lxsession
 alias callgrind='valgrind --tool=callgrind'
 alias profgrind='valgrind --tool=kcachegrind'
 alias blank='sleep 1; xset dpms force off'
+alias suspend='systemctl suspend'
 alias cc='clang'
 alias previous-command='fc -s'
 alias k='previous-command'

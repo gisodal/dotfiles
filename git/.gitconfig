@@ -21,65 +21,16 @@
 [difftool "diffpdf"]
 	cmd = diffpdf \"$LOCAL\" \"$REMOTE\"
 [difftool "vimdiff"]
-	cmd = vim -d -c 'norm ]c[c' \"$LOCAL\" \"$REMOTE\"
+	cmd = vim -d -c 'wincmd =' -c 'norm ]c[c' \"$LOCAL\" \"$REMOTE\"
 [alias]
 	pdfdiff = difftool --tool=diffpdf
 	vimdiff = difftool --tool=vimdiff
-	log1 = log --all --graph --decorate --pretty=oneline --abbrev-commit
-    log2 = log --all --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset)%x09%x09%C(auto)%d%C(reset) %x09%x09%C(bold yellow)(%cr)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)'
-	log3 = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset)%C(bold yellow)%d%C(reset)%n'' %C(white)%s%C(reset) %C(dim white)- %an%C(reset)' --all
-    log4 = log --graph --full-history --oneline --all --color --pretty=format:'%C(bold blue)%h%x09%C(auto)%d%x1b[0m%x20%s'
-    logx = log --all --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset)+%C(dim black)(%cr)%C(reset)+%C(auto)%d%C(reset)++\n+++       %C(bold black)%an%C(reset)%C(black): %s%C(reset)'
-    log5 = !bash -c '"                                                                              \
-        while IFS=+ read -r hash time branch message; do                                            \
-            timelength=$(echo \"$time\" | sed -r \"s:[^ ][[]([0-9]{1,2}(;[0-9]{1,2})?)?m::g\");     \
-            timelength=$(echo \"16+${#time}-${#timelength}\" | bc);                                 \
-            printf \"%${timelength}s    %s %s %s\n\" \"$time\" \"$hash\" \"$branch\" \"$message\";  \
-        done < <(git logx && echo);"'
-    log6 = !bash -c '"                                                                              \
-        while IFS=+ read -r hash time branch message; do                                            \
-            timelength=$(echo \"$time\" | sed -r \"s:[^ ][[]([0-9]{1,2}(;[0-9]{1,2})?)?m::g\");     \
-            timelength=$(echo \"16+${#time}-${#timelength}\" | bc);                                 \
-            printf \"%${timelength}s    %s %s %s\n\" \"$time\" \"$hash\" \"$branch\" \"\";          \
-        done < <(git logx && echo);"'
-    log7 = log --all --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %C(auto)%d%C(reset)\n         %C(black)[%cr]%C(reset)  %x09%C(black)%an: %s %C(reset)'
-    log8 = log --all --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %x09%C(auto)%d%C(reset) %<(16,trunc)%C(bold black)%an%C(reset) %s\n%x09%x09%C(black) [%ar on %cd]%C(reset)' --date=format:'%A %d %B %Y %H:%M:%S'
     timelogcvs = log --all --no-color --format=format:'%cd, %an, \"%s\"'  --date=local
     timelog = !bash -c '"git timelogcvs | column -t -s,"'
-    vtree = !bash -c '"                                                         \
-        echo;                                                                   \
-        git log5;                                                               \
-        echo;"'
-    stree = !bash -c '"                                                         \
-        echo;                                                                   \
-        git log6;                                                               \
-        echo;"'
-    tree = !bash -c '"                                                          \
-        echo;                                                                   \
-        git log8;                                                               \
-        echo;"'
-
-    roothash = !bash -c '"                                                      \
-        git log --pretty=oneline --no-color                                     \
-        | tail -1                                                               \
-        | awk '{print $1}';"'
-
-    upstream = !bash -c '"                                                      \
-        BRANCH=$(git branchname);                                               \
-        git branch -vv                                                          \
-        | grep \"^\\*\"                                                         \
-        | sed -n \"s:.*\\[\\(.*\\)].*:\\1:p\";"'
-
-    pullhard = !bash -c '"                                                      \
-        UPSTREAM=$(git upstream);                                               \
-        if [ \"$UPSTREAM\" != \"\" ]; then                                      \
-            read -sn 1 -p \"This will delete untracked files!! Press any key to continue, or CTRL-C to abort...\" 2>&1;\
-            git fetch --all;                                                    \
-            git reset --hard $UPSTREAM;                                         \
-            git clean -f;                                                       \
-        else                                                                    \
-            echo No upstream set! 1>&2;                                         \
-        fi;"'
+    tree = log --author-date-order --all --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %x09%C(auto)%d%C(reset) %<(16,trunc)%C(bold black)%an%C(reset) %C(dim white)%s%C(reset)\n%x09%x09%C(black) [%ar on %cd]%C(reset)' --date=format:'%A %d %B %Y %H:%M:%S'
+    atree = log --all --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %x09%C(auto)%d%C(reset) %<(16,trunc)%C(bold black)%an%C(reset) %C(dim white)%s%C(reset)\n%x09%x09%C(black) [%ar on %cd]%C(reset)' --date=format:'%A %d %B %Y %H:%M:%S'
+    ltree = log --author-date-order --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %x09%C(auto)%d%C(reset) %<(16,trunc)%C(bold black)%an%C(reset) %C(dim white)%s%C(reset)\n%x09%x09%C(black) [%ar on %cd]%C(reset)' --date=format:'%A %d %B %Y %H:%M:%S'
+    stree = log --author-date-order --all --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %x09%C(auto)%d%C(reset) %C(black)%s%C(reset)\n'
 
     tar = !bash -c '"                                                           \
         BRANCH=$(git branchname);                                               \
@@ -116,25 +67,6 @@
         echo Pushing...;                                                        \
         git push;"'
 
-    status-pull = !bash -c '"                                                   \
-        git repository;                                                         \
-        echo;                                                                   \
-        echo \"Checking status...\";                                            \
-        if [ \"$(git status -s | grep -v \"^??\")\" == \"\" ]; then             \
-            echo;                                                               \
-            echo \"Pulling...\";                                                \
-            git pull;                                                           \
-        else                                                                    \
-            echo \"There are local changes!\" 1>&2;                             \
-        fi;"'
-
-    print-tags = !bash -c '"                                                    \
-        for f in $(git tag -l); do                                              \
-            git print-tag $f | fold -s -w 80;                                   \
-            echo -en \"========================================\";              \
-            echo -en \"========================================\n\n\";          \
-        done;"'
-
     delete-branch = !bash -c '"                                                 \
         read -n1 -r -p \"Delete local branch \\\"$0\\\" (N/y)? \" response;     \
         echo; if [[ ${response,,} =~ y$ ]]; then                                \
@@ -156,11 +88,9 @@
     status-submodules = submodule foreach git status -uno
     branchname = rev-parse --abbrev-ref HEAD
     count = rev-list --count HEAD
-    print-tag = !sh -c 'git rev-parse $1 | xargs git cat-file -p' -
     root = rev-parse --show-toplevel
     check = fetch --dry-run -v
     unstage = reset HEAD -- .
-    add-push = remote set-url --add --push origin
     ls = ls-tree -r HEAD --name-only
     st = status
     co = checkout
@@ -177,4 +107,5 @@
 [status]
 	submoduleSummary = true
 [http]
-	postBuffer = 524288000
+    postBuffer = 524288000
+
