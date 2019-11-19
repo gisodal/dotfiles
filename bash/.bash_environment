@@ -58,14 +58,13 @@ if [ -z "$BASH_CUSTOM_ENVIRONMENT" ]; then
     # update PATH, INCLUDE and LIBRARY paths and environment
     # -----------------------------------------------------------------------------
 
-    CUDA="/usr/local/cuda"
     GCCL="$HOME/gcc"
     PRG="$HOME/usr"
     PYTHON="$PRG/local/python"
 
-    add-path include $GCCL/include $PRG/include $PRG/include/ncurses $CUDA/include /usr/include
-    add-path library $GCCL/lib $GCCL/lib64 $PRG/lib $PRG/lib64 $CUDA/lib $CUDA/lib64 /lib64 /usr/lib
-    add-path bin     $GCCL/bin $PRG/bin:$CUDA/bin $PRG/bin/texbin $HOME/texlive/bin/i386-linux $PYTHON/bin
+    add-path include $PRG/include $GCCL/include
+    add-path library $PRG/lib $PRG/lib64 $GCCL/lib $GCCL/lib64
+    add-path bin     $PRG/bin $GCCL/bin
 
 
     # -----------------------------------------------------------------------------
