@@ -32,6 +32,8 @@
     ltree = log --author-date-order --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %x09%C(auto)%d%C(reset) %<(16,trunc)%C(bold black)%an%C(reset) %C(dim white)%s%C(reset)\n%x09%x09%C(black) [%ar on %cd]%C(reset)' --date=format:'%A %d %B %Y %H:%M:%S'
     stree = log --author-date-order --all --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %x09%C(auto)%d%C(reset) %C(black)%s%C(reset)\n'
 
+    forest = "forest --pretty=format:\"%C(red)%h %C(magenta)(%ar) %C(blue)%an %C(reset)%s\""
+
     tar = !bash -c '"                                                           \
         BRANCH=$(git branchname);                                               \
         REPODIR=$(git root);                                                    \

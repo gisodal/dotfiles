@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ -z "${BASH_VERSINFO}" ] || [ -z "${BASH_VERSINFO[0]}" ] || [ ${BASH_VERSINFO[0]} -lt 4 ]; then
+    echo "This script requires Bash version >= 4"
+    exit 1
+fi
+
 # color printers
 grn() {
     echo -e "\033[32m$@\033[0m"
@@ -12,9 +17,13 @@ red() {
 PREFIX="$HOME/gcc"
 SRC=src
 
-THREADS=$(grep -c ^processor /proc/cpuinfo)
+export LD_LIBRARY_PATH=$PREFIX/lib:$PREFIX/lib64:$LD_LIBRARY_PATH
+export C_INCLUDE_PATH=$PREFIX/include
+export CPLUS_INCLUDE_PATH=$PREFIX/include
+
+export THREADS=$(grep -c ^processor /proc/cpuinfo)
 if [ -z "$THREADS" ]; then
-    THREADS=4
+    export THREADS=4
 fi
 
 BINUTILS="binutils"
@@ -26,9 +35,10 @@ CLOOG="cloog"
 ISL="isl"
 GCC="gcc"
 
+# all tools that will be installed, in listed order
 TOOLS=($BINUTILS $GMP $MPFR $MPC $ELF $ISL $CLOOG $GCC)
 
-
+# download urls of tools
 declare -A LOCATION
 LOCATION=(
     [$BINUTILS]="https://ftp.gnu.org/gnu/binutils/binutils-2.33.1.tar.xz"
@@ -41,6 +51,7 @@ LOCATION=(
     [$GCC]="https://ftp.gnu.org/gnu/gcc/gcc-9.2.0/gcc-9.2.0.tar.xz"
     )
 
+# configure options for each tool
 declare -A OPTIONS
 OPTIONS=(
     [$BINUTILS]="--prefix=$PREFIX"
@@ -70,14 +81,14 @@ function extract() {
     if [ -f $1 ]; then
         case $1 in
             *.tar.*)     tar xvf $1    ;;
-            *.bz2)       bunzip2 $1     ;;
-            *.rar)       unrar x $1     ;;
-            *.gz)        gunzip $1      ;;
-            *.tbz2)      tar xvjf $1    ;;
-            *.tgz)       tar xvzf $1    ;;
-            *.zip)       unzip $1       ;;
-            *.Z)         uncompress $1  ;;
-            *.7z)        7z x $1        ;;
+            *.bz2)       bunzip2 $1    ;;
+            *.rar)       unrar x $1    ;;
+            *.gz)        gunzip $1     ;;
+            *.tbz2)      tar xvjf $1   ;;
+            *.tgz)       tar xvzf $1   ;;
+            *.zip)       unzip $1      ;;
+            *.Z)         uncompress $1 ;;
+            *.7z)        7z x $1       ;;
             *)           echo "I don't know how to extract '$1'..." ;;
         esac
         if [ $? -ne 0 ]; then
@@ -93,17 +104,18 @@ function extract() {
 function download() {
     TOOL=$1
     grn "Download $TOOL"
+
     wget -N ${LOCATION[$TOOL]}
     if [[ $? -ne 0 ]]; then
-        red "downloading $TOOL failed at '${LOCATION[$TOOL]}'"
-        exit 1;
+        red "downloading $TOOL failed from location '${LOCATION[$TOOL]}'"
+        exit 1
     fi
 }
 
 function unpack() {
     TOOL=$1
-
     grn "Unpack $TOOL"
+
     TAR=$(find . -maxdepth 1 -name "$TOOL*tar*" -type f | head -1)
     if [ ! -f "$TAR" ]; then
         red "Can't find tool $TOOL's tar $TAR"
@@ -115,7 +127,6 @@ function unpack() {
 
 function install() {
     TOOL=$1
-
     grn "Install $TOOL"
 
     CONFIGURE=$(find . -maxdepth 2 -path "*$TOOL*/configure" -type f | head -1)
@@ -130,19 +141,18 @@ function install() {
         exit 1
     fi
 
-    (cd $TOOLDIR && ./$(basename $CONFIGURE) ${OPTIONS[$TOOL]} && LD_LIBRARY_PATH=$PREFIX/lib:$LD_LIBRARY_PATH make -j $THREADS && make install)
+    (
+        cd $TOOLDIR &&
+        ./$(basename $CONFIGURE) ${OPTIONS[$TOOL]} &&
+        LD_LIBRARY_PATH="$PREFIX/lib64:$PREFIX/lib${LD_LIBRARY_PATH:+:}$LD_LIBRARY_PATH"  make -j $THREADS &&
+        make install
+    )
+
     if [ $? -ne 0 ]; then
         red "Installation failed for tool $TOOL"
         exit 1
     fi
 }
-
-mkdir -p $SRC
-cd $SRC
-
-export LD_LIBRARY_PATH=$PREFIX/lib:$PREFIX/lib64:$LD_LIBRARY_PATH
-export C_INCLUDE_PATH=$PREFIX/include
-export CPLUS_INCLUDE_PATH=$PREFIX/include
 
 for TOOL in ${TOOLS[@]}; do
     download $TOOL
@@ -150,8 +160,10 @@ for TOOL in ${TOOLS[@]}; do
     install  $TOOL
 done
 
-echo "Don't forget to update"
-echo "  * LD_LIBRARY_PATH with '$PREFIX/lib:$PREFIX/lib64'"
-echo "  * C_INCLUDE_PATH with '$PREFIX/include'"
-echo "  * CPLUST_INCLUDE_PATH with '$PREFIX/include'"
-echo "  * PATH with $PREFIX/bin"
+grn
+grn "Don't forget to update:"
+grn "  * LD_LIBRARY_PATH with '$PREFIX/lib:$PREFIX/lib64'"
+grn "  * C_INCLUDE_PATH with '$PREFIX/include'"
+grn "  * CPLUST_INCLUDE_PATH with '$PREFIX/include'"
+grn "  * PATH with $PREFIX/bin"
+
