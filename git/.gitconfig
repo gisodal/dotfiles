@@ -129,3 +129,6 @@
 [http]
     postBuffer = 524288000
 
+[pager]
+	color = false
+	show = vim -R -
