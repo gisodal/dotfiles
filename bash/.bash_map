@@ -4,8 +4,9 @@
 # Key mapping
 # -----------------------------------------------------------------------------
 
-alias swapcaps='setxkbmap -option; setxkbmap -layout us; setxkbmap -option ctrl:swapcaps -option terminate:ctrl_alt_bksp'
+alias nomap='setxkbmap -option;'
 alias freestyle='xkbcomp -w0 -I"$HOME/.xkb" "$HOME/.xkb/keymap/myfreestylekbd" "$DISPLAY"'
+#alias swapcaps='setxkbmap -option; setxkbmap -layout us; setxkbmap -option ctrl:swapcaps -option terminate:ctrl_alt_bksp'
 alias swapcaps='xkbcomp -w0 -I"$HOME/.xkb" "$HOME/.xkb/keymap/mykbd" "$DISPLAY"'
 alias disable-mouseacceleration='xset m 00'
 alias kd='disable-mouseacceleration; kbd'

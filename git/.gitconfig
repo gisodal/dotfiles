@@ -27,7 +27,11 @@
 	vimdiff = difftool --tool=vimdiff
     timelogcvs = log --all --no-color --format=format:'%cd, %an, \"%s\"'  --date=local
     timelog = !bash -c '"git timelogcvs | column -t -s,"'
-    tree = log --author-date-order --all --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %x09%C(auto)%d%C(reset) %<(16,trunc)%C(bold black)%an%C(reset) %C(dim white)%s%C(reset)\n%x09%x09%C(black) [%ar on %cd]%C(reset)' --date=format:'%A %d %B %Y %H:%M:%S'
+    basetree = log --author-date-order --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %x09%C(auto)%d%C(reset) %<(16,trunc)%C(bold black)%an%C(reset) %C(dim white)%s%C(reset)\n%x09%x09%C(black) [%ar on %cd]%C(reset)' --date=format:'%A %d %B %Y %H:%M:%S'
+    tree = !bash -c '"git basetree --all"'
+    unmergedtree = !bash -c '"git basetree $(git unmerged)"'
+    unmerged = branch --no-merged master
+
     atree = log --all --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %x09%C(auto)%d%C(reset) %<(16,trunc)%C(bold black)%an%C(reset) %C(dim white)%s%C(reset)\n%x09%x09%C(black) [%ar on %cd]%C(reset)' --date=format:'%A %d %B %Y %H:%M:%S'
     ltree = log --author-date-order --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %x09%C(auto)%d%C(reset) %<(16,trunc)%C(bold black)%an%C(reset) %C(dim white)%s%C(reset)\n%x09%x09%C(black) [%ar on %cd]%C(reset)' --date=format:'%A %d %B %Y %H:%M:%S'
     stree = log --author-date-order --all --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %x09%C(auto)%d%C(reset) %C(black)%s%C(reset)\n'
@@ -116,9 +120,10 @@
     co = checkout
     cm = commit
 
-    sp = !git status-pull
-	cn = !git commit-now
-    cnp = !git commit-now-push
+    pwd = rev-parse --show-prefix
+    sp = status-pull
+	cn = commit-now
+    cnp = commit-now-push
 [core]
     editor = vim
     excludesfile = ~/.gitignoreglobal

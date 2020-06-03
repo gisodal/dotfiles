@@ -289,3 +289,23 @@ git-show(){
     git show "$1" | vim - -c "set filetype=${1##*.} nobuflisted buftype=nofile bufhidden=wipe noswapfile";
 }
 
+timestamp() {
+    if [ $# -eq 0 ]; then
+        awk '{ print strftime("[%Y-%m-%d %H:%M:%S]"), $0 }' < /dev/stdin
+    else
+        echo "$@" | awk '{ print strftime("[%Y-%m-%d %H:%M:%S]"), $0 }'
+    fi
+}
+
+log() {
+    if [ $# -eq 1 ]; then
+        timestamp < /dev/stdin >> $1;
+    elif [ $# -ge 1 ]; then
+        timestamp "${@:2}" >> $1;
+    else
+        echo "Usage: log <filename> [line to log]" 1>&2
+        return 1
+    fi
+}
+
+
