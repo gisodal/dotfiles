@@ -31,6 +31,7 @@
     tree = !bash -c '"git basetree --all"'
     unmergedtree = !bash -c '"git basetree $(git unmerged)"'
     unmerged = branch --no-merged master
+    unmerged-all = !bash -c '"git unmerged;  git branch -r --no-merged origin/master;"'
 
     atree = log --all --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %x09%C(auto)%d%C(reset) %<(16,trunc)%C(bold black)%an%C(reset) %C(dim white)%s%C(reset)\n%x09%x09%C(black) [%ar on %cd]%C(reset)' --date=format:'%A %d %B %Y %H:%M:%S'
     ltree = log --author-date-order --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %x09%C(auto)%d%C(reset) %<(16,trunc)%C(bold black)%an%C(reset) %C(dim white)%s%C(reset)\n%x09%x09%C(black) [%ar on %cd]%C(reset)' --date=format:'%A %d %B %Y %H:%M:%S'
