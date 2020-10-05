@@ -6,15 +6,9 @@
 
 alias cp="rsync -ahv"
 alias cp%="rsync -ahv --progress"
-alias h='history'
-alias lt='command ls --color=auto -lht'
-alias ltf='lt --color=always -lht | command grep "^-"'
-alias ltd='lt --color=always -lht | command grep "^d"'
 alias grep='grep --line-number --color=auto'
-alias lpr='lpr -o sides=two-sided-long-edge -o number-up=2'
-alias cugdb='cgdb -d cuda-gdb'
-alias nettop='sudo nethogs'
 alias tmux='tmux -2 -u'                        # force 256 colors AND UTF-8
+alias ll='ls -al'
 alias xcopy='xclip -selectionclipboard'        # copy to clipboard
 alias xpaste='xclip -selection clipboard -o'   # paste from clipboard
 alias sshnokey='ssh -Y -o PreferredAuthentications=password -o PubkeyAuthentication=no'
@@ -24,18 +18,14 @@ alias vimdiff='vim -d -c "norm ]c[c"' # jump to first difference on startup
 alias unspoof='spoof x'
 alias vgdb='valgrind --vgdb=yes --vgdb-error=0 --leak-check=full --show-reachable=yes --track-origins=yes --num-callers=20 --track-fds=yes -s'
 alias gdb='gdb -q'
-alias ls='ls --color=auto -v -h --group-directories-first'
 alias evince='env -i DISPLAY=$DISPLAY evince'
 alias lock='lxlock' # sudo apt-get install lxsession
 alias callgrind='valgrind --tool=callgrind'
 alias profgrind='valgrind --tool=kcachegrind'
 alias blank='sleep 1; xset dpms force off'
 alias suspend='systemctl suspend'
-alias cc='clang'
 alias previous-command='fc -s'
 alias k='previous-command'
-alias scrfix='xrandr --output VGA-1 --right-of HDMI-1'
-alias cmaked='cmake -DCMAKE_BUILD_TYPE=Debug'
 alias d='nautilus . 1>/dev/null 2>/dev/null &'
 
 [ -n "$(which htop 2>/dev/null)" ] && alias top='(TERM=xterm-256color; htop)'

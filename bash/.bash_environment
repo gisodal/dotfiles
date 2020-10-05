@@ -58,30 +58,23 @@ if [ -z "$BASH_CUSTOM_ENVIRONMENT" ]; then
     # update PATH, INCLUDE and LIBRARY paths and environment
     # -----------------------------------------------------------------------------
 
-    GCCL="$HOME/gcc"
-    PRG="$HOME/usr"
-    PYTHON="$PRG/local/python"
+    USR_DOTFILES="$HOME/.dotfiles/usr"
+    USR_LOCAL="$HOME/usr"
 
-    add-path include $PRG/include $GCCL/include
-    add-path library $PRG/lib $PRG/lib64 $GCCL/lib $GCCL/lib64
-    add-path bin     $PRG/bin $GCCL/bin
-
+    add-path include $USR_LOCAL/include
+    add-path library $USR_LOCAL/lib $USR_LOCAL/lib64
+    add-path bin     $USR_LOCAL/bin $USR_DOTFILES/bin
 
     # -----------------------------------------------------------------------------
     # Update program environment
     # -----------------------------------------------------------------------------
 
     # setup git user
-    printf "[user]\n    name = $USER@$HOSTNAME\n    email = $USER@cs.ru.nl\n" > $HOME/.gituser
+    printf "[user]\n    name = $USER@$HOSTNAME\n    email = noreply@gmail.com\n" > $HOME/.gituser
 
-    #export CDPATH=".:$HOME"                 # homedir available from everywhere
-    export CVSROOT="$HOME/trunk/cvs"
-    export CVSEDITOR="vim"
-    mkdir -p "$CVSROOT/CVSROOT"
-    export PYTHONPATH="$PYTHON:/usr/local/lib/python2.7/dist-packages"
-
-    export PKG_CONFIG_PATH="$PRG/lib/pkgconfig"
-    export VALGRIND_LIB="$PRG/lib/valgrind"
+    export GIT_CONFIG_DIR="$HOME/.gitcfg"
+    export PKG_CONFIG_PATH="$USR_LOCAL/lib/pkgconfig"
+    export VALGRIND_LIB="$USR_LOCAL/lib/valgrind"
     export EDITOR="vim"
     export VISUAL="vim"
     export XZ_OPT="-9"                      # best compression for tar.xz creation
@@ -89,13 +82,10 @@ if [ -z "$BASH_CUSTOM_ENVIRONMENT" ]; then
     export LANG="en_US.UTF-8"
     export LANGUAGE="en_US.UTF-8"
     export CLICOLOR=1                       # use colors (if possible)
-    export PRINTER="$([ $HOSTNAME == "silveru" ] && echo "lacertian";)"
-    export STDERR_COLOR="\033[31m"          # make stderr output red
     export HISTTIMEFORMAT="[%Y-%m-%d %T] "  # timestamp history commands
     export HISTCONTROL="ignoredups"         # dont record duplicate commands
     export HISTIGNORE="&:ls:cd:[bf]g:exit"  # dont record simple commands like ls
     export CORES=$(grep -c ^processor /proc/cpuinfo)
-    export TEXMFHOME="${HOME}/.texmf"
 
     add-prefix-path CLASSPATH .             # scala path
 

@@ -1,14 +1,41 @@
 #!/bin/bash
 
-source environment
+function script_dir() {
+    (cd "$(dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd)
+}
+
+function separator() {
+    local len="${#@}"
+    eval printf '=%.0s' {1..$len}
+    echo
+}
+
+function run_stow() {
+    if ! [ -x "$(command -v stow)" ]; then
+        echo 'Error: GNU Stow is not installed.' >&2
+        exit 1
+    fi
+
+    local packages=$@
+    local cmd="stow -vv -d $SOURCE -t $TARGET -S $packages"
+
+    separator "    $cmd"
+    echo -e "** Stowing '$packages' with command:\n    $cmd"
+    separator "    $cmd"
+
+    $cmd
+    [ $? -ne 0 ] && exit 1
+}
+
+TARGET=$HOME
+SOURCE=$(script_dir)
+PACKAGES=$(find "$SOURCE" -mindepth 1 -maxdepth 1 ! -path .  -type d -printf '%P ')
 
 if [ $# -gt 0 ]; then
     PACKAGES=$@
-
-    for PACKAGE in $PACKAGES; do
-        ${STOW} -d $STOWDIR -t $TARGET -S $PACKAGE
-    done
-else
-    ${STOW} -d $STOWDIR -t $TARGET -S $PACKAGES
 fi
+
+for package in $PACKAGES; do
+    run_stow $package
+done
 

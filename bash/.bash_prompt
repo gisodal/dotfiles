@@ -45,20 +45,7 @@ function git_info(){
 }
 
 function last_two_dirs {
-    DIRS=$(echo "$(pwd)" \
-        | sed "s:^${HOME}:\~:" \
-        | rev \
-        | awk -F/ '{printf "%s",$1; if($2 != "") printf "/%s",$2;}' \
-        | rev )
-
-    if [ "${DIRS:0:1}" != '~' ]; then
-        if [ -n "$DIRS" ]; then
-            echo -n "../"
-        else
-            echo -n "/"
-        fi
-    fi
-    echo $DIRS
+    pwd | awk -F'/' '{ OFS = ""; if (NF > 3) { print "../",$(NF-1),"/",$NF } else { print $0 } }'
 }
 
 case $HOSTNAME in

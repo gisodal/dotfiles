@@ -4,7 +4,7 @@ autocmd!
 " -----------------------------------------------------------------------------
 " Basic settings
 " -----------------------------------------------------------------------------
-
+let g:tex_flavor = "latex"          " prefer 'latex' when tex files are opened
 set shortmess=at                    " no startup message
 set modeline                        " read vim settings in the comments of files
 set nocompatible                    " don't make compatible with vi
