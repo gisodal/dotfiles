@@ -24,9 +24,10 @@
 	cmd = vim -d -c 'wincmd =' -c 'norm ]c[c' \"$LOCAL\" \"$REMOTE\"
 [alias]
 	pdfdiff = difftool --tool=diffpdf
-	vimdiff = difftool --tool=vimdiff
-    timelogcvs = log --all --no-color --format=format:'%cd, %an, \"%s\"'  --date=local
-    timelog = !bash -c '"git timelogcvs | column -t -s,"'
+    vimdiff = difftool --tool=vimdiff
+    timelogcsv = log --all --no-color --date=local --format=format:"%cd,%an,%s"
+    timelogtsv = log --all --no-color --date=local --pretty=format:"%ad%x09%an%x09%s"
+    timelog = !bash -c '"git timelogcsv | column -t -s,"'
     basetree = log --author-date-order --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %x09%C(auto)%d%C(reset) %<(16,trunc)%C(bold black)%an%C(reset) %C(dim white)%s%C(reset)\n%x09%x09%C(black) [%ar on %cd]%C(reset)' --date=format:'%A %d %B %Y %H:%M:%S'
     tree = !bash -c '"git basetree --all"'
     unmergedtree = !bash -c '"git basetree $(git unmerged)"'
@@ -112,19 +113,20 @@
     pull-submodules = submodule foreach git pull
     status-submodules = submodule foreach git status -uno
     branchname = rev-parse --abbrev-ref HEAD
-    count = rev-list --count HEAD
     root = rev-parse --show-toplevel
-    check = fetch --dry-run -v
     unstage = reset HEAD -- .
     ls = ls-tree -r HEAD --name-only
+
     st = status
     co = checkout
     cm = commit
+    fe = fetch-diff
+    pu = !git fetch-diff && git merge
+    vd = !git vimdiff
 
-    pwd = rev-parse --show-prefix
-    sp = status-pull
 	cn = commit-now
     cnp = commit-now-push
+
 [core]
     editor = vim
     excludesfile = ~/.gitignoreglobal
