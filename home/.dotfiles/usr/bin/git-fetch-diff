@@ -23,9 +23,5 @@ if [ ! -z "$added_hashes" ]; then
     echo "Incoming commits:"
     echo "================="
     echo "$added_hashes" |  git log --stdin --no-walk --author-date-order --color --format=format:'%C(blue)[%cd]%C(reset)%x09%<(16,trunc)%C(bold black)%an%C(reset) %C(dim white)%s%C(reset) %C(auto)%d%C(reset)' --date=format:'%A %d %b %Y %H:%M:%S'
-else
-    echo "No incoming commits."
 fi
-
-
 
