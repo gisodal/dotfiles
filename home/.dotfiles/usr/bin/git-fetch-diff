@@ -16,7 +16,7 @@ git fetch
 new_hashes=$(get_commits)
 
 # get the difference
-added_hashes=$(comm -1 -3  <(echo "$old_hashes") <(echo "$new_hashes"))
+added_hashes=$(comm -1 -3 --nocheck-order <(echo "$old_hashes") <(echo "$new_hashes"))
 
 # print added hashes
 if [ ! -z "$added_hashes" ]; then
