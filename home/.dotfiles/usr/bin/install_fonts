@@ -1,0 +1,10 @@
+#!/bin/bash
+
+set -e
+
+cd ~/.fonts
+
+mkfontscale
+mkfontdir
+fc-cache -fv ~/.fonts
+

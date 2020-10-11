@@ -1,9 +1,0 @@
-#!/bin/bash
-
-DIR=$( cd "$( dirname "$0" )" && pwd )
-for f in $(find $DIR -name "*.ti" -type f); do
-    echo compiling $f
-    tic $f
-done
-echo done
-

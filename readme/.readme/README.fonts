@@ -1,0 +1,33 @@
+================================================================
+INSTALL A FONT
+================================================================
+* Download (and extract) a font to ~/.fonts
+    - fonts can be found at https://www.nerdfonts.com/
+    - e.g.: Hack font: https://github.com/ryanoasis/nerd-fonts/releases/download/v2.1.0/Hack.zip
+
+* Install the font:
+    > cd ~/.fonts
+    > mkfontscale
+    > mkfontdir
+    > fc-cache -fv ~/.fonts
+
+    - or run (if available):
+        > install_fonts
+
+* Select the font in terminal to use it
+
+
+================================================================
+ISSUES
+================================================================
+* Font issue: space between test and powerline symbols
+    - install tweak tool:
+        > sudo apt install gnome-tweak-tool
+
+    - start tweak tool:
+        > gnome-tweaks
+
+    - select tab 'Fonts'
+
+    - change option for antialiasing from subpixel to grayscala
+
