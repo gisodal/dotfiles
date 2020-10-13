@@ -33,19 +33,38 @@ export ORANGE=$(EXT_COLOR 172)
 # shell prompt appearance functions
 # -----------------------------------------------------------------------------
 
+function is_git_repository() {
+    git rev-parse >/dev/null 2>&1
+    echo $?
+}
+
+function git_repository_name() {
+    GITDIR=$(git rev-parse --show-toplevel 2>&1)
+    if [ ! -z "$GITDIR" ]; then
+        echo "$GITDIR" | sed "s:$HOME:home:" | xargs basename -- 2>/dev/null
+    else
+        GITPARENT=$(pwd | sed "s:\(.*\)/.git.*:\1:")
+        if [ "$GITPARENT" != "$(pwd)" ]; then
+            (command cd $GITPARENT 2>/dev/null && git_repository_name)
+        else
+            echo ""
+        fi
+    fi
+}
+
 function git_info(){
-    if [ "$(git rev-parse 2>&1)" == "" ]; then
-        GITDIR=$(git rev-parse --show-toplevel  2>&1 | sed "s:$HOME:home:")
-        #BRANCH=$(git rev-parse --abbrev-ref HEAD 2>&1)
+    if [ $(is_git_repository) -eq 0 ]; then
         BRANCH=$(git symbolic-ref HEAD 2>/dev/null)
         BRANCH=${BRANCH##refs/heads/}
         BRANCH=${BRANCH:-detached}
-        echo -e "$(basename $GITDIR) ${FGRN}${BRANCH}${RS}:"
+        REPOSITORY=$(git_repository_name)
+        REPOSITORY=${REPOSITORY:-?}
+        echo -e "${FBLE}$REPOSITORY${RS} ${FGRN}${BRANCH}${RS}:"
     fi
 }
 
 function last_two_dirs {
-    pwd | awk -F'/' '{ OFS = ""; if (NF > 3) { print "../",$(NF-1),"/",$NF } else { print $0 } }'
+    pwd | sed "s:$HOME:~:" | awk -F'/' '{ OFS = ""; if (NF > 3) { print "../",$(NF-1),"/",$NF } else { print $0 } }'
 }
 
 case $HOSTNAME in

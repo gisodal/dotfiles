@@ -21,9 +21,9 @@ To install the config files, type:
 
 
 Examples:
+    > ./install
 
     > ./install bash
 
     > ./install git vim
-
 
