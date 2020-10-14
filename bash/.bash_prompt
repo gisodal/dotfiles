@@ -4,126 +4,95 @@
 # ANSI color codes
 # -----------------------------------------------------------------------------
 
-export RS="\033[0m"    # reset
-export HC="\033[1m"    # hicolor
-export UL="\033[4m"    # underline
-export INV="\033[7m"   # inverse background and foreground
-export FBLK="\033[30m" # foreground black
-export FRED="\033[31m" # foreground red
-export FGRN="\033[32m" # foreground green
-export FYEL="\033[33m" # foreground yellow
-export FBLE="\033[34m" # foreground blue
-export FMAG="\033[35m" # foreground magenta
-export FCYN="\033[36m" # foreground cyan
-export FWHT="\033[37m" # foreground white
-export BBLK="\033[40m" # background black
-export BRED="\033[41m" # background red
-export BGRN="\033[42m" # background green
-export BYEL="\033[43m" # background yellow
-export BBLE="\033[44m" # background blue
-export BMAG="\033[45m" # background magenta
-export BCYN="\033[46m" # background cyan
-export BWHT="\033[47m" # background white
-
-function EXT_COLOR () { echo -ne "\033[38;5;$1m"; }
-
-export ORANGE=$(EXT_COLOR 172)
+export STYLE_RESET="\033[0m"        #  reset
+export STYLE_BRIGHT="\033[1m"       #  hicolor
+export STYLE_UNDERLINE="\033[4m"    #  underline
+export STYLE_INVERSE="\033[7m"      #  inverse     background  and  foreground
+export COLOR_FG_BLACK="\033[30m"    #  foreground  black
+export COLOR_FG_RED="\033[31m"      #  foreground  red
+export COLOR_FG_GREEN="\033[32m"    #  foreground  green
+export COLOR_FG_YELLOW="\033[33m"   #  foreground  yellow
+export COLOR_FG_BLUE="\033[34m"     #  foreground  blue
+export COLOR_FG_MAGENTA="\033[35m"  #  foreground  magenta
+export COLOR_FG_CYAN="\033[36m"     #  foreground  cyan
+export COLOR_FG_WHITE="\033[37m"    #  foreground  white
+export COLOR_BG_BLACK="\033[40m"    #  background  black
+export COLOR_BG_RED="\033[41m"      #  background  red
+export COLOR_BG_GREEN="\033[42m"    #  background  green
+export COLOR_BG_YELLOW="\033[43m"   #  background  yellow
+export COLOR_BG_BLUE="\033[44m"     #  background  blue
+export COLOR_BG_MAGENTA="\033[45m"  #  background  magenta
+export COLOR_BG_CYAN="\033[46m"     #  background  cyan
+export COLOR_BG_WHITE="\033[47m"    #  background  white
 
 # -----------------------------------------------------------------------------
-# shell prompt appearance functions
+# 256 colors
 # -----------------------------------------------------------------------------
 
-function is_git_repository() {
-    git rev-parse >/dev/null 2>&1
-    echo $?
-}
+function create_color () { echo -ne "\033[38;5;$1m"; }
 
-function git_repository_name() {
-    GITDIR=$(git rev-parse --show-toplevel 2>&1)
-    if [ ! -z "$GITDIR" ]; then
-        echo "$GITDIR" | sed "s:$HOME:home:" | xargs basename -- 2>/dev/null
-    else
-        GITPARENT=$(pwd | sed "s:\(.*\)/.git.*:\1:")
-        if [ "$GITPARENT" != "$(pwd)" ]; then
-            (command cd $GITPARENT 2>/dev/null && git_repository_name)
-        else
-            echo ""
-        fi
-    fi
-}
-
-function git_info(){
-    if [ $(is_git_repository) -eq 0 ]; then
-        BRANCH=$(git symbolic-ref HEAD 2>/dev/null)
-        BRANCH=${BRANCH##refs/heads/}
-        BRANCH=${BRANCH:-detached}
-        REPOSITORY=$(git_repository_name)
-        REPOSITORY=${REPOSITORY:-?}
-        echo -e "${FBLE}$REPOSITORY${RS} ${FGRN}${BRANCH}${RS}:"
-    fi
-}
-
-function last_two_dirs {
-    pwd | sed "s:$HOME:~:" | awk -F'/' '{ OFS = ""; if (NF > 3) { print "../",$(NF-1),"/",$NF } else { print $0 } }'
-}
-
-case $HOSTNAME in
-    silver          ) export PROMPT_COLOR=$FGRN;;
-    fs              ) export PROMPT_COLOR=$FMAG;;
-    node[0-9][0-9]  ) export PROMPT_COLOR=$FBLE;;
-    lilo*           ) export PROMPT_COLOR=$FYEL;;
-    *               ) export PROMPT_COLOR=$ORANGE;;
-esac
+export COLOR_FG_ORANGE=$(create_color 172)
 
 # -----------------------------------------------------------------------------
-# color stderr red
+# set prompt color
 # -----------------------------------------------------------------------------
 
-export COLOR_RED="$(tput setaf 1)"
 function __prompt_command(){
     RETURN_VALUE=$?;
     history -a;
+
+    # reset terminal title (this is used in TMUX)
     echo -ne "\033]0;\007";
-    RETURN_COLOR="$([ $RETURN_VALUE -eq 0 ] && echo -en "$PROMPT_COLOR" || echo -en "$COLOR_RED")";
+
+    # set the prompt color based on the previous return value
+    export PROMPT_COLOR="$([ $RETURN_VALUE -eq 0 ] && echo -en "$PROMPT_DEFAULT_COLOR" || echo -en "$COLOR_FG_RED")";
 }
+
 export PROMPT_COMMAND=__prompt_command
-
-function stderred(){
-    export COLOR_RED="$(tput setaf 1)"
-    export COLOR_RESET="$(tput sgr0)"
-
-    exec 9>&2
-    exec 8> >(
-        perl -e '$|=1; while(sysread STDIN,$a,9999) {print "$ENV{COLOR_RED}$a$ENV{COLOR_RESET}"}'
-    )
-    function undirect(){ exec 2>&9; } # reset to original 9 (==2)
-    function redirect(){ exec 2>&8; } # set to custom 8
-
-    function __prompt_command(){
-        RETURN_VALUE=$?;
-        history -a;
-        echo -ne "\033]0;\007";
-        RETURN_COLOR="$([ $RETURN_VALUE -eq 0 ] && echo -en "$PROMPT_COLOR" || echo -en "$COLOR_RED")";
-        undirect;
-    }
-
-    trap "redirect;" DEBUG
-    export PROMPT_COMMAND=__prompt_command
-}
+export PROMPT_DEFAULT_COLOR=$COLOR_FG_ORANGE
+export PROMPT_COLOR=$COLOR_FG_ORANGE
 
 # -----------------------------------------------------------------------------
 # prompt appearance
 # -----------------------------------------------------------------------------
 
-PROMPT_PRIMARY=$(echo -e "\xe2\x97\x8f")
+PROMPT_PRIMARY=$(echo -en "\xe2\x97\x8f")
 PROMPT_SECONDARY=$(echo -en "\xe2\x97\x8b")
-OS=$(if [ "$(uname -m)" == "x86_64" ]; then echo "64"; else echo "32"; fi)
+BEGIN="\\\["
+END="\\\]"
+
+function unicode() {
+    echo -en "\u$1"
+}
+
+function prompt_primary() {
+    echo -en "${BEGIN}\${PROMPT_COLOR}${END}${PROMPT_PRIMARY}${BEGIN}${STYLE_RESET}${END}"
+}
+
+function prompt_secondary() {
+    echo -en "${BEGIN}\${PROMPT_COLOR}${END}${PROMPT_SECONDARY}${BEGIN}${STYLE_RESET}${END}"
+}
+
+function prompt_hostname() {
+    echo -en "$(unicode 2500)[${BEGIN}${PROMPT_DEFAULT_COLOR}${END}$HOSTNAME${BEGIN}${STYLE_RESET}${END}]"
+}
+
+function prompt_context() {
+    echo -en "$(unicode 2500)[$(pwd-context)]"
+}
+
+function prompt_git_context() {
+    local context=$(git context)
+    if [ ! -z "$context" ]; then
+        local repository=${context%%:*}
+        local branch=${context#*:}
+        repository="${COLOR_FG_BLUE}${repository}${STYLE_RESET}"
+        branch="${COLOR_FG_GREEN}${branch}${STYLE_RESET}"
+        echo -en "$(unicode 2500)[$repository]$(unicode 2500)[$branch]"
+    fi
+}
 
 # keep in mind color codes without surrounding [ and ] will screw up history lookup
-if [ "$OS" == "32" ]; then
-    PS1="\n\[${PROMPT_COLOR}\]\$HOSTNAME\[${RS}\] \[${FRED}\]32-bit\[${RS}\]:\$(git_info)\$(last_two_dirs)\n \[\${RETURN_COLOR}\]${PROMPT_PRIMARY}\[${RS}\] "
-else
-    PS1="\n\[${PROMPT_COLOR}\]\$HOSTNAME\[${RS}\]:\$(git_info)\$(last_two_dirs)\n \[\${RETURN_COLOR}\]${PROMPT_PRIMARY}\[${RS}\] "
-fi
-PS2=" \[\${RETURN_COLOR}\]${PROMPT_SECONDARY}\[${RS}\] "
+PS1="\n$(unicode 250c)$(prompt_hostname)\$(prompt_git_context)\$(prompt_context)\n$(unicode 2514)$(prompt_primary) "
+PS2=" $(prompt_secondary) "
 
