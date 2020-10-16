@@ -29,70 +29,121 @@ export COLOR_BG_WHITE="\033[47m"    #  background  white
 # 256 colors
 # -----------------------------------------------------------------------------
 
-function create_color () { echo -ne "\033[38;5;$1m"; }
+function tmux-colors () {
+    for i in {0..255}; do
+        printf "\x1b[38;5;${i}mcolour${i}\x1b[0m\n"
+    done | column
+}
+export -f tmux-colors
+
+function create_color () { printf '%s%d%s' '\033[38;5;' "${1:=0}" 'm'; }
+export -f create_color
 
 export COLOR_FG_ORANGE=$(create_color 172)
+export COLOR_FG_GREY=$(create_color 233)
 
 # -----------------------------------------------------------------------------
 # set prompt color
 # -----------------------------------------------------------------------------
 
 function __prompt_command(){
-    RETURN_VALUE=$?;
-    history -a;
+    RETURN_VALUE=$?
 
-    # reset terminal title (this is used in TMUX)
-    echo -ne "\033]0;\007";
+    # do not store duplicate commands in history
+    history -a
+
+    # reset terminal title (this is used in TMUX/VIM)
+    printf '\x1b[0;\007'
 
     # set the prompt color based on the previous return value
-    export PROMPT_COLOR="$([ $RETURN_VALUE -eq 0 ] && echo -en "$PROMPT_DEFAULT_COLOR" || echo -en "$COLOR_FG_RED")";
+    [ $RETURN_VALUE -eq 0 ] && export PROMPT_COLOR=$PROMPT_DEFAULT_COLOR || export PROMPT_COLOR=$COLOR_FG_RED
 }
 
 export PROMPT_COMMAND=__prompt_command
 export PROMPT_DEFAULT_COLOR=$COLOR_FG_ORANGE
 export PROMPT_COLOR=$COLOR_FG_ORANGE
+export PROMPT_BOX_COLOR=$COLOR_FG_GREEN
 
 # -----------------------------------------------------------------------------
 # prompt appearance
 # -----------------------------------------------------------------------------
 
-PROMPT_PRIMARY=$(echo -en "\xe2\x97\x8f")
-PROMPT_SECONDARY=$(echo -en "\xe2\x97\x8b")
+PROMPT_PRIMARY=$(printf "\xe2\x97\x8f")
+PROMPT_SECONDARY=$(printf "\xe2\x97\x8b")
 BEGIN="\\\["
 END="\\\]"
 
 function unicode() {
-    echo -en "\u$1"
+    printf "\u${1}"
+}
+
+function wrap() {
+    printf '%s%s%s' '\[' "$1" '\]'
+}
+
+function colorize() {
+    printf '%s%s%s' "$(wrap $1)" "$2" "$(wrap $STYLE_RESET)"
+}
+
+function box() {
+    #prompt_primary
+    #printf '%s' "$(colorize "\$PROMPT_BOX_COLOR" X)"
+    printf '%s' "$(colorize "\\\$PROMPT_BOX_COLOR" $(unicode $1))"
 }
 
 function prompt_primary() {
-    echo -en "${BEGIN}\${PROMPT_COLOR}${END}${PROMPT_PRIMARY}${BEGIN}${STYLE_RESET}${END}"
+    printf '%s' "$(colorize '\$PROMPT_COLOR' $PROMPT_PRIMARY)"
 }
 
 function prompt_secondary() {
-    echo -en "${BEGIN}\${PROMPT_COLOR}${END}${PROMPT_SECONDARY}${BEGIN}${STYLE_RESET}${END}"
+    printf '%s' "$(colorize '\$PROMPT_COLOR' $PROMPT_SECONDARY)"
 }
 
 function prompt_hostname() {
-    echo -en "$(unicode 2500)[${BEGIN}${PROMPT_DEFAULT_COLOR}${END}$HOSTNAME${BEGIN}${STYLE_RESET}${END}]"
+    printf '%s%s%s' "$(box 2500)" "" "" #$(box 005B)" "$(colorize $PROMPT_DEFAULT_COLOR x$HOSTNAME)" "$(box 005D)"
+    #echo -en "$(box 2500)$(box 005B)$(colorize $PROMPT_DEFAULT_COLOR $HOSTNAME)$(box 005D)"
 }
 
 function prompt_context() {
-    echo -en "$(unicode 2500)[$(pwd-context)]"
+    echo -en "$(box 2500)[$(pwd-context)]"
+
 }
 
+function prompt_element() {
+    printf '%s%s%s' "$(box 2500)$(box 005B)" "$1" "$(box 005D)"
+
+}
 function prompt_git_context() {
     local context=$(git context)
     if [ ! -z "$context" ]; then
         local repository=${context%%:*}
         local branch=${context#*:}
-        repository="${COLOR_FG_BLUE}${repository}${STYLE_RESET}"
-        branch="${COLOR_FG_GREEN}${branch}${STYLE_RESET}"
-        echo -en "$(unicode 2500)[$repository]$(unicode 2500)[$branch]"
+        #repository="${COLOR_FG_BLUE}${repository}${STYLE_RESET}"
+        #branch="${COLOR_FG_GREEN}${branch}${STYLE_RESET}"
+        printf '%s%s' "$(prompt_element $repository)" "$(prompt_element $branch)"
     fi
 }
 
+function imp() {
+    local RESULT=$(eval $@)
+    echo -en "$RESULT"
+}
+
+
+function prompts() {
+    printf "PS1: %s\n" "$PS1"
+    printf "PS2: %s\n" "$PS2"
+}
+# \$(imp prompt_git_context)
 # keep in mind color codes without surrounding [ and ] will screw up history lookup
-PS1="\n$(unicode 250c)$(prompt_hostname)\$(prompt_git_context)\$(prompt_context)\n$(unicode 2514)$(prompt_primary) "
+
+#PS1="\n$(box 250c)$(prompt_hostname)\$(imp prompt_context)\n$(box 2514)$(prompt_primary) "
+#PS1="\n\n \[$PROMPT_BOX_COLOR\]─\[\033[0m\]\[\\\$PROMPT_COLOR\]●\[\033[0m\] "
+prompt_ps1() {
+    printf '%s' "\n\n $(prompt_hostname)$(prompt_primary) "
+}
+
+PS1="\$COLOR_FG_GREEN\$(date)$STYLE_RESET "
 PS2=" $(prompt_secondary) "
 
+prompts
