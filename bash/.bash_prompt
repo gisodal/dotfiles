@@ -46,14 +46,20 @@ export COLOR_FG_GREY=$(create_color 233)
 # set prompt color
 # -----------------------------------------------------------------------------
 
+function set_terminal_title() {
+    printf "\e]2;%s\a" "$1"
+}
+
 function __prompt_command(){
     export RETURN_VALUE=$?
 
     # do not store duplicate commands in history
     history -a
 
-    # reset terminal title (this is used in TMUX/VIM)
-    printf '\x1b[0;\007'
+    # reset terminal title when this shell is run inside TMUX (this is used in TMUX/VIM)
+    if [ -n "$TMUX" ]; then
+        set_terminal_title ""
+    fi
 
     # set the prompt color based on the previous return value
     if [ $RETURN_VALUE -eq 0 ]; then
