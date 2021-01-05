@@ -86,6 +86,7 @@ if [ -z "$BASH_CUSTOM_ENVIRONMENT" ]; then
     export HISTCONTROL="ignoredups"         # dont record duplicate commands
     export HISTIGNORE="&:ls:cd:[bf]g:exit"  # dont record simple commands like ls
     export CORES=$(grep -c ^processor /proc/cpuinfo)
+    export MAVEN_HOME="/usr"
 
     add-prefix-path CLASSPATH .             # scala path
 

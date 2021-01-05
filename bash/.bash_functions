@@ -13,9 +13,24 @@ function script_dir() {
 function detach(){
     COMMAND=$1
     if [[ -n "$(command -v "$COMMAND")" ]]; then
-        nohup $@ </dev/null 1>/dev/null 2>&1 &
+        (nohup $@ </dev/null 1>/dev/null 2>&1 &)
     else
         echo "Command '$COMMAND' does not exist" 1>&2
+        return 1
+    fi
+}
+
+function o() {
+    if [ $# -eq 0 ]; then
+        o "."
+    elif [ $# -eq 1 -a -d "$@" ]; then
+        detach nautilus "$@"
+    elif [ $# -eq 1 -a -f "$@" ]; then
+        detach gnome-open $@
+    else
+        echo "$# arguments are provided."  1>&2
+        echo "Usage: o <filename|dirname>" 1>&2
+        return 1
     fi
 }
 
