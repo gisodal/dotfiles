@@ -20,6 +20,27 @@ function detach(){
     fi
 }
 
+# go into a directory if there is only 1 to choose from.
+function d() {
+    NOTHIDDEN=$(find . -maxdepth 1 -mindepth 1 -type d -not -path '*/\.*')
+    NOTHIDDENCOUNT=$(find . -maxdepth 1 -mindepth 1 -type d -not -path '*/\.*' -printf '.' | wc -c)
+
+    if [ $NOTHIDDENCOUNT -eq 1 ]; then
+        cd $NOTHIDDEN
+    elif [ $NOTHIDDENCOUNT -eq 0 ]; then
+        HIDDEN=$(find . -maxdepth 1 -mindepth 1 -type d -path '*/\.*')
+        HIDDENCOUNT=$(find . -maxdepth 1 -mindepth 1 -type d -path '*/\.*' -printf '.' | wc -c)
+        if [ $HIDDENCOUNT -eq 1 ]; then
+            cd $HIDDEN
+        else
+            echo "No directories to go in to"
+        fi
+    else
+        echo "More than one directories to choose from"
+    fi
+}
+
+# either op a file with a default program or open a directory in nautilus.
 function o() {
     if [ $# -eq 0 ]; then
         o "."
