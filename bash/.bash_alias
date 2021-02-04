@@ -26,7 +26,6 @@ alias blank='sleep 1; xset dpms force off'
 alias suspend='systemctl suspend'
 alias previous-command='fc -s'
 alias k='previous-command'
-alias d='nautilus . 1>/dev/null 2>/dev/null &'
 
 [ -n "$(which htop 2>/dev/null)" ] && alias top='(TERM=xterm-256color; htop)'
 [ "$XDG_CURRENT_DESKTOP" == "GNOME" ] && alias open='gnome-open 2>/dev/null';
