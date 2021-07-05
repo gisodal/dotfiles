@@ -52,18 +52,19 @@ function add-path() {
     done
 }
 
+# -----------------------------------------------------------------------------
+# update PATH, INCLUDE and LIBRARY paths and environment
+# -----------------------------------------------------------------------------
+
+USR_DOTFILES="$HOME/.dotfiles/usr"
+USR_LOCAL="$HOME/usr"
+
+add-path include $USR_LOCAL/include
+add-path library $USR_LOCAL/lib $USR_LOCAL/lib64
+add-path bin     $USR_LOCAL/bin $USR_DOTFILES/bin
+
+
 if [ -z "$BASH_CUSTOM_ENVIRONMENT" ]; then
-
-    # -----------------------------------------------------------------------------
-    # update PATH, INCLUDE and LIBRARY paths and environment
-    # -----------------------------------------------------------------------------
-
-    USR_DOTFILES="$HOME/.dotfiles/usr"
-    USR_LOCAL="$HOME/usr"
-
-    add-path include $USR_LOCAL/include
-    add-path library $USR_LOCAL/lib $USR_LOCAL/lib64
-    add-path bin     $USR_LOCAL/bin $USR_DOTFILES/bin
 
     # -----------------------------------------------------------------------------
     # Update program environment
@@ -87,6 +88,8 @@ if [ -z "$BASH_CUSTOM_ENVIRONMENT" ]; then
     export HISTIGNORE="&:ls:cd:[bf]g:exit"  # dont record simple commands like ls
     export CORES=$(grep -c ^processor /proc/cpuinfo)
     export MAVEN_HOME="/usr"
+    export DOCKER_HOST=unix:///run/user/1000/docker.sock # allow rootless docker
+    export DOCKER_BUILDKIT=1
 
     add-prefix-path CLASSPATH .             # scala path
 

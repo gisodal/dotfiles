@@ -23,6 +23,8 @@
 [difftool "vimdiff"]
 	cmd = vim -d -c 'wincmd =' -c 'norm ]c[c' \"$LOCAL\" \"$REMOTE\"
 [alias]
+    name = !sh -c 'basename $(git root)'
+    zip = !sh -c 'git archive --format zip --output \"$(git name).zip\" HEAD' -
 	pdfdiff = difftool --tool=diffpdf
     vimdiff = difftool --tool=vimdiff
     timelogcsv = log --all --no-color --date=local --format=format:"%cd,%an,%s"
