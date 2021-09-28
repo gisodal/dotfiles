@@ -106,7 +106,7 @@
                     echo \"Returning to $CURRENT\" &&      \
                     git checkout --quiet $CURRENT;         \
             else                                           \
-                echo 'Branch $1 does not exist';           \
+                echo \"Branch $1 does not exist\";         \
             fi;                                            \
         }; f"
 
