@@ -23,11 +23,11 @@
 [difftool "vimdiff"]
 	cmd = vim -d -c 'wincmd =' -c 'norm ]c[c' \"$LOCAL\" \"$REMOTE\"
 [alias]
+    mt = mergetool
     name = !sh -c 'basename $(git root)'
     zip = !sh -c 'git archive --format zip --output \"$(git name).zip\" HEAD' -
 	pdfdiff = difftool --tool=diffpdf
     vimdiff = difftool --tool=vimdiff
-    vd = vimdiff = difftool --tool=vimdiff
     timelogcsv = log --all --no-color --date=local --format=format:"%cd,%an,%s"
     timelogtsv = log --all --no-color --date=local --pretty=format:"%ad%x09%an%x09%s"
     timelog = !bash -c '"git timelogcsv | column -t -s,"'
@@ -141,8 +141,8 @@
     cm = commit
     fe = fetch-diff
     pu = !git fetch-diff && git merge
-    vd = !git vimdiff
-
+    vd = difftool --tool=vimdiff
+    mt = mergetool
 	cn = commit-now
     cnp = commit-now-push
 
