@@ -16,3 +16,8 @@ Thumbs.db
 *.un~
 *~
 
+# configuration files #
+# =====================
+.vscode
+build
+target
