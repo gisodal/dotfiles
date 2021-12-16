@@ -67,9 +67,10 @@ function add-path-tree() {
     local PPATH
     local PPATHS=$@
     for PPATH in "${PPATHS[@]}"; do
-        add-path include "$PPATH/include"
-        add-path library "$PPATH/lib" "$PPATH/lib64"
-        add-path bin     "$PPATH/bin"
+        [ -d "$PPATH/include" ] && add-path include "$PPATH/include"
+        [ -d "$PPATH/lib" ]     && add-path library "$PPATH/lib"
+        [ -d "$PPATH/lib64" ]   && add-path library "$PPATH/lib64"
+        [ -d "$PPATH/bin" ]     && add-path bin     "$PPATH/bin"
     done
 }
 
@@ -99,7 +100,6 @@ function add-opt-tree() {
 
 add-path-tree "$HOME/usr"
 add-opt-tree  "$HOME/usr/opt"
-
 
 if [ -z "$BASH_CUSTOM_ENVIRONMENT" ]; then
 
