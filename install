@@ -13,6 +13,7 @@ function separator() {
 function run_stow() {
     if ! [ -x "$(command -v stow)" ]; then
         echo 'Error: GNU Stow is not installed.' >&2
+        echo 'Run: sudo apt install stow'
         exit 1
     fi
 
@@ -29,7 +30,7 @@ function run_stow() {
 
 TARGET=$HOME
 SOURCE=$(script_dir)
-PACKAGES=$(find "$SOURCE" -mindepth 1 -maxdepth 1 ! -path .  -type d -printf '%P ')
+PACKAGES=$(find "$SOURCE" -mindepth 1 -maxdepth 1 ! -path . ! -path ./.git -type d -printf '%P ')
 
 if [ $# -gt 0 ]; then
     PACKAGES=$@

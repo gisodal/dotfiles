@@ -28,6 +28,7 @@
     zip = !sh -c 'git archive --format zip --output \"$(git name).zip\" HEAD' -
 	pdfdiff = difftool --tool=diffpdf
     vimdiff = difftool --tool=vimdiff
+    vd = vimdiff = difftool --tool=vimdiff
     timelogcsv = log --all --no-color --date=local --format=format:"%cd,%an,%s"
     timelogtsv = log --all --no-color --date=local --pretty=format:"%ad%x09%an%x09%s"
     timelog = !bash -c '"git timelogcsv | column -t -s,"'

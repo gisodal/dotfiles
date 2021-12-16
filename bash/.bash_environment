@@ -52,16 +52,46 @@ function add-path() {
     done
 }
 
+function add-path-tree() {
+    local USAGE="echo 'Usage: add-path-tree <PATH> [[PATH] [PATH] ...]' 1>&2"
+    if ! [ $# -ge 1 ]; then
+        eval "$USAGE"
+        return 1;
+    fi
+
+    local PPATH
+    local PPATHS=$@
+    for PPATH in "${PPATHS[@]}"; do
+        add-path include "$PPATH/include"
+        add-path library "$PPATH/lib" "$PPATH/lib64"
+        add-path bin     "$PPATH/bin"
+    done
+}
+
+function add-opt-tree() {
+    local USAGE="echo 'Usage: add-opt-tree <PATH> [[PATH] [PATH] ...]' 1>&2"
+    if ! [ $# -ge 1 ]; then
+        eval "$USAGE"
+        return 1;
+    fi
+
+    local PPATH
+    local PPATHS=$@
+    for PPATH in "${PPATHS[@]}"; do
+        local OPT_PATH
+        local IFS=$'\n'
+        for OPT_PATH in $(find $PPATH -maxdepth 1 -mindepth 1 -type d -print 2>/dev/null); do
+            add-path-tree "$OPT_PATH"
+        done
+    done
+}
+
 # -----------------------------------------------------------------------------
 # update PATH, INCLUDE and LIBRARY paths and environment
 # -----------------------------------------------------------------------------
 
-USR_DOTFILES="$HOME/.dotfiles/usr"
-USR_LOCAL="$HOME/usr"
-
-add-path include $USR_LOCAL/include
-add-path library $USR_LOCAL/lib $USR_LOCAL/lib64
-add-path bin     $USR_LOCAL/bin $USR_DOTFILES/bin
+add-path-tree "$HOME/usr"
+add-opt-tree  "$HOME/usr/opt"
 
 
 if [ -z "$BASH_CUSTOM_ENVIRONMENT" ]; then
