@@ -88,7 +88,7 @@ function add-opt-tree() {
     for PPATH in "${PPATHS[@]}"; do
         local OPT_PATH
         local IFS=$'\n'
-        for OPT_PATH in $(find "$PPATH" -maxdepth 1 -mindepth 1 -type d -print 2>/dev/null); do
+        for OPT_PATH in $(find "$PPATH" -maxdepth 1 -mindepth 1 -type l,d -print 2>/dev/null); do
             add-path-tree "$OPT_PATH"
         done
     done

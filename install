@@ -10,10 +10,10 @@ function separator() {
     echo
 }
 
-function install_usr() {
-    local OPT_TARGET=$TARGET/usr/opt/dotfiles
+function install_opt() {
+    local OPT_TARGET=$TARGET/usr/opt
     mkdir -p $OPT_TARGET || exit 1
-    local cmd="stow -vv -d $SOURCE -t $OPT_TARGET -S usr"
+    local cmd="stow -vv -d $SOURCE -t $OPT_TARGET -S opt"
 
     separator "    $cmd"
     echo -e "** Stowing '$packages' with command:\n    $cmd"
@@ -32,12 +32,12 @@ function run_stow() {
     fi
 
     local packages="$@"
-    if [[ " $packages " =~ " usr " ]]; then
-        install_usr
+    if [[ " $packages " =~ " opt " ]]; then
+        install_opt
     fi
 
-    # remove usr
-    packages=$(echo " $packages " | sed -e 's: usr : :g' -e 's:[ ]+: :g' | awk '{$1=$1};1')
+    # remove opt
+    packages=$(echo " $packages " | sed -e 's: opt : :g' -e 's:[ ]+: :g' | awk '{$1=$1};1')
     if [[ ! -z "${packages// }" ]]; then
         local cmd="stow -vv -d $SOURCE -t $TARGET -S $packages"
         separator "    $cmd"
