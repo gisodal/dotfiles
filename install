@@ -5,9 +5,23 @@ function script_dir() {
 }
 
 function separator() {
-    local len="${#@}"
+    local len=$(echo "$@" | wc -c)
     eval printf '=%.0s' {1..$len}
     echo
+}
+
+function install_usr() {
+    local OPT_TARGET=$TARGET/usr/opt/dotfiles
+    mkdir -p $OPT_TARGET || exit 1
+    local cmd="stow -vv -d $SOURCE -t $OPT_TARGET -S usr"
+
+    separator "    $cmd"
+    echo -e "** Stowing '$packages' with command:\n    $cmd"
+    separator "    $cmd"
+    echo
+
+    $cmd
+    [ $? -ne 0 ] && exit 1
 }
 
 function run_stow() {
@@ -17,15 +31,22 @@ function run_stow() {
         exit 1
     fi
 
-    local packages=$@
-    local cmd="stow -vv -d $SOURCE -t $TARGET -S $packages"
+    local packages="$@"
+    if [[ " $packages " =~ " usr " ]]; then
+        install_usr
+    fi
 
-    separator "    $cmd"
-    echo -e "** Stowing '$packages' with command:\n    $cmd"
-    separator "    $cmd"
+    # remove usr
+    packages=$(echo " $packages " | sed -e 's: usr : :g' -e 's:[ ]+: :g' | awk '{$1=$1};1')
+    if [[ ! -z "${packages// }" ]]; then
+        local cmd="stow -vv -d $SOURCE -t $TARGET -S $packages"
+        separator "    $cmd"
+        echo -e "** Stowing '$packages' with command:\n    $cmd"
+        separator "    $cmd"
 
-    $cmd
-    [ $? -ne 0 ] && exit 1
+        $cmd
+        [ $? -ne 0 ] && exit 1
+    fi
 }
 
 TARGET=$HOME
@@ -37,6 +58,6 @@ if [ $# -gt 0 ]; then
 fi
 
 for package in $PACKAGES; do
-    run_stow $package
+    run_stow "${package%%+(/)}"
 done
 
