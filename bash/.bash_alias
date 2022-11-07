@@ -28,5 +28,4 @@ alias previous-command='fc -s'
 alias k='previous-command'
 
 [ -n "$(which htop 2>/dev/null)" ] && alias top='(TERM=xterm-256color; htop)'
-[ "$XDG_CURRENT_DESKTOP" == "GNOME" ] && alias open='gnome-open 2>/dev/null';
 

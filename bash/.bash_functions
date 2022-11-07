@@ -47,7 +47,7 @@ function o() {
     elif [ $# -eq 1 -a -d "$@" ]; then
         detach nautilus "$@"
     elif [ $# -eq 1 -a -f "$@" ]; then
-        detach gnome-open $@
+        detach open $@
     else
         echo "$# arguments are provided."  1>&2
         echo "Usage: o <filename|dirname>" 1>&2
