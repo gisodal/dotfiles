@@ -101,14 +101,26 @@ function add-opt-tree() {
 add-path-tree "$HOME/usr"
 add-opt-tree  "$HOME/usr/opt"
 
+# setup git user
+if [ ! -z "$PS1" -a ! -f ~/.gituser ]; then
+    GITUSER=$USER@$HOSTNAME
+    echo "Configure a git user and email:"
+    read -p "    Using $GITUSER as username. Is that ok? (Y/n) " choice
+    case "$choice" in
+      y|Y|"" ) ;;
+      * ) read -p "    Enter username: " GITUSER;;
+    esac
+    read -p "    Enter email: " GITMAIL
+
+    printf "[user]\n    name = $GITUSER\n    email = $GITMAIL\n" > $HOME/.gituser
+    echo -e "\n    Username '$GITUSER' and email '$GITMAIL' written to ~/.gituser"
+fi
+
 if [ -z "$BASH_CUSTOM_ENVIRONMENT" ]; then
 
     # -----------------------------------------------------------------------------
     # Update program environment
     # -----------------------------------------------------------------------------
-
-    # setup git user
-    printf "[user]\n    name = $USER@$HOSTNAME\n    email = noreply@gmail.com\n" > $HOME/.gituser
 
     export GIT_CONFIG_DIR="$HOME/.gitcfg"
     export PKG_CONFIG_PATH="$USR_LOCAL/lib/pkgconfig"
