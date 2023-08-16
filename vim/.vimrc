@@ -5,25 +5,18 @@ autocmd!
 " Basic settings
 " -----------------------------------------------------------------------------
 let g:tex_flavor = "latex"          " prefer 'latex' when tex files are opened
-set shortmess=at                    " no startup message
-set modeline                        " read vim settings in the comments of files
+set shortmess+=I                    " no startup message on empty file
 set nocompatible                    " don't make compatible with vi
 set term=xterm-256color             " 256 color vim :)
-set backspace=eol,start,indent      " backspace behaviour
+
 set cindent                         " programmers autoindent, and dont remove indent on '#':
-set cinkeys-=0#
-set indentkeys-=0#
 set shiftwidth=4
 set softtabstop=4                   " tab is 4 spaces in insert mode
 set tabstop=4                       " tab is 4 spaces
-set expandtab                       " turn tabs into spaces
-set nohidden                        " 'set hidden' : enable unsaved buffer switching
-set sidescroll=1                    " move window by 1 while scrolling
+
 set sidescrolloff=10                " horizontal area around cursor
 set scrolloff=10                    " vertical area around cursor
-set history=50                      " default: 20. command history
-set wildmode=list:longest,full      " have command-line completion <Tab>
-set wildignore=*.o,*~,*.pyc,.git\*,.hg\*,.svn\*  " ignore compiled files
+
 set showmode                        " display the current mode and partially-typed commands in the status line
 set noshowcmd                         " Show (partial) command in the last line of the screen.
 set wildignorecase                  " case insensitive on filename completion
@@ -35,21 +28,12 @@ set spelllang=en_us                 " set language
 set virtualedit=all                 " let cursor go beyond end of line (set to default: 'set ve=')
 set number                          " show line numbers
 set textwidth=0                     " wrapping options: text width is terminal width
-set wrapmargin=0
 set nowrap
-set nolinebreak
-set nolist
 set shell=/bin/bash
-set fillchars="vert: "              " remove vertical split separator
 set autoread                        " auto read when file changes from external source
-"set colorcolumn=80                 " indicator for line width
+"set colorcolumn=80                  " indicator for line width
 set encoding=utf8                   " set utf8 as standard encoding
 let mapleader=","                   " we can now use <leader> for additional key combinations
-set ffs=unix                        " use unix as the standard file type
-set splitbelow                      " new split open below
-set splitright                      " new split open to the right
-set noequalalways                   " dont resize splits when creating a new one
-set shortmess+=I                    " no startup message on empty file
 set nostartofline                   " dont jump to first non-blank chararcter on line
 set magic                           " use regular expressions
 
@@ -59,26 +43,6 @@ set diffopt+=context:99999            " disable folding
 let g:vim_markdown_folding_disabled=1 " disable folding
 
 syntax on                           " syntax highlighting
-
-" generate ctags from anywhere in source tree
-set tags=tags;/
-
-" reduce timeout
-set timeout
-set timeoutlen=500
-set ttimeout
-set ttimeoutlen=100
-
-set ttyfast                         " smooth redrawing on fast terminals
-set lazyredraw                      " fix slow scrolling on some files
-autocmd VimEnter * redraw!          " redraw is necessary because of startup bug with 'set lazyredraw'
-
-if &diff
-    autocmd VimResized * wincmd =
-endif
-
-" better encryption, activate with :X<CR>
-set cryptmethod=blowfish
 
 " no visual bell
 set visualbell t_vb=
@@ -133,18 +97,12 @@ if $VIMDIR == "" | if exists("*mkdir")
     if !isdirectory(expand(&backupdir))|call mkdir(expand(&backupdir), "p", 0700)|endif
     if !isdirectory(expand(&undodir))| call mkdir(expand(&undodir), "p", 0700)|endif
     autocmd VimLeave * if filereadable(expand("$VIMDIR/.netrwhist"))|call delete(expand("$VIMDIR/.netrwhist"))|endif
-else
-    set noundofile                      " don't maintain undos between sessions
-    set nobackup                        " no backup files
-    set nowritebackup                   " don't backup file while editing
-    echoerr "Unable to create runtime directories.."
 endif | endif
 
 " -----------------------------------------------------------------------------
 " Plugin configurations
 " -----------------------------------------------------------------------------
 
-set nocompatible  " be iMproved, required
 filetype off      " required
 
 if !filereadable(expand("~/.vim/bundle/Vundle.vim/autoload/vundle.vim"))
@@ -155,54 +113,6 @@ if !filereadable(expand("~/.vim/bundle/Vundle.vim/autoload/vundle.vim"))
     endtry
 endif
 
-if filereadable(expand("~/.vim/bundle/Vundle.vim/autoload/vundle.vim"))
-    " let Vundle manage plugins. Brief help:
-    "
-    " :PluginList       - lists configured plugins
-    " :PluginInstall    - installs plugins; append `!` to update or just :PluginUpdate
-    " :PluginSearch foo - searches for foo; append `!` to refresh local cache
-    " :PluginClean      - confirms removal of unused plugins; append `!` to auto-approve removal
-
-    set rtp+=~/.vim/bundle/Vundle.vim
-    call vundle#begin()
-    Plugin 'VundleVim/Vundle.vim'
-
-
-    Plugin 'rhysd/vim-grammarous'
-    Plugin 'vim-scripts/VisIncr'
-    Plugin 'vim-scripts/Syntastic'
-    Plugin 'kien/rainbow_parentheses.vim'
-    Plugin 'scrooloose/syntastic'
-    Plugin 'chrisbra/Recover.vim'
-    Plugin 'altercation/vim-colors-solarized'
-    Plugin 'jezcope/vim-breakindent'
-    Plugin 'derekwyatt/vim-scala'
-    Plugin 'tpope/vim-unimpaired'
-
-    " Git plugin not hosted on GitHub
-    "Plugin 'git://<url>/<repository>'
-    " git repos on your local machine (i.e. when working on your own plugin)
-    "Plugin 'file:///home/.vim/bundle/<plugin>'
-
-    call vundle#end()
-    if exists('g:install_plugins')
-        execute ':PluginInstall'
-    endif
-
-    " synctastic configuration
-    let g:syntastic_cpp_config_file = '.syntastic_cpp_config'
-    let g:syntastic_enable_signs=1
-    let g:syntastic_cpp_include_dirs = [$HOME.'/programs/include', 'usr/include', 'include', '../include', '../../include', '../../../include' ]
-    let g:syntastic_cpp_check_header = 1
-    let g:syntastic_cpp_remove_include_errors = 1
-    let g:syntastic_cpp_compiler_options = ' -std=c++0x'
-    let g:syntastic_mode_map = { 'mode': 'passive', 'active_filetypes': [],'passive_filetypes': [] }
-    nnoremap <C-w>E :SyntasticToggleMode<CR>
-
-    " plugin: ctrl-P
-    " let g:ctrlp_map = '<c-p>'
-endif
-
 " -----------------------------------------------------------------------------
 " Show filename of currently focussed file in the tmux statusbar
 " -----------------------------------------------------------------------------
@@ -211,19 +121,6 @@ endif
 set title                           " set terminal title to current open file
 autocmd BufEnter * let &titlestring = ' ' . expand("%:t")  " set terminal title
 
-" alternative 2: print filename to tmux environment variable
-"autocmd BufEnter *
-"    \ silent execute '!
-"    \ if [ -n "$TMUX" ]; then
-"    \     tmux set-environment TMUX_STATUS_$(tmux display -p "\#S_\#I") '.expand('%:t').';
-"    \     tmux refresh-client -S;
-"    \ fi;'
-"autocmd VimLeave *
-"    \ silent execute '!
-"    \ if [ -n "$TMUX" ]; then
-"    \     tmux set-environment TMUX_STATUS_$(tmux display -p "\#S_\#I") "";
-"    \     tmux refresh-client -S;
-"    \ fi;'
 
 " -----------------------------------------------------------------------------
 " Filetype settings
@@ -247,17 +144,8 @@ autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o "
 " User functions and trics
 " -----------------------------------------------------------------------------
 
-" quickly ROT13 your buffer:
-nmap <C-w>X ggg?G``
-
 " resize windows on terminal resize
 autocmd VimResized * :wincmd =
-
-" make cursor stay put when leaving edit mode
-let CursorColumnI = 0 "the cursor column position in INSERT
-autocmd InsertEnter * let CursorColumnI = col('.')
-autocmd CursorMovedI * let CursorColumnI = col('.')
-autocmd InsertLeave * if col('.') != CursorColumnI | call cursor(0, col('.')+1) | endif
 
 " toggle maximization of buffer in split screen with <c-w>m
 nnoremap <C-W>m :call MaximizeToggle()<CR>
@@ -278,9 +166,6 @@ function! MaximizeToggle()
     endif
 endfunction
 
-" remove trailing white space on write
-autocmd BufWritePre * :%s/\s\+$//e
-
 " make pretty columns in visual mode
 vnoremap t !column -t<CR>
 
@@ -289,15 +174,10 @@ vnoremap n :-1s/\n/\ /g<CR>
 
 " reload configuration
 nnoremap <C-w>r :source ~/.vimrc<CR>
-" print current file
-ca lpr execute ':!lpr -o sides=two-sided-long-edge -o number-up=2 '.expand('%:p')<CR>
 
 " search will center on target found
 nnoremap N Nzz
 nnoremap n nzz
-
-" why press SHIFT all the time?
-nnoremap ; :
 
 " command aliases
 cnoreabbrev hs split
@@ -329,22 +209,12 @@ ca WQA wqa
 
 " navigational keybindings
 
-inoremap <C-k> <Esc>gki
-inoremap <C-j> <Esc>gji
+inoremap <C-k> <Up>
+inoremap <C-j> <Down>
 inoremap <C-l> <Right>
 inoremap <C-h> <Left>
-inoremap <C-r> <Esc>g_a
-inoremap <C-e> <Esc>^i
-inoremap <C-u> <BS>
-inoremap <C-o> <Del><Esc>i
-inoremap <C-f> <Esc>
 
-nnoremap I i
 nnoremap i <Esc>i
-nnoremap L 4zl
-nnoremap H 4zh
-nnoremap <silent> K 2gk2
-nnoremap <silent> J 2gj2
 nnoremap j gj
 nnoremap k gk
 vnoremap j gj
@@ -355,14 +225,7 @@ nnoremap <C-l> <Right>
 nnoremap <C-h> <Left>
 nnoremap <C-r> g_
 nnoremap <C-e> ^
-nnoremap <C-q> <C-e>
-nnoremap <C-u> <Left>
-nnoremap <C-o> <Nop>
 
-vnoremap L <End>
-vnoremap H <Home>
-vnoremap K <C-u>
-vnoremap J <C-d>
 vnoremap <C-k> gk
 vnoremap <C-j> gj
 vnoremap <C-l> <Right>
@@ -376,69 +239,19 @@ cnoremap <C-k> <Up>
 cnoremap <C-j> <Down>
 cnoremap <C-r> <End>
 cnoremap <C-e> <Home>
-cnoremap <C-u> <BS>
-cnoremap <C-o> <Del>
-cnoremap <C-f> <Esc>
 
 " remove search highlighing when ESCing in normal mode
 nnoremap <silent> <C-w><Space> :nohlsearch<CR>
 "to remove search pattern use ':let @/ = ""<CR>'
-nnoremap f <Esc>
-nmap <C-f> f
-nmap F f
-
-cnoremap <C-f> <Esc>
-cnoremap <f> <Esc>
 
 " visual mode behaviour (don't copy on escape)
 nnoremap dd "_dd
 nmap DD dd
 vnoremap <Esc> "_<Esc>
-vnoremap o c
-vnoremap f <Esc>
-vmap F f
-vmap <C-f> f
-
-cmap ;\ \(\)<Left><Left>
-
 
 " simple commenting by visual select and [,] and [.]
 "vmap . :s:^://<CR>:nohlsearch<CR>
 "vmap , :s:^\(\s*\)//:\1<CR>:nohlsearch<CR>
-
-" fix arrow keys and delete
-imap <Esc>[A <Up>
-imap <Esc>[B <Down>
-imap <Esc>[C <Right>
-imap <Esc>[D <Left>
-vmap <Esc>[A <Up>
-vmap <Esc>[B <Down>
-vmap <Esc>[C <Right>
-vmap <Esc>[D <Left>"
-imap <Esc>[3~ <Del>
-imap <Esc>[Z <S-Tab>
-vmap <Esc>[Z <S-Tab>
-nmap  <Esc>[Z <S-Tab>
-
-" navigate previous changes
-nnoremap <C-n> g;
-nnoremap <C-m> g,
-
-" fix tabing (only shift-tab in insert mode not working)
-vnoremap <C-t> >gv
-vnoremap <C-d> <gv
-nnoremap <C-t> i<C-t><Esc>
-nnoremap <C-d> i<C-d><Esc>
-vnoremap <Tab> >gv
-vnoremap <s-Tab> <gv
-nnoremap <Tab> i<C-t><Esc>
-nnoremap <S-Tab> a<C-d><Esc>
-
-inoremap <C-Space> <Space>
-" when wrapping, still be able to move line by line
-
-" fix counter issue:
-nnoremap <C-a> <Esc>
 
 " -----------------------------------------------------------------------------
 " copy-pasting

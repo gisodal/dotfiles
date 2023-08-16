@@ -33,16 +33,16 @@
     timelogcsv = log --all --no-color --date=local --format=format:"%cd,%an,%s"
     timelogtsv = log --all --no-color --date=local --pretty=format:"%ad%x09%an%x09%s"
     timelog = !bash -c '"git timelogcsv | column -t -s,"'
-    basetree = log --author-date-order --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %x09%C(auto)%d%C(reset) %<(16,trunc)%C(bold black)%an%C(reset) %C(dim white)%s%C(reset)\n%x09%x09%C(black) [%ar on %cd]%C(reset)' --date=format:'%A %d %B %Y %H:%M:%S'
+    basetree = log --author-date-order --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %x09%C(auto)%d%C(reset) %<(16,trunc)%C(dim magenta)%an%C(reset) %C(dim white)%s%C(reset)\n%x09%x09%C(blue) [%ar on %cd]%C(reset)' --date=format:'%A %d %B %Y %H:%M:%S'
     tree = !bash -c '"git basetree --all"'
     unmergedtree = !bash -c '"git basetree $(git unmerged)"'
     unmerged = branch --no-merged master
     unmerged-all = !bash -c '"git unmerged;  git branch -r --no-merged origin/master;"'
 
-    mtree = log --author-date-order --author="gdal*" --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %x09%C(auto)%d%C(reset) %<(16,trunc)%C(bold black)%an%C(reset) %C(dim white)%s%C(reset)\n%x09%x09%C(black) [%ar on %cd]%C(reset)' --date=format:'%A %d %B %Y %H:%M:%S'
-    atree = log --all --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %x09%C(auto)%d%C(reset) %<(16,trunc)%C(bold black)%an%C(reset) %C(dim white)%s%C(reset)\n%x09%x09%C(black) [%ar on %cd]%C(reset)' --date=format:'%A %d %B %Y %H:%M:%S'
-    ltree = log --author-date-order --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %x09%C(auto)%d%C(reset) %<(16,trunc)%C(bold black)%an%C(reset) %C(dim white)%s%C(reset)\n%x09%x09%C(black) [%ar on %cd]%C(reset)' --date=format:'%A %d %B %Y %H:%M:%S'
-    stree = log --author-date-order --all --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %x09%C(auto)%d%C(reset) %C(black)%s%C(reset)\n'
+    mtree = log --author-date-order --author="gdal*" --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %x09%C(auto)%d%C(reset) %<(16,trunc)%C(dim magenta)%an%C(reset) %C(dim white)%s%C(reset)\n%x09%x09%C(blue) [%ar on %cd]%C(reset)' --date=format:'%A %d %B %Y %H:%M:%S'
+    atree = log --all --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %x09%C(auto)%d%C(reset) %<(16,trunc)%C(dim magenta)%an%C(reset) %C(dim white)%s%C(reset)\n%x09%x09%C(blue) [%ar on %cd]%C(reset)' --date=format:'%A %d %B %Y %H:%M:%S'
+    ltree = log --author-date-order --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %x09%C(auto)%d%C(reset) %<(16,trunc)%C(dim magenta)%an%C(reset) %C(dim white)%s%C(reset)\n%x09%x09%C(blue) [%ar on %cd]%C(reset)' --date=format:'%A %d %B %Y %H:%M:%S'
+    stree = log --author-date-order --all --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %x09%C(auto)%d%C(reset) %C(blue)%s%C(reset)\n'
 
     forest = "forest --pretty=format:\"%C(red)%h %C(magenta)(%ar) %C(blue)%an %C(reset)%s\""
 
