@@ -6,12 +6,13 @@ if ! [ -x "$(command -v stow)" ]; then
 fi
 
 TARGET=$HOME
-SOURCE=(cd "$(dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd)
-PACKAGES=$(find "$SOURCE" -mindepth 1 -maxdepth 1 ! -path . ! -path ./.git -type d -printf '%P ')
+SOURCE=$(cd "$(dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd)
+PACKAGES=$(find "$SOURCE" -mindepth 1 -maxdepth 1 ! -path . ! -path '*.git' -type d -printf '%P ')
 
 if [ $# -gt 0 ]; then
     PACKAGES=$@
 fi
+echo "$PACKAGES"
 
 for package in $PACKAGES; do
     stow --no-folding -vt "$HOME" "${package%%+(/)}"
