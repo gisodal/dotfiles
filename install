@@ -12,7 +12,8 @@ PACKAGES=$(find "$SOURCE" -mindepth 1 -maxdepth 1 ! -path . ! -path '*.git' -typ
 if [ $# -gt 0 ]; then
     PACKAGES=$@
 fi
-echo "$PACKAGES"
+
+echo "Installing package(s): $PACKAGES"
 
 for package in $PACKAGES; do
     stow --no-folding -vt "$HOME" "${package%%+(/)}"
