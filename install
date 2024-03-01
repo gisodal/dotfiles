@@ -1,56 +1,12 @@
 #!/bin/bash
 
-function script_dir() {
-    (cd "$(dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd)
-}
-
-function separator() {
-    local len=$(echo "$@" | wc -c)
-    eval printf '=%.0s' {1..$len}
-    echo
-}
-
-function install_opt() {
-    local OPT_TARGET=$TARGET/usr/opt
-    mkdir -p $OPT_TARGET || exit 1
-    local cmd="stow -vv -d $SOURCE -t $OPT_TARGET -S opt"
-
-    separator "    $cmd"
-    echo -e "** Stowing '$packages' with command:\n    $cmd"
-    separator "    $cmd"
-    echo
-
-    $cmd
-    [ $? -ne 0 ] && exit 1
-}
-
-function run_stow() {
-    if ! [ -x "$(command -v stow)" ]; then
-        echo 'Error: GNU Stow is not installed.' >&2
-        echo 'Run: sudo apt install stow'
-        exit 1
-    fi
-
-    local packages="$@"
-    if [[ " $packages " =~ " opt " ]]; then
-        install_opt
-    fi
-
-    # remove opt
-    packages=$(echo " $packages " | sed -e 's: opt : :g' -e 's:[ ]+: :g' | awk '{$1=$1};1')
-    if [[ ! -z "${packages// }" ]]; then
-        local cmd="stow -vv -d $SOURCE -t $TARGET -S $packages"
-        separator "    $cmd"
-        echo -e "** Stowing '$packages' with command:\n    $cmd"
-        separator "    $cmd"
-
-        $cmd
-        [ $? -ne 0 ] && exit 1
-    fi
-}
+if ! [ -x "$(command -v stow)" ]; then
+	echo 'Error: GNU Stow is not installed.' >&2
+	exit 1
+fi
 
 TARGET=$HOME
-SOURCE=$(script_dir)
+SOURCE=(cd "$(dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd)
 PACKAGES=$(find "$SOURCE" -mindepth 1 -maxdepth 1 ! -path . ! -path ./.git -type d -printf '%P ')
 
 if [ $# -gt 0 ]; then
@@ -58,6 +14,6 @@ if [ $# -gt 0 ]; then
 fi
 
 for package in $PACKAGES; do
-    run_stow "${package%%+(/)}"
+    stow --no-folding -vt "$HOME" "${package%%+(/)}"
 done
 
