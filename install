@@ -5,17 +5,26 @@ if ! [ -x "$(command -v stow)" ]; then
 	exit 1
 fi
 
+XDG_CONFIG_HOME=${XDG_CONFIG_HOME:=$HOME/.config}
 TARGET=$HOME
 SOURCE=$(cd "$(dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd)
+CONFIG="$SOURCE/.stownofolding"
 PACKAGES=$(find "$SOURCE" -mindepth 1 -maxdepth 1 ! -path . ! -path '*.git' -type d -printf '%P ')
+XDG_CONFIG_HOME=${XDG_CONFIG_HOME:=$HOME/.config}
 
 if [ $# -gt 0 ]; then
     PACKAGES=$@
 fi
 
-echo "Installing package(s): $PACKAGES"
-
+mkdir -p "$XDG_CONFIG_HOME"
 for package in $PACKAGES; do
-    stow --no-folding -vt "$HOME" "${package%%+(/)}"
+	package=${package%%+(/)}
+	if grep -q -x -F "$package" "$CONFIG"; then
+        OPT="--no-folding"
+	else
+		OPT=""
+	fi
+
+	stow $OPT -vt "$HOME" "$package"
 done
 
