@@ -1,5 +1,0 @@
-# disable find dialog in gnome-terminal
-
-* goto: gnome-terminal -> preferences -> shortcuts -> search -> find
-
-* remove shortcut
