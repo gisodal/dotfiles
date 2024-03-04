@@ -4,3 +4,4 @@ if [ -f $HOME/.bash_map ]; then
     . $HOME/.bash_map
 fi
 
+export XDG_CONFIG_HOME="$HOME/.config"
