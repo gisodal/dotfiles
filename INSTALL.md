@@ -5,9 +5,29 @@
 	- arandr (graphical screen settings, uses xrandr underneeth)
 	- rofi   ( new dmenu)
 	- dunst  (notifications)
+	- scrot, imagemagick, i3lock. (lock screen)
 
 
+## appearance
 
+### intall Arc dark theme
+	
+	* GTK theme:
+		- github: horst3180/arc-theme
+		- ubuntu: sudo apt-get install arc-theme
+		- use lxappearance and select arc-dark
+
+	* chrome:
+		- https://chromewebstore.google.com/detail/arc-dark/adicoenigffoolephelklheejpcpoolk
+
+	* icons
+		- download moka theme: https://www.snwh.org/moka/download
+		- install
+		- use lxappearance -> tab icon theme
+	
+	* rofi
+		- run rofi-theme-selector
+		- select Arc-dark
 
 ## brightness control in i3
 

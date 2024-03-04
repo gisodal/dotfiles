@@ -99,6 +99,7 @@ function add-opt-tree() {
 # -----------------------------------------------------------------------------
 
 add-path-tree "$HOME/usr"
+add-path-tree "$HOME/usr/scripts"
 add-opt-tree  "$HOME/usr/opt"
 
 # setup git user
