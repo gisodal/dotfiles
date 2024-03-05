@@ -6,6 +6,7 @@
 	- rofi   ( new dmenu)
 	- dunst  (notifications)
 	- scrot, imagemagick, i3lock. (lock screen)
+	- polybar (i3 bar)
 
 
 ## appearance
