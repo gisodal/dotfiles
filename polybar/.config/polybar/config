@@ -1,3 +1,5 @@
+include-file = $HOME/.config/polybar/colors.ini
+
 [bar/top]
 enable-ipc = true
 bottom = false
@@ -6,10 +8,14 @@ width = 100%
 height = 30
 dpi = 100
 
-background = #1f1f1f
-foreground = #eee
+modules-left = i3 
+modules-right = cpu memory pulseaudio battery 
+modules-center = date 
 
-line-color = ${bar/bottom.background}
+background = ${colors.bg}
+foreground = ${colors.fg}
+
+line-color = ${bar/top.background}
 line-size = 1
 
 padding-left = 0
@@ -29,25 +35,27 @@ separator = |
 ;font-3 = FontAwesome:size=9;0
 
 font-0 = System San Francisco Display:size=9;0
-;font-0 = NotoSans-Regular:size=9;0
 font-1 = Material\ Icons:size=11;2
 font-2 = xos4\ Terminus:size=14;0
 font-3 = Siji:pixelsize=11;1
 font-4 = FontAwesome:size=11;0
 
 
-modules-left = i3 
-modules-right = backlight cpu memory temperature battery date        
 
 wm-restack = i3
 
-tray-position = right 
+tray-background = ${bar/bottom.background}
+tray-foreground = #eee
+
+;${bar/bottom.background}
+
+tray-position = right
+tray-detached = false
+tray-padding = 3
 tray-scale = 1.0
 ;tray-transparent = true
-tray-background = ${self.background}
-tray-maxsize = 64
-
-tray-offset-y = 0
+;tray-maxsize = 30
+;tray-offset-y = 10
 
 scroll-up = i3wm-wsnext
 scroll-down = i3wm-wsprev
@@ -56,35 +64,75 @@ overline-size = 10
 overline-color = ${self.background}
 underline-size = 2
 underline-color = ${self.background}
+                                     
+[module/pulseaudio]
+type = internal/pulseaudio
+
+; Sink to be used, if it exists
+; pactl list short sinks
+sink = "alsa_output.pci-0000_00_1f.3.analog-stereo"
+
+; Use PA_VOLUME_UI_MAX (~153%) if true, or PA_VOLUME_NORM (100%) if false
+use-ui-max = false
+
+; Interval for volume increase/decrease (in percent points)
+interval = 5
+
+format-volume = <ramp-volume> <label-volume>
+format-volume-background = ${colors.bg}
+format-volume-padding = 2
+label-volume = %percentage%%
+label-volume-foreground = ${colors.fg}
+label-volume-padding = 0
+
+format-muted-background = ${colors.bg}
+format-muted-padding = 0
+label-muted = " Muted"
+label-muted-foreground = ${colors.shade-5}
+
+ramp-volume-0 = "%{T5} %{T-}"
+ramp-volume-1 = "%{T5} %{T-}"
+ramp-volume-2 = "%{T5}墳 %{T-}"
+ramp-volume-3 = "%{T5} %{T-}"
+ramp-volume-0-foreground = ${colors.shade-3}
+ramp-volume-1-foreground = ${colors.shade-4}
+ramp-volume-2-foreground = ${colors.shade-5}
+ramp-volume-3-foreground = ${colors.shade-5}
+
+click-right = pavucontrol& 
 
 [module/chrome]
 type = custom/text
 content = " "
 content-padding = 2
 click-left = google-chrome-stable &
-
+        
 [module/backlight]
 type = internal/backlight
-format = <label>
-#format = <ramp> <bar>
 
-card =  intel_backlight
+enable-scroll=true
+card = intel_backlight
 
-label = %percentage%%
-ramp-0 = 
-ramp-1 = 
-ramp-2 = 
+format = <ramp> <label>
+format-background = ${colors.bg}
+format-padding = 1
+label = %{A1:$HOME/.config/polybar/scripts/brightness_toggle.sh &:}%percentage%%%{A}
+label-padding = 0
 
-bar-width = 10
-bar-indicator = |
-bar-indicator-font = 3
-bar-indicator-foreground = #ff
-bar-fill = ─
-bar-fill-font = 3
-bar-fill-foreground = #c9665e
-bar-empty = ─
-bar-empty-font = 3
-bar-empty-foreground = #44
+ramp-0 = "%{T1}%{A1:$HOME/.config/polybar/scripts/brightness_toggle.sh &:} %{A}%{T-}"
+ramp-1 = "%{T1}%{A1:$HOME/.config/polybar/scripts/brightness_toggle.sh &:} %{A}%{T-}"
+ramp-2 = "%{T1}%{A1:$HOME/.config/polybar/scripts/brightness_toggle.sh &:} %{A}%{T-}"
+ramp-3 = "%{T1}%{A1:$HOME/.config/polybar/scripts/brightness_toggle.sh &:} %{A}%{T-}"
+ramp-4 = "%{T1}%{A1:$HOME/.config/polybar/scripts/brightness_toggle.sh &:} %{A}%{T-}"
+ramp-5 = "%{T1}%{A1:$HOME/.config/polybar/scripts/brightness_toggle.sh &:} %{A}%{T-}"
+ramp-6 = "%{T1}%{A1:$HOME/.config/polybar/scripts/brightness_toggle.sh &:} %{A}%{T-}"
+ramp-0-foreground = ${colors.shade-1}
+ramp-1-foreground = ${colors.shade-1}
+ramp-2-foreground = ${colors.shade-2}
+ramp-3-foreground = ${colors.shade-2}
+ramp-4-foreground = ${colors.shade-3}
+ramp-5-foreground = ${colors.shade-4}
+ramp-6-foreground = ${colors.shade-5} 
 
 [module/consumation]
 type = custom/script
@@ -100,8 +148,10 @@ format-charging = <animation-charging> <label-charging>
 format-discharging = <ramp-capacity> <label-discharging>
 format-full = <ramp-capacity> <label-full>
 
-label-charging = %percentage%% %time%h
-label-discharging = %percentage%% %time%h 
+label-charging = %percentage%%
+;label-charging = %percentage%% %time%h
+label-discharging = %percentage%%
+;label-discharging = %percentage%% %time%h 
 ramp-capacity-0 = 
 ramp-capacity-0-foreground = #f53c3c
 ramp-capacity-1 = 
@@ -228,7 +278,7 @@ ramp-coreload-7-foreground = #ff5555
 
 [module/date]
 type = internal/date
-date = %Y-%m-%d%%{F-}  %%{F#fff}%H:%M:%S%%{F-}
+date = %%{F#fff}%H:%M%%{F-}
 date-alt = %%{F#fff}%A, %d %B %Y  %%{F#fff}%H:%M%%{F#666}:%%{F#fba922}%S%%{F-}
 
 [module/memory]

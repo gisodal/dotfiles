@@ -1,13 +1,27 @@
 
-## applications
+## Dependencies
 
+### applications
 	- feh    (set desktop wallpaper)
 	- arandr (graphical screen settings, uses xrandr underneeth)
 	- rofi   ( new dmenu)
 	- dunst  (notifications)
 	- scrot, imagemagick, i3lock. (lock screen)
 	- polybar (i3 bar)
+	- picom  (compositor)
 
+
+### fonts
+	- Nerd fonts:
+		- available at https://www.nerdfonts.com/font-downloads
+	- JetBrainsMono Nerd font
+		- available at: https://github.com/ryanoasis/nerd-fonts/releases
+	- Hack
+		- available at: https://github.com/source-foundry/Hack/releases
+	- System San Francisco Display
+		- available at: https://github.com/supermarin/YosemiteSanFranciscoFont/tree/master
+	- Siji icons
+		- available at: https://github.com/stark/siji
 
 ## appearance
 
@@ -29,6 +43,33 @@
 	* rofi
 		- run rofi-theme-selector
 		- select Arc-dark
+
+## fonts
+
+1. Install the font by placing ttf files in `HOME/.local/share/fonts`
+2. Activate bitmaps
+	
+	> sudo rm /etc/fonts/conf.d/70-no-bitmaps.conf
+
+3. Update the font cache:
+	
+	- add to .xinitrc:
+		
+        xset +fp $HOME/.local/share/fonts
+        xset fp rehash 
+
+	- update cache
+
+		> xset +fp $HOME/.local/share/fonts 
+        > xset fp rehash  
+        > fc-cache -f -v
+
+4. Check font installation:
+
+	> fc-list | grep -i "<font name>"
+	> fc-match <font name>
+	> xlsfonts | grep -i "<font name>"
+
 
 ## brightness control in i3
 
