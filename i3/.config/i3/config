@@ -6,6 +6,7 @@ tiling_drag modifier titlebar
 floating_modifier $mod
 
 include $HOME/.config/i3/config.d/workspaces.conf
+include $HOME/.config/i3/config.d/gaps.conf
 include $HOME/.config/i3/config.d/appearance.conf
 include $HOME/.config/i3/config.d/keybindings.conf
 include $HOME/.config/i3/config.d/applications.conf
