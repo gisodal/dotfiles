@@ -9,7 +9,7 @@
 	- scrot, imagemagick, i3lock. (lock screen)
 	- polybar (i3 bar)
 	- picom  (compositor)
-
+	- lf (https://github.com/gokcehan/lf)
 
 ### fonts
 	- Nerd fonts:
