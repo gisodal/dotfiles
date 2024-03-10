@@ -23,6 +23,35 @@
 	- Siji icons
 		- available at: https://github.com/stark/siji
 
+## change to zsh
+
+    > chsh -s $(which zsh)
+
+	or: 
+
+	> sudo chsh -s /bin/zsh <userName>
+
+reboot for changes to take affect
+
+### troubleshooting
+
+	- check if zsh is installed
+	- set shell to zsh
+
+		> grep $USER /etc/passwd
+	
+	- is zsh a valid login shell?
+
+		> grep zsh /etc/shells
+
+## zsh theme (powerlevel10k)
+	
+	- get at: https://github.com/romkatv/powerlevel10k?tab=readme-ov-file#meslo-nerd-font-patched-for-powerlevel10k
+	- install p10k
+
+		> git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ~/.config/powerlevel10k
+		> echo 'source ~/.config/powerlevel10k/powerlevel10k.zsh-theme' >>~/.zshrc
+
 ## appearance
 
 ### intall Arc dark theme

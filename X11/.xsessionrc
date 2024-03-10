@@ -7,6 +7,8 @@ fi
 export XDG_DATA_HOME=${XDG_DATA_HOME:-"$HOME/.local/share"}
 export XDG_CONFIG_HOME="$HOME/.config"
 
+systemctl --user import-environment DISPLAY
+
 xset +fp "$XDG_DATA_HOME/fonts"
 xset fp rehash
  
