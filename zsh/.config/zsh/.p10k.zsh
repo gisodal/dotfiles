@@ -198,8 +198,5 @@ typeset -g POWERLEVEL9K_CONFIG_FILE=${${(%):-%x}:a}
 (( ${#p10k_config_opts} )) && setopt ${p10k_config_opts[@]}
 'builtin' 'unset' 'p10k_config_opts'
 
-typeset -g POWERLEVEL9K_SHORTEN_STRATEGY=default
-typeset -g POWERLEVEL9K_SHORTEN_DIR_LENGTH=3
-typeset -g POWERLEVEL9K_SHORTEN_DELIMITER='..'
-typeset -g POWERLEVEL9K_DIR_MAX_LENGTH=32
+source "${funcsourcetrace[1]%/*}/.my.p10k.zsh"
 
