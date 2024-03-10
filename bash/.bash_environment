@@ -97,7 +97,7 @@ function add-opt-tree() {
 # -----------------------------------------------------------------------------
 # update PATH, INCLUDE and LIBRARY paths and environment
 # -----------------------------------------------------------------------------
-
+add-path-tree "$HOME/.local"
 add-path-tree "$HOME/usr"
 add-path-tree "$HOME/usr/scripts"
 add-opt-tree  "$HOME/usr/opt"

@@ -17,7 +17,7 @@ if [ $# -gt 0 ]; then
 fi
 
 mkdir -p "$XDG_CONFIG_HOME"
-mkdir -p "$HOME/usr/bin"
+mkdir -p "$HOME/.local/bin"
 for package in $PACKAGES; do
 	package=${package%%+(/)}
 	if grep -q -x -F "$package" "$CONFIG"; then
