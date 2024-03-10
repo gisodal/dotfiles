@@ -51,3 +51,11 @@ ZSH_AUTOSUGGEST_STRATEGY=(history completion)
 # To customize prompt, run `p10k configure` or edit ~/.config/zsh/.p10k.zsh.
 [[ ! -f $ZDOTDIR/.p10k.zsh ]] || source $ZDOTDIR/.p10k.zsh
  
+if  [ -z "$SSH_TTY" ]           && \
+	[ -z "$SSH_CONNECTION" ]    && \
+	[ -z "$SSH_CLIENT" ]        && \
+	[ -n "$DISPLAY" ]           && \
+	[ -z "$TMUX"  ]; then
+	tmux
+fi
+
