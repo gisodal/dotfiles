@@ -11,7 +11,6 @@ mkdir -p "$PLUGINDIR"
 
 cd $PLUGINDIR
 
-# powerlevel10k
 git clone --depth=1 https://github.com/romkatv/powerlevel10k.git
 git clone https://github.com/jeffreytse/zsh-vi-mode.git 
 git clone https://github.com/zsh-users/zsh-autosuggestions.git
@@ -24,5 +23,4 @@ echo  "source  $PLUGINDIR/powerlevel10k/powerlevel10k.zsh-theme"
 echo  "source  $PLUGINDIR/zsh-vi-mode/zsh-vi-mode.plugin.zsh"                  
 echo  "source  $PLUGINDIR/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" 
 echo  "source  $PLUGINDIR/zsh-autosuggestions/zsh-autosuggestions.zsh"         
-
  
