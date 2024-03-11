@@ -5,7 +5,7 @@ if ! [ -x "$(command -v stow)" ]; then
 	exit 1
 fi
 
-XDG_CONFIG_HOME=${XDG_CONFIG_HOME:=$HOME/.config}
+XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
 TARGET=$HOME
 SOURCE=$(cd "$(dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd)
 CONFIG="$SOURCE/.stownofolding"
