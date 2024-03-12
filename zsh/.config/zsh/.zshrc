@@ -51,13 +51,59 @@ ZSH_AUTOSUGGEST_STRATEGY=(history completion)
 # To customize prompt, run `p10k configure` or edit ~/.config/zsh/.p10k.zsh.
 [[ ! -f $ZDOTDIR/.p10k.zsh ]] || source $ZDOTDIR/.p10k.zsh
  
-case $- in *i*)
-  if  [ -z "$SSH_TTY" ]         && \
-    [ -z "$SSH_CONNECTION" ]    && \
-    [ -z "$SSH_CLIENT" ]        && \
-    [ -n "$DISPLAY" ]           && \
-    [ -z "$TMUX"  ]; then
-    tmux
-  fi
-esac
+#case $- in *i*)
+#  if  [ -z "$SSH_TTY" ]         && \
+#    [ -z "$SSH_CONNECTION" ]    && \
+#    [ -z "$SSH_CLIENT" ]        && \
+#    [ -n "$DISPLAY" ]           && \
+#    [ -z "$TMUX"  ]; then
+#    tmux
+#  fi
+#esac
 
+# detach function from terminal
+function detach(){
+    COMMAND=$1
+    if [[ -n "$(command -v "$COMMAND")" ]]; then
+        (nohup $@ </dev/null 1>/dev/null 2>&1 &)
+    else
+        echo "Command '$COMMAND' does not exist" 1>&2
+        return 1
+    fi
+}
+
+# go into a directory if there is only 1 to choose from.
+function d() {
+    NOTHIDDEN=$(find . -maxdepth 1 -mindepth 1 -type d -not -path '*/\.*')
+    NOTHIDDENCOUNT=$(find . -maxdepth 1 -mindepth 1 -type d -not -path '*/\.*' -printf '.' | wc -c)
+
+    if [ $NOTHIDDENCOUNT -eq 1 ]; then
+        cd $NOTHIDDEN
+    elif [ $NOTHIDDENCOUNT -eq 0 ]; then
+        HIDDEN=$(find . -maxdepth 1 -mindepth 1 -type d -path '*/\.*')
+        HIDDENCOUNT=$(find . -maxdepth 1 -mindepth 1 -type d -path '*/\.*' -printf '.' | wc -c)
+        if [ $HIDDENCOUNT -eq 1 ]; then
+            cd $HIDDEN
+        else
+            echo "No directories to go in to"
+        fi
+    else
+        echo "More than one directories to choose from"
+    fi
+}
+
+# either op a file with a default program or open a directory in nautilus.
+function o() {
+    if [ $# -eq 0 ]; then
+        o "."
+    elif [ $# -eq 1 -a -d "$@" ]; then
+        detach nautilus "$@"
+    elif [ $# -eq 1 -a -f "$@" ]; then
+        detach open $@
+    else
+        echo "$# arguments are provided."  1>&2
+        echo "Usage: o <filename|dirname>" 1>&2
+        return 1
+    fi
+}
+ 

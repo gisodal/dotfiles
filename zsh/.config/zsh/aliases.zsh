@@ -5,3 +5,4 @@ alias tmux='tmux -2 -u'                        # force 256 colors AND UTF-8
 alias grep='grep --line-number --color=auto'
 alias lf='lfcd'
 alias cd='f() { c\d $1 && ls };f'
+alias drive='(){ [ ! -d "$1" ] && mkdir -p $1 && rclone --vfs-cache-mode writes mount "gdrive": ${1} && rm -r "$1" }'
