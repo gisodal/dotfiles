@@ -37,18 +37,8 @@ cmd unarchive ${{
 }}
 
 # Trash bindings
-cmd trash ${{
-  files=$(printf "$fx" | tr '\n' ';')
-  while [ "$files" ]; do
-    file=${files%%;*}
-
-    trash-put "$(basename "$file")"
-    if [ "$files" = "$file" ]; then
-      files=''
-    else
-      files="${files#*;}"
-    fi
-  done
+cmd trash %{{
+	gio trash "$f"
 }}
 
 cmd restore_trash ${{

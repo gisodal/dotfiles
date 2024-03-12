@@ -10,6 +10,7 @@
 	- polybar (i3 bar)
 	- picom  (compositor)
 	- lf (https://github.com/gokcehan/lf)
+	- fzf (https://github.com/junegunn/fzf.git)
 
 ### fonts
 	- Nerd fonts:
