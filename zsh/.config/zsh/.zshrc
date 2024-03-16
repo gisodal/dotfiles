@@ -10,7 +10,7 @@ case $- in *i*)
         [ -z "$SSH_CLIENT" ]        && \
         [ -n "$DISPLAY" ]           && \
         [ -z "$TMUX"  ]; then
-        tmux -2 -u
+        exec tmux -2 -u
       fi
 esac
 
