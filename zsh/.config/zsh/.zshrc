@@ -3,6 +3,17 @@ ZDOTDIR=${ZDOTDIR:-$XDG_CONFIG_HOME/zsh}
 ZSHRC="$ZDOTDIR/.zshrc"
 PLUGINDIR="$ZDOTDIR/plugins"
 
+# start TMUX before the p10k is initialized: https://github.com/romkatv/powerlevel10k/issues/1203
+case $- in *i*)
+      if  [ -z "$SSH_TTY" ]         && \
+        [ -z "$SSH_CONNECTION" ]    && \
+        [ -z "$SSH_CLIENT" ]        && \
+        [ -n "$DISPLAY" ]           && \
+        [ -z "$TMUX"  ]; then
+        tmux -2 -u
+      fi
+esac
+
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.config/zsh/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
 # confirmations, etc.) must go above this block; everything else may go below.
@@ -48,18 +59,6 @@ zstyle ':completion:*' menu select
 
 ZSH_AUTOSUGGEST_STRATEGY=(history completion)
 
-# To customize prompt, run `p10k configure` or edit ~/.config/zsh/.p10k.zsh.
-[[ ! -f $ZDOTDIR/.p10k.zsh ]] || source $ZDOTDIR/.p10k.zsh
- 
-#case $- in *i*)
-#  if  [ -z "$SSH_TTY" ]         && \
-#    [ -z "$SSH_CONNECTION" ]    && \
-#    [ -z "$SSH_CLIENT" ]        && \
-#    [ -n "$DISPLAY" ]           && \
-#    [ -z "$TMUX"  ]; then
-#    tmux
-#  fi
-#esac
 
 # detach function from terminal
 function detach(){
@@ -106,4 +105,7 @@ function o() {
         return 1
     fi
 }
- 
+
+# To customize prompt, run `p10k configure` or edit ~/.config/zsh/.p10k.zsh.
+[[ ! -f $ZDOTDIR/.p10k.zsh ]] || source $ZDOTDIR/.p10k.zsh
+  
