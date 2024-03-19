@@ -11,6 +11,7 @@
 	- picom  (compositor)
 	- lf (https://github.com/gokcehan/lf)
 	- fzf (https://github.com/junegunn/fzf.git)
+	- ripgrep (faster grep used by neovim's telescope)
 
 ### fonts
 	- Nerd fonts:
