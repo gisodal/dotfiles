@@ -10,6 +10,7 @@ return {
 	require("plugins/conform"),
 	require("plugins/cmp"),
 	require("plugins/theme"),
+	require("plugins/neodev"),
 	require("plugins/todo_comments"),
 	--  Uncomment any of the lines below to enable them (you will need to restart nvim).
 	--
