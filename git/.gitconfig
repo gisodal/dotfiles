@@ -4,32 +4,35 @@
 [include] # add file containing user info
     path = ~/.gituser
 [push]
-	default = matching
+    default = matching
 [merge]
-	defaultToUpstream = true
-    tool = vimdiff
-	conflictstyle = diff3
-	ff = false
+    defaultToUpstream = true
+    tool = ndiff
+    conflictstyle = diff3
+    ff = false
 [color]
     diff = always
 [log]
     decorate = short
 [mergetool]
-	prompt = false
-	keepBackup = false
+    prompt = false
+    keepBackup = false
 [difftool]
     prompt = false
-[difftool "diffpdf"]
-	cmd = diffpdf \"$LOCAL\" \"$REMOTE\"
+[difftool "pdfdiff"]
+    cmd = diffpdf \"$LOCAL\" \"$REMOTE\"
 [difftool "vimdiff"]
-	cmd = vim -d -c 'wincmd =' -c 'norm ]c[c' \"$LOCAL\" \"$REMOTE\"
+    cmd = vim -d -c 'wincmd =' -c 'norm ]c[c' \"$LOCAL\" \"$REMOTE\"
+[difftool "ndiff"]
+    cmd = nvim  -d \"$LOCAL\" \"$REMOTE\"
+
 [alias]
     mt = mergetool
     name = !sh -c 'basename $(git root)'
     zip = !sh -c 'git archive --format zip --output \"$(git name).zip\" HEAD' -
-	pdfdiff = difftool --tool=diffpdf
+    pdfdiff = difftool --tool=pdfdiff
     vimdiff = difftool --tool=vimdiff
-    vd = vimdiff = difftool --tool=vimdiff
+    vd = difftool --tool=ndiff
     timelogcsv = log --all --no-color --date=local --format=format:"%cd,%an,%s"
     timelogtsv = log --all --no-color --date=local --pretty=format:"%ad%x09%an%x09%s"
     timelog = !bash -c '"git timelogcsv | column -t -s,"'

@@ -57,6 +57,10 @@ source $PLUGINDIR/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
 zstyle ':completion:*' menu select
 
+zmodload -i zsh/complist
+bindkey -M menuselect '^i' accept-line
+zstyle ':completion:*' menu select=1
+
 ZSH_AUTOSUGGEST_STRATEGY=(history completion)
 
 
@@ -105,6 +109,15 @@ function o() {
         return 1
     fi
 }
+
+
+function rebuild_completions() {
+    rm "$ZDOTDIR/.zcompdump"
+    compinit
+}
+
+# add zoxide. This should be added after 'compinit'.
+eval "$(zoxide init zsh)"
 
 # To customize prompt, run `p10k configure` or edit ~/.config/zsh/.p10k.zsh.
 [[ ! -f $ZDOTDIR/.p10k.zsh ]] || source $ZDOTDIR/.p10k.zsh
