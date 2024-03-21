@@ -1,6 +1,7 @@
 return {
 	"nvimdev/dashboard-nvim",
 	event = "VimEnter",
+	lazy = false,
 	config = function()
 		local banner = {
 			[[                                                                       ]],

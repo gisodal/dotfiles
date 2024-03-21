@@ -18,12 +18,12 @@ return { -- Autocompletion
 				-- `friendly-snippets` contains a variety of premade snippets.
 				--    See the README about individual language/framework/plugin snippets:
 				--    https://github.com/rafamadriz/friendly-snippets
-				-- {
-				--   'rafamadriz/friendly-snippets',
-				--   config = function()
-				--     require('luasnip.loaders.from_vscode').lazy_load()
-				--   end,
-				-- },
+				{
+					"rafamadriz/friendly-snippets",
+					config = function()
+						require("luasnip.loaders.from_vscode").lazy_load()
+					end,
+				},
 			},
 		},
 		"saadparwaiz1/cmp_luasnip",
@@ -71,7 +71,7 @@ return { -- Autocompletion
 				--  Generally you don't need this, because nvim-cmp will display
 				--  completions whenever it has completion options available.
 				["<C-Space>"] = cmp.mapping.complete({}),
-
+				["<CR>"] = cmp.mapping.confirm({ select = true }),
 				-- Think of <c-l> as moving to the right of your snippet expansion.
 				--  So if you have a snippet that's like:
 				--  function $name($args)
@@ -95,6 +95,8 @@ return { -- Autocompletion
 				{ name = "nvim_lsp" },
 				{ name = "luasnip" },
 				{ name = "path" },
+			},
+			{
 				{ name = "buffer" },
 			},
 		})
