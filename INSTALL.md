@@ -24,6 +24,15 @@
 		- available at: https://github.com/supermarin/YosemiteSanFranciscoFont/tree/master
 	- Siji icons
 		- available at: https://github.com/stark/siji
+## install languages servers for n vim
+	- c++: 
+		install clang-format
+			> sudo apt-get install clang-format
+
+		install ccls
+			> sudo apt-get install ccls
+
+i	
 
 ## change to zsh
 

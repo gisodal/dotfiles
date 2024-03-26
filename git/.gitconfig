@@ -6,10 +6,10 @@
 [push]
     default = matching
 [merge]
-    defaultToUpstream = true
-    tool = ndiff
-    conflictstyle = diff3
-    ff = false
+    #defaultToUpstream = true
+    tool = nvimdiff
+    #conflictstyle = diff3
+    #ff = false
 [color]
     diff = always
 [log]
@@ -17,22 +17,22 @@
 [mergetool]
     prompt = false
     keepBackup = false
+[mergetool "diffview"]
+    cmd = nvim -n -c \"DiffviewOpen\" \"$MERGE\"
 [difftool]
     prompt = false
 [difftool "pdfdiff"]
     cmd = diffpdf \"$LOCAL\" \"$REMOTE\"
 [difftool "vimdiff"]
     cmd = vim -d -c 'wincmd =' -c 'norm ]c[c' \"$LOCAL\" \"$REMOTE\"
-[difftool "ndiff"]
+[difftool "nvimdiff"]
     cmd = nvim  -d \"$LOCAL\" \"$REMOTE\"
+[difftool "diffview"]
+    cmd = nvim -n -c \"DiffviewOpen\"
 
 [alias]
-    mt = mergetool
     name = !sh -c 'basename $(git root)'
     zip = !sh -c 'git archive --format zip --output \"$(git name).zip\" HEAD' -
-    pdfdiff = difftool --tool=pdfdiff
-    vimdiff = difftool --tool=vimdiff
-    vd = difftool --tool=ndiff
     timelogcsv = log --all --no-color --date=local --format=format:"%cd,%an,%s"
     timelogtsv = log --all --no-color --date=local --pretty=format:"%ad%x09%an%x09%s"
     timelog = !bash -c '"git timelogcsv | column -t -s,"'
@@ -141,14 +141,17 @@
     unstage = reset HEAD -- .
     ls = ls-tree -r HEAD --name-only
 
+    pdfdiff = difftool --tool=pdfdiff
+    vimdiff = difftool --tool=vimdiff
+
     st = status
     co = checkout
     cm = commit
     fe = fetch-diff
     pu = !git fetch-diff && git merge
-    vd = difftool --tool=vimdiff
-    mt = mergetool
-	cn = commit-now
+    vd = difftool --tool=diffview --dir-diff
+    mt = mergetool --tool=diffview
+    cn = commit-now
     cnp = commit-now-push
 
 [core]

@@ -22,3 +22,9 @@ Thumbs.db
 
 /.backup
 
+# files #
+#########
+
+.luarc.json
+
+
