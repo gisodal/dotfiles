@@ -31,6 +31,14 @@
         - install plugins: 
             [Press <prefix> I]
       
+      4. Configure ssh
+
+	> cp -r <.ssh/dir> ~/.ssh
+	> chmod 700 ~/.ssh
+	> chmod 700 ~/.ssh/keys
+	> chmod 600 ~/.ssh/*
+	> chmod 600 ~/.ssh/keys/*
+
 ## Dependencies
 
 
