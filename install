@@ -26,6 +26,7 @@ for package in $PACKAGES; do
 		OPT=""
 	fi
 
+	echo "Install $package"
 	stow $OPT -vt "$HOME" "$package"
 done
 

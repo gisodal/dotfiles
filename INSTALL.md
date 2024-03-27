@@ -1,5 +1,38 @@
+## Fedora 39 (GNOME) install
+   
+    1. Install config: 
 
+        > sudo dnf install git
+        > git clone https://github.com/gisodal/dotfiles.git ~/trunk/dotfiles
+        > sudo dnf install stow
+        > rm ~/.config/user-dirs.*
+        > rm ~/.bash*
+        > cd ~/trunk/dotfiles 
+        > ./install
+      
+    2. Install terminal
+
+        > sudo dnf install alacritty
+        > gsettings set org.gnome.desktop.default-applications.terminal exec alacritty
+
+    2. set up ZSH
+
+        > sudo dnf install zsh
+	    > sudo chsh -s /bin/zsh <username>
+        > git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ~/.config/zsh/plugins/powerlevel10k  
+        
+    3. setup tmux
+
+        > sudo dnf install tmux
+        > mkdir -p ~/.config/tmux/plugins
+        > git clone https://github.com/tmux-plugins/tpm ~/.config/tmux/plugins/tpm 
+        > tmux
+        
+        - install plugins: 
+            [Press <prefix> I]
+      
 ## Dependencies
+
 
 ### applications
 	- feh    (set desktop wallpaper)
@@ -24,6 +57,7 @@
 		- available at: https://github.com/supermarin/YosemiteSanFranciscoFont/tree/master
 	- Siji icons
 		- available at: https://github.com/stark/siji
+
 ## install languages servers for n vim
 	- c++: 
 		install clang-format
@@ -32,28 +66,6 @@
 		install ccls
 			> sudo apt-get install ccls
 
-i	
-
-## change to zsh
-
-    > chsh -s $(which zsh)
-
-	or: 
-
-	> sudo chsh -s /bin/zsh <userName>
-
-reboot for changes to take affect
-
-### troubleshooting
-
-	- check if zsh is installed
-	- set shell to zsh
-
-		> grep $USER /etc/passwd
-	
-	- is zsh a valid login shell?
-
-		> grep zsh /etc/shells
 
 ## zsh theme (powerlevel10k)
 	
