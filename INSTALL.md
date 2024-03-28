@@ -1,6 +1,14 @@
 ## Fedora 39 (GNOME) install
    
-    1. Install config: 
+    1. Configure ssh
+
+	> cp -r <.ssh/dir> ~/.ssh
+	> chmod 700 ~/.ssh
+	> chmod 700 ~/.ssh/keys
+	> chmod 600 ~/.ssh/*
+	> chmod 600 ~/.ssh/keys/*
+
+    2. Install config: 
 
         > sudo dnf install git
         > git clone https://github.com/gisodal/dotfiles.git ~/trunk/dotfiles
@@ -10,34 +18,43 @@
         > cd ~/trunk/dotfiles 
         > ./install
       
-    2. Install terminal
+    3. Install terminal (gnome)
 
         > sudo dnf install alacritty
         > gsettings set org.gnome.desktop.default-applications.terminal exec alacritty
 
-    2. set up ZSH
+    4. Install JetBrainsMono font
+	
+	> mkdir font
+	> cd font
+	> wget https://github.com/ryanoasis/nerd-fonts/releases/download/v3.1.1/JetBrainsMono.zip
+	> unzip JetBrainsMono.zip
+	> mkdir -p ~/.local/share/fonts
+	> mv JetBrainsMono ~/.local/share/fonts
+        > fc-cache -f -v
+
+    5. set up ZSH
 
         > sudo dnf install zsh
-	    > sudo chsh -s /bin/zsh <username>
-        > git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ~/.config/zsh/plugins/powerlevel10k  
+        > sudo chsh -s /bin/zsh <username>
+	> cd ~/.config/zsh/install_plugins.sh
         
-    3. setup tmux
+    6. setup tmux
 
         > sudo dnf install tmux
         > mkdir -p ~/.config/tmux/plugins
         > git clone https://github.com/tmux-plugins/tpm ~/.config/tmux/plugins/tpm 
-        > tmux
         
         - install plugins: 
             [Press <prefix> I]
       
-      4. Configure ssh
+      
+## Fedora update issue
 
-	> cp -r <.ssh/dir> ~/.ssh
-	> chmod 700 ~/.ssh
-	> chmod 700 ~/.ssh/keys
-	> chmod 600 ~/.ssh/*
-	> chmod 600 ~/.ssh/keys/*
+Try: 
+
+	> sudo dnf distrosync
+	> sudo dnf remove --duplicates
 
 ## Dependencies
 
@@ -54,55 +71,6 @@
 	- fzf (https://github.com/junegunn/fzf.git)
 	- ripgrep (faster grep used by neovim's telescope)
 
-### fonts
-	- Nerd fonts:
-		- available at https://www.nerdfonts.com/font-downloads
-	- JetBrainsMono Nerd font
-		- available at: https://github.com/ryanoasis/nerd-fonts/releases
-	- Hack
-		- available at: https://github.com/source-foundry/Hack/releases
-	- System San Francisco Display
-		- available at: https://github.com/supermarin/YosemiteSanFranciscoFont/tree/master
-	- Siji icons
-		- available at: https://github.com/stark/siji
-
-## install languages servers for n vim
-	- c++: 
-		install clang-format
-			> sudo apt-get install clang-format
-
-		install ccls
-			> sudo apt-get install ccls
-
-
-## zsh theme (powerlevel10k)
-	
-	- get at: https://github.com/romkatv/powerlevel10k?tab=readme-ov-file#meslo-nerd-font-patched-for-powerlevel10k
-	- install p10k
-
-		> git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ~/.config/powerlevel10k
-		> echo 'source ~/.config/powerlevel10k/powerlevel10k.zsh-theme' >>~/.zshrc
-
-## appearance
-
-### intall Arc dark theme
-	
-	* GTK theme:
-		- github: horst3180/arc-theme
-		- ubuntu: sudo apt-get install arc-theme
-		- use lxappearance and select arc-dark
-
-	* chrome:
-		- https://chromewebstore.google.com/detail/arc-dark/adicoenigffoolephelklheejpcpoolk
-
-	* icons
-		- download moka theme: https://www.snwh.org/moka/download
-		- install
-		- use lxappearance -> tab icon theme
-	
-	* rofi
-		- run rofi-theme-selector
-		- select Arc-dark
 
 ## fonts
 
@@ -113,39 +81,22 @@
 
 3. Update the font cache:
 	
-	- add to .xinitrc:
+	- add to .xinitrc (when use X11):
 		
-        xset +fp $HOME/.local/share/fonts
-        xset fp rehash 
+		xset +fp $HOME/.local/share/fonts
+		xset fp rehash 
 
 	- update cache
 
-		> xset +fp $HOME/.local/share/fonts 
-        > xset fp rehash  
-        > fc-cache -f -v
+		> fc-cache -f -v
 
-4. Check font installation:
+4. List font names
+
+	> fc-match NameOfFont -s
+
+5. Check font installation:
 
 	> fc-list | grep -i "<font name>"
 	> fc-match <font name>
 	> xlsfonts | grep -i "<font name>"
 
-
-## brightness control in i3
-
-* install brightnessctl
-
-    > sudo apt-get install brightnessctl
-
-
-* Paste these lines in your i3 config file(~/.config/i3/config)
-
-	- Increase brightness
-
-	    bindsym XF86MonBrightnessUp exec --no-startup-id brightnessctl set +5%
-
-	- Decrease brightness
-   
-	    bindsym XF86MonBrightnessDown exec --no-startup-id brightnessctl set 5%-
-
-[source](https://github.com/particleofmass/i3wm_screen_brightness)
