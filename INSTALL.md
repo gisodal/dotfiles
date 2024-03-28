@@ -56,21 +56,6 @@ Try:
 	> sudo dnf distrosync
 	> sudo dnf remove --duplicates
 
-## Dependencies
-
-
-### applications
-	- feh    (set desktop wallpaper)
-	- arandr (graphical screen settings, uses xrandr underneeth)
-	- rofi   ( new dmenu)
-	- dunst  (notifications)
-	- scrot, imagemagick, i3lock. (lock screen)
-	- polybar (i3 bar)
-	- picom  (compositor)
-	- lf (https://github.com/gokcehan/lf)
-	- fzf (https://github.com/junegunn/fzf.git)
-	- ripgrep (faster grep used by neovim's telescope)
-
 
 ## fonts
 
