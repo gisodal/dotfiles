@@ -330,5 +330,7 @@ bindings = [
     # { key = "Key", mods = "Modifiers", action = "Action" },
     # { key = "Key", mods = "Modifiers", chars = "Characters to send" },
     # ...
+
+    { key = "F11", action = "Togglefullscreen" },
 ]
 
