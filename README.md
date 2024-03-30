@@ -59,15 +59,17 @@ These are modern replacements for common applications, and a few that are just v
 |  dog     |  dig      |  https://github.com/ogham/dog                   |
 | neovim   | vi        |  https://github.com/neovim/neovim               |
 | tmux     | screen    | - |
+| flameshot | - | https://github.com/flameshot-org/flameshot |
 
-### applications for i3 based desktop
+### Applications for i3 based desktop
 
 | application | description
 | --          | -- 
+| i3          | X11 tiling window manager
+| i3lock      | lock screen
+| polybar     | i3 bar
+| picom       | compositor
 | feh         | set desktop wallpaper
 | arandr      | graphical screen settings, uses xrandr underneeth
 | rofi        | new dmenu
 | dunst       | notifications
-| i3lock      | lock screen
-| polybar     | i3 bar
-| picom       | compositor

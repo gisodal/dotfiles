@@ -63,7 +63,7 @@ decorations = "Full"  # Default: "Full"
 opacity = 0.9  # Default: 1.0
 
 # Blur (macOS/KDE Wayland only)
-blur = false  # Default: false
+blur = true  # Default: false
 
 # Startup mode
 startup_mode = "Windowed"  # Default: "Windowed"
