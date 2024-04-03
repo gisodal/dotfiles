@@ -9,7 +9,7 @@ alias vim='nvim'
 alias vimdiff='nvim -d -c "norm ]c[c"' # jump to first difference on startup
 alias md=ghostwriter
 
-alias ls='exa --icons --git --time-style=long-iso --group-directories-first -a'
+alias ls='eza --icons --git --time-style=long-iso --group-directories-first -a'
 alias ll='ls -l'
 alias lt='ls --tree --level=2'
 alias grep='rg'
@@ -20,6 +20,6 @@ alias df='dust'
 alias http='xh'
 alias cat='bat'
 alias man='tldr'
-alias cd='z'
-alias cdi='zi'
+#alias cd='z'
+#alias cdi='zi'
 

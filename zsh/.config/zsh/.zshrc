@@ -48,6 +48,9 @@ setopt inc_append_history
 setopt share_history
 
 source $ZDOTDIR/aliases.zsh
+if [[ $(uname) == "Darwin" ]]; then
+    source $ZDOTDIR/aliases.osx.zsh
+fi
 source $XDG_CONFIG_HOME/lf/lfcd.sh
 
 source $PLUGINDIR/powerlevel10k/powerlevel10k.zsh-theme

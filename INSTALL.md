@@ -25,6 +25,7 @@
 
     4. Install JetBrainsMono font
 	
+	* fedora
 	> mkdir font
 	> cd font
 	> wget https://github.com/ryanoasis/nerd-fonts/releases/download/v3.1.1/JetBrainsMono.zip
@@ -32,6 +33,9 @@
 	> mkdir -p ~/.local/share/fonts
 	> mv JetBrainsMono ~/.local/share/fonts
         > fc-cache -f -v
+
+	* macos
+	> brew tap homebrew/cask-fonts && brew install --cask font-jetbrains-mono-nerd-font
 
     5. set up ZSH
 

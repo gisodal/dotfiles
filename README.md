@@ -45,6 +45,8 @@ These are modern replacements for common applications, and a few that are just v
 |  duf     |  du       |  https://github.com/muesli/duf                  |
 |  sd      |  sed      |  https://github.com/chmln/sd                    |
 |  zoxide (z)  |  ch       |  https://github.com/ajeetdsouza/zoxide          |
+|  eza     | ls        | https://github.com/eza-community/eza |
+|  lsd     | ls        | https://github.com/lsd-rs/lsd | 
 |  exa     |  ls       |  https://github.com/ogham/exa                   |
 |  lf      |  ls       |  https://github.com/gokcehan/lf                 |
 |  ranger  |  ls       |  https://github.com/ranger/ranger               |
