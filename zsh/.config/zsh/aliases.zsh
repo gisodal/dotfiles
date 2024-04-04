@@ -20,6 +20,6 @@ alias df='dust'
 alias http='xh'
 alias cat='bat'
 alias man='tldr'
-#alias cd='z'
-#alias cdi='zi'
+alias cd='() { z $@ && ls }'
+alias cdi='zi'
 

@@ -5,6 +5,7 @@ return { -- Highlight, edit, and navigate code
 		ensure_installed = {
 			"bash",
 			"c",
+			"cpp",
 			"html",
 			"lua",
 			"markdown",
