@@ -42,6 +42,11 @@ TERM = "xterm-256color"
 # WINDOW #
 ##########
 
+[shell]
+program = "/bin/zsh"  # Example for Linux/BSD/macOS
+args = ["-l", "-c", "tmux attach || tmux"]
+
+
 [window]
 
 # Window dimensions
@@ -63,7 +68,7 @@ decorations = "Full"  # Default: "Full"
 opacity = 0.9  # Default: 1.0
 
 # Blur (macOS/KDE Wayland only)
-blur = true  # Default: false
+blur = false  # Default: false
 
 # Startup mode
 startup_mode = "Windowed"  # Default: "Windowed"

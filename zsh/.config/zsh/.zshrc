@@ -63,6 +63,7 @@ zstyle ':completion:*' menu select
 zmodload -i zsh/complist
 bindkey -M menuselect '^i' accept-line
 zstyle ':completion:*' menu select=1
+zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}'
 
 ZSH_AUTOSUGGEST_STRATEGY=(history completion)
 
