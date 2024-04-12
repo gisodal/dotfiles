@@ -1,4 +1,11 @@
-## Fedora 39 (GNOME) install
+## Quick ubuntu install 
+
+	> install local
+	> install tmux
+	> install bash
+
+
+## Full install (on Fedora 39 (GNOME))
    
     1. Configure ssh
 
