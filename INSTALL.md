@@ -1,5 +1,6 @@
 ## Quick ubuntu install 
 
+	> sudo apt-get install tmux git stow
 	> install local
 	> install tmux-legacy
 	> install bash
