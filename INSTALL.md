@@ -1,8 +1,9 @@
 ## Quick ubuntu install 
 
 	> install local
-	> install tmux
+	> install tmux-legacy
 	> install bash
+	> install git
 
 
 ## Full install (on Fedora 39 (GNOME))
