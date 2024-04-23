@@ -62,7 +62,7 @@ function keygen(){
 
 
         COMMENT="$KEY $(date '+%Y-%m-%d %H:%M:%S')"
-        ssh-keygen -q -t ed25519 -b 4096 -N "$PASSWORD" -f "$KEYS/$KEY" -C "$COMMENT"
+        ssh-keygen -q -t rsa -b 4096 -N "$PASSWORD" -f "$KEYS/$KEY" -C "$COMMENT"
         chmod 600 "$KEYS/$KEY"
         echo -e "Key '$KEY' created in '$KEYS/'...\n"
 
