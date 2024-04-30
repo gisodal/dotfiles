@@ -47,8 +47,6 @@
     ltree = log --author-date-order --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %x09%C(auto)%d%C(reset) %<(16,trunc)%C(dim magenta)%an%C(reset) %C(dim white)%s%C(reset)\n%x09%x09%C(blue) [%ar on %cd]%C(reset)' --date=format:'%A %d %B %Y %H:%M:%S'
     stree = log --author-date-order --all --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %x09%C(auto)%d%C(reset) %C(blue)%s%C(reset)\n'
 
-    forest = "forest --pretty=format:\"%C(red)%h %C(magenta)(%ar) %C(blue)%an %C(reset)%s\""
-
     tar = !bash -c '"                                                           \
         BRANCH=$(git branchname);                                               \
         REPODIR=$(git root);                                                    \
@@ -156,6 +154,9 @@
     mv = mergetool --tool=diffview
     cn = commit-now
     cnp = commit-now-push
+	skipped = "!f(){ git ls-files -v ${1} | grep ^S;};f"
+	skip = update-index --skip-worktree --
+	unskip = update-index --no-skip-worktree --
 
 [core]
     editor = vim
