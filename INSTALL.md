@@ -1,4 +1,13 @@
-## Fedora 39 (GNOME) install
+## Quick ubuntu install 
+
+	> sudo apt-get install tmux git stow
+	> install local
+	> install tmux-legacy
+	> install bash
+	> install git
+
+
+## Full install (on Fedora 39 (GNOME))
    
     1. Configure ssh
 

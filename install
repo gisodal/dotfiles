@@ -5,12 +5,11 @@ if ! [ -x "$(command -v stow)" ]; then
 	exit 1
 fi
 
-FIND=$([ $(which gfind) == "" ] && "find" || "gfind")
 XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
 TARGET=$HOME
 SOURCE=$(cd "$(dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd)
 CONFIG="$SOURCE/.stownofolding"
-PACKAGES=$($FIND "$SOURCE" -mindepth 1 -maxdepth 1 ! -path . ! -path '*.git' -type d -printf '%P ')
+PACKAGES=$(find "$SOURCE" -maxdepth 1 ! -path . ! -path '*.git' -type d | xargs -l1 basename | xargs)
 XDG_CONFIG_HOME=${XDG_CONFIG_HOME:=$HOME/.config}
 
 if [ $# -gt 0 ]; then
