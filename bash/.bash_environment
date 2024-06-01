@@ -125,7 +125,7 @@ if [ -z "$BASH_CUSTOM_ENVIRONMENT" ]; then
 
     export GIT_CONFIG_DIR="$HOME/.gitcfg"
     export PKG_CONFIG_PATH="$USR_LOCAL/lib/pkgconfig"
-    export VALGRIND_LIB="$USR_LOCAL/lib/valgrind"
+    export VALGRIND_LIB="/usr/lib/valgrind"
     export EDITOR="vim"
     export VISUAL="vim"
     export XZ_OPT="-9"                      # best compression for tar.xz creation

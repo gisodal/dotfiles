@@ -6,10 +6,10 @@
 [push]
     default = matching
 [merge]
-    defaultToUpstream = true
-    tool = vim
-    conflictstyle = diff3
-	#ff = false
+	defaultToUpstream = true
+    tool = vimdiff
+	conflictstyle = diff3
+	ff = false
 [color]
     diff = always
 [log]
@@ -150,7 +150,7 @@
     vd = difftool --tool=diffview --dir-diff
 	dv = difftool --tool=vimdiff
 	dn = difftool --tool=nvimdiff
-    mt = mergetool --tool=diffview
+    mt = mergetool
     mv = mergetool --tool=diffview
     cn = commit-now
     cnp = commit-now-push
@@ -173,3 +173,5 @@
 	show = vim -R -
 [pull]
 	ff = true
+[rerere]
+	enabled = true
