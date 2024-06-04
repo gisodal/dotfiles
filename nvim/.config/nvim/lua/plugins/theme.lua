@@ -1,6 +1,7 @@
 return {
   -- add gruvbox
   { "ellisonleao/gruvbox.nvim" },
+  -- add catppuccin
   {
     "catppuccin/nvim",
     name = "catppuccin",
@@ -46,6 +47,8 @@ return {
       vim.cmd.colorscheme("catppuccin")
       require("catppuccin").setup({
         flavour = "mocha",
+        -- black background for the mocha colorscheme flavour
+        color_overrides = { mocha = { base = '#000000' } }
       })
     end,
   },
