@@ -4,4 +4,17 @@
 
 vim.cmd([[
   cnoreabbrev hs split
+
+  nnoremap x "_x
+  vnoremap x "_x
+
+  nnoremap d "_d
+  vnoremap d "_d
+
+  nnoremap D "_D
+
+  nnoremap dd "_dd
+  vnoremap dd "_dd
+
+  vnoremap <Esc> "_<Esc>
 ]])
