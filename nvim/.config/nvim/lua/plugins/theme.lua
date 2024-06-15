@@ -48,7 +48,10 @@ return {
       require("catppuccin").setup({
         flavour = "mocha",
         -- black background for the mocha colorscheme flavour
-        color_overrides = { mocha = { base = '#000000' } }
+        color_overrides = { mocha = { base = '#000000' } },
+        custom_highlights = {
+          NeoTreeCursorLine = { bg = '#000000' }
+        }
       })
     end,
   },
