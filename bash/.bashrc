@@ -17,7 +17,7 @@ case "$-" in
 
         test -f "$HOME/.bash-completion/bash_completion" && . $_
 
-        test -f "$GIT_CONFIG_DIR/git-completion.bash" && . $_
+        test -f "$HOME/$GIT_CONFIG_DIR/git-completion.bash" && . $_
 
         if [ -f $HOME/.bash_local ]; then
             source $HOME/.bash_local

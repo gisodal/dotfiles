@@ -18,6 +18,5 @@ Thumbs.db
 
 # configuration files #
 # =====================
-.vscode
 build
 target

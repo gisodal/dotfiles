@@ -101,9 +101,11 @@ add-path-tree "$HOME/.local"
 add-path-tree "$HOME/usr"
 add-path-tree "$HOME/usr/scripts"
 add-opt-tree  "$HOME/usr/opt"
+add-prefix-path PATH "$HOME/.config/git/commands"
 
 # setup git user
-if [ ! -z "$PS1" -a ! -f ~/.gituser ]; then
+export GIT_USER_FILE="$HOME/.config/git/.gituser"
+if [ ! -z "$PS1" -a ! -f "$GIT_USER_FILE" ]; then
     GITUSER=$USER@$HOSTNAME
     echo "Configure a git user and email:"
     read -p "    Using $GITUSER as username. Is that ok? (Y/n) " choice
@@ -113,8 +115,8 @@ if [ ! -z "$PS1" -a ! -f ~/.gituser ]; then
     esac
     read -p "    Enter email: " GITMAIL
 
-    printf "[user]\n    name = $GITUSER\n    email = $GITMAIL\n" > $HOME/.gituser
-    echo -e "\n    Username '$GITUSER' and email '$GITMAIL' written to ~/.gituser"
+    printf "[user]\n    name = $GITUSER\n    email = $GITMAIL\n" > "$GIT_USER_FILE"
+    echo -e "\n    Username '$GITUSER' and email '$GITMAIL' written to $GIT_USER_FILE"
 fi
 
 if [ -z "$BASH_CUSTOM_ENVIRONMENT" ]; then
@@ -123,7 +125,7 @@ if [ -z "$BASH_CUSTOM_ENVIRONMENT" ]; then
     # Update program environment
     # -----------------------------------------------------------------------------
 
-    export GIT_CONFIG_DIR="$HOME/.gitcfg"
+    export GIT_CONFIG_DIR="$HOME/.config/git"
     export PKG_CONFIG_PATH="$USR_LOCAL/lib/pkgconfig"
     export VALGRIND_LIB="/usr/lib/valgrind"
     export EDITOR="vim"

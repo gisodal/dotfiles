@@ -1,0 +1,19 @@
+#!/bin/bash
+
+if date -d "$@" 1>/dev/null; then                                             
+    :;                                                                          
+else                                                                            
+    echo
+   	echo 'Usage: git time-amend <date>'
+	exit 1
+fi                                                                             
+
+TIME=$(date -d "$@")
+read -p "Amend previous commit with time '$TIME'? (y/N) " -r REPLY           
+
+if [ "$REPLY" = "y" ]; then                                                 
+	(GIT_COMMITTER_DATE="$TIME" git commit --amend --no-edit --date "$TIME")
+else                                                                            
+    echo Operation canceled
+fi
+

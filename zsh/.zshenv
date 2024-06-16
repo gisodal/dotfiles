@@ -15,7 +15,7 @@ export BROWSER="google-chrome-stable"
 # Adds ~/.local/bin and subfolders to $PATH
 export BREW=$(eval "$(/opt/homebrew/bin/brew shellenv)" 2>/dev/null)
 export LOCALBINS=$(find ~/.local/bin -maxdepth 1 -type d 2>/dev/null | xargs printf "%s:")
-export PATH="$PATH:/opt/homebrew/bin:$BREW:$LOCALBINS:~/.local/share/coursier/bin"
+export PATH="$PATH:/opt/homebrew/bin:$BREW:$LOCALBINS:~/.local/share/coursier/bin:~/.config/git/commands"
 
 export LESSHISTFILE="-"
 

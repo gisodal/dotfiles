@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# delete local branch
+read -n1 -r -p "Delete local branch \"$0\" (N/y)? " response
+echo
+
+if [[ ${response,,} =~ y$ ]]; then                                
+    git branch -d "$0"
+fi                                                                     
+
+# delete remote branch
+read -n1 -r -p "Delete remote branch \"$0\" (N/y)? " response;    
+echo
+
+if [[ ${response,,} =~ y$ ]]; then
+	git push origin --delete "$0"
+fi

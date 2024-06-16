@@ -1,0 +1,13 @@
+#!/bin/bash
+
+if git show-ref -q --heads $1; then
+    CURRENT=$(git symbolic-ref --short HEAD)
+    echo "Swithing to $1" &&                 \
+        git checkout --quiet $1 &&           \
+        echo "Pulling $1" &&                 \
+        git pull &&                          \
+        echo "Returning to $CURRENT" &&      \
+        git checkout --quiet $CURRENT
+else                                           
+    echo "Branch $1 does not exist"
+fi

@@ -1,0 +1,88 @@
+#[user]
+    #name = username
+    #email = email
+[include] # add file containing user info
+    path = ~/.config/git/.gituser
+[push]
+    default = matching
+[merge]
+    #defaultToUpstream = true
+    tool = nvim
+	conflictstyle = diff3
+	ff = false
+[color]
+    diff = always
+[log]
+    decorate = short
+[mergetool]
+    prompt = false
+    keepBackup = false
+[mergetool "diffview"]
+    cmd = nvim -n -c "DiffviewOpen" "$MERGE"
+[mergetool "echo"]
+    cmd = echo "local: $LOCAL -- remote: $REMOTE -- merge: $MERGE"
+[difftool]
+    prompt = false
+[difftool "pdfdiff"]
+    cmd = diffpdf "$LOCAL" "$REMOTE"
+[difftool "vim"]
+    cmd = vim -d -c 'wincmd =' -c 'norm ]c[c' "$LOCAL" "$REMOTE"
+[difftool "nvim"]
+    cmd = nvim -d -c 'wincmd =' -c 'norm ]c[c' "$LOCAL" "$REMOTE"
+[difftool "diffview"]
+    cmd = nvim -n -c "DiffviewOpen $LOCAL..$REMOTE" 
+[difftool "echo"]
+    cmd = echo "local: $LOCAL -- remote: $REMOTE -- merge: $MERGE"
+[alias]
+    name = !sh -c 'basename $(git root)'
+    zip = !sh -c 'git archive --format zip --output \"$(git name).zip\" HEAD' -
+    basetree = log --author-date-order --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %x09%C(auto)%d%C(reset) %<(16,trunc)%C(dim magenta)%an%C(reset) %C(dim white)%s%C(reset)\n%x09%x09%C(blue) [%ar on %cd]%C(reset)' --date=format:'%A %d %B %Y %H:%M:%S'
+    tree = !bash -c '"git basetree --all"'
+
+    mtree = log --author-date-order --author="gdal*" --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %x09%C(auto)%d%C(reset) %<(16,trunc)%C(dim magenta)%an%C(reset) %C(dim white)%s%C(reset)\n%x09%x09%C(blue) [%ar on %cd]%C(reset)' --date=format:'%A %d %B %Y %H:%M:%S'
+    atree = log --all --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %x09%C(auto)%d%C(reset) %<(16,trunc)%C(dim magenta)%an%C(reset) %C(dim white)%s%C(reset)\n%x09%x09%C(blue) [%ar on %cd]%C(reset)' --date=format:'%A %d %B %Y %H:%M:%S'
+    ltree = log --author-date-order --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %x09%C(auto)%d%C(reset) %<(16,trunc)%C(dim magenta)%an%C(reset) %C(dim white)%s%C(reset)\n%x09%x09%C(blue) [%ar on %cd]%C(reset)' --date=format:'%A %d %B %Y %H:%M:%S'
+    stree = log --author-date-order --all --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %x09%C(auto)%d%C(reset) %C(blue)%s%C(reset)\n'
+
+    pull-submodules = submodule foreach git pull
+    status-submodules = submodule foreach git status -uno
+    branchname = rev-parse --abbrev-ref HEAD
+    root = rev-parse --show-toplevel
+    ls = ls-files
+
+    pdfdiff = difftool --tool=pdfdiff
+    vimdiff = difftool --tool=vimdiff
+    vimmerge = mergetool --tool=vim
+
+    st = status
+    co = checkout
+    cm = commit
+    fd = fetch-diff
+
+    dv = difftool --tool=vim
+    dn = difftool --tool=nvim
+	dd = diffview
+
+    mt = mergetool
+    md = mergetool --tool=diffview
+
+	skipped = "!f(){ git ls-files -v ${1} | grep ^S;};f"
+	skip = update-index --skip-worktree --
+	unskip = update-index --no-skip-worktree --
+
+[core]
+    editor = nvim
+    excludesfile = ~/.config/git/.gitignore
+[merge "ours"]
+	driver = true
+[status]
+	submoduleSummary = true
+[http]
+    postBuffer = 524288000
+[pager]
+	color = false
+	show = nvim -R -
+[pull]
+	ff = true
+[rerere]
+	enabled = true
