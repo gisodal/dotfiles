@@ -5,7 +5,7 @@ require("config.lazy")
 -- see docs at https://github.com/neovim/nvim-lspconfig/blob/master/doc/lspconfig.txt
 if vim.fn.hostname() == "rts" then
   require("lspconfig").clangd.setup({
-	cmd = { "clangd", 
+	cmd = { "clangd",
 	"--background-index",
 	"--clang-tidy",
 	"--completion-style=bundled",
@@ -15,3 +15,5 @@ if vim.fn.hostname() == "rts" then
   })
   require("notify")("Loaded clangd")
 end
+
+-- require("config.editorconfig")
