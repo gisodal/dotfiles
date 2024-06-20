@@ -7,6 +7,10 @@ local opt = vim.opt
 opt.scrolloff = 10
 opt.sidescrolloff = 10
 
+-- disable all folding
+opt.foldenable = false
+opt.diffopt = opt.diffopt + 'context:99999'
+
 -- show whitespaces
 local cmd = vim.cmd
 local api = vim.api
