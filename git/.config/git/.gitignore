@@ -8,6 +8,7 @@
 ehthumbs.db
 Thumbs.db
 .nfs*
+*.log
 
 # VIM generated files #
 ######################

@@ -61,7 +61,8 @@
 
     dv = difftool --tool=vim
     dn = difftool --tool=nvim
-	dd = diffview
+    dd = diffview-uno
+    dda = diffview
 
     mt = mergetool
     md = mergetool --tool=diffview
