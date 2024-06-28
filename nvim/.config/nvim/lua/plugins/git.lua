@@ -48,20 +48,15 @@ return {
     end,
   },
 
-  -- -----------------------------------------------------------------------------
-  -- -- Git blame visualizer
-  -- {
-  --   "FabijanZulj/blame.nvim",
-  --   cmd = "ToggleBlame",
-  --   -- stylua: ignore
-  --   keys = {
-  --     { '<leader>gb', '<cmd>ToggleBlame virtual<CR>', desc = 'Git blame' },
-  --     { '<leader>gB', '<cmd>ToggleBlame window<CR>',  desc = 'Git blame (window)' },
-  --   },
-  --   opts = {
-  --     date_format = "%Y-%m-%d %H:%M",
-  --   },
-  -- },
+  -----------------------------------------------------------------------------
+  -- Git blame visualizer
+  {
+    "FabijanZulj/blame.nvim",
+    -- keybinding is set in config/keymaps.lua
+    config = function()
+      require("blame").setup({ date_format = "%d-%m-%Y %H:%M" })
+    end
+  },
 
   -- -----------------------------------------------------------------------------
   -- -- Reveal the commit messages under the cursor

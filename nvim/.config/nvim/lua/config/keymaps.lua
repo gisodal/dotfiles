@@ -18,3 +18,5 @@ vim.cmd([[
 
   vnoremap <Esc> "_<Esc>
 ]])
+
+vim.keymap.set('n', '<leader>gb', '<cmd>BlameToggle<CR>', { desc = 'Git blame new style' })
