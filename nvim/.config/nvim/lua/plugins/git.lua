@@ -2,6 +2,7 @@
 return {
   {
     "sindrets/diffview.nvim",
+    dependencies = { "nvim-tree/nvim-web-devicons" },
     cmd = { "DiffviewOpen", "DiffviewFileHistory" },
     keys = {
       { "<Leader>gd", "<cmd>DiffviewFileHistory %<CR>", desc = "Diff File" },
@@ -18,8 +19,25 @@ return {
         end,
       })
 
+
       return {
+        use_icons = true,
         enhanced_diff_hl = true, -- See ':h diffview-config-enhanced_diff_hl'
+        icons = {                -- Only applies when use_icons is true.
+          folder_closed = "",
+          folder_open = "",
+        },
+        signs = {
+          fold_closed = "",
+          fold_open = "",
+          done = "✓",
+        },
+        view = {
+          merge_tool = {
+            layout = "diff4_mixed",
+            disable_diagnostics = true,
+          },
+        },
         keymaps = {
           view = {
             { "n", "q",              actions.close },
