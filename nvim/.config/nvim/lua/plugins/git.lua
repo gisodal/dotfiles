@@ -2,6 +2,7 @@
 return {
   {
     "sindrets/diffview.nvim",
+    dependencies = { "nvim-tree/nvim-web-devicons" },
     cmd = { "DiffviewOpen", "DiffviewFileHistory" },
     keys = {
       { "<Leader>gd", "<cmd>DiffviewFileHistory %<CR>", desc = "Diff File" },
@@ -18,8 +19,25 @@ return {
         end,
       })
 
+
       return {
+        use_icons = true,
         enhanced_diff_hl = true, -- See ':h diffview-config-enhanced_diff_hl'
+        icons = {                -- Only applies when use_icons is true.
+          folder_closed = "",
+          folder_open = "",
+        },
+        signs = {
+          fold_closed = "",
+          fold_open = "",
+          done = "✓",
+        },
+        view = {
+          merge_tool = {
+            layout = "diff4_mixed",
+            disable_diagnostics = true,
+          },
+        },
         keymaps = {
           view = {
             { "n", "q",              actions.close },
@@ -48,20 +66,15 @@ return {
     end,
   },
 
-  -- -----------------------------------------------------------------------------
-  -- -- Git blame visualizer
-  -- {
-  --   "FabijanZulj/blame.nvim",
-  --   cmd = "ToggleBlame",
-  --   -- stylua: ignore
-  --   keys = {
-  --     { '<leader>gb', '<cmd>ToggleBlame virtual<CR>', desc = 'Git blame' },
-  --     { '<leader>gB', '<cmd>ToggleBlame window<CR>',  desc = 'Git blame (window)' },
-  --   },
-  --   opts = {
-  --     date_format = "%Y-%m-%d %H:%M",
-  --   },
-  -- },
+  -----------------------------------------------------------------------------
+  -- Git blame visualizer
+  {
+    "FabijanZulj/blame.nvim",
+    -- keybinding is set in config/keymaps.lua
+    config = function()
+      require("blame").setup({ date_format = "%d-%m-%Y %H:%M" })
+    end
+  },
 
   -- -----------------------------------------------------------------------------
   -- -- Reveal the commit messages under the cursor

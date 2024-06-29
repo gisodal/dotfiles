@@ -6,12 +6,9 @@
 [push]
     default = matching
 [merge]
-    #defaultToUpstream = true
-    tool = nvim
-	conflictstyle = diff3
-	ff = false
-[color]
-    diff = always
+    defaultToUpstream = true
+    tool = diffview
+	  ff = false
 [log]
     decorate = short
 [mergetool]
@@ -29,8 +26,6 @@
     cmd = vim -d -c 'wincmd =' -c 'norm ]c[c' "$LOCAL" "$REMOTE"
 [difftool "nvim"]
     cmd = nvim -d -c 'wincmd =' -c 'norm ]c[c' "$LOCAL" "$REMOTE"
-[difftool "diffview"]
-    cmd = nvim -n -c "DiffviewOpen $LOCAL..$REMOTE" 
 [difftool "echo"]
     cmd = echo "local: $LOCAL -- remote: $REMOTE -- merge: $MERGE"
 [alias]
@@ -65,25 +60,24 @@
     dda = diffview
 
     mt = mergetool
-    md = mergetool --tool=diffview
 
-	skipped = "!f(){ git ls-files -v ${1} | grep ^S;};f"
-	skip = update-index --skip-worktree --
-	unskip = update-index --no-skip-worktree --
+	  skipped = "!f(){ git ls-files -v ${1} | grep ^S;};f"
+	  skip = update-index --skip-worktree --
+	  unskip = update-index --no-skip-worktree --
 
 [core]
     editor = nvim
     excludesfile = ~/.config/git/.gitignore
 [merge "ours"]
-	driver = true
+	  driver = true
 [status]
-	submoduleSummary = true
+	  submoduleSummary = true
 [http]
     postBuffer = 524288000
 [pager]
-	color = false
-	show = nvim -R -
+	  color = false
+	  show = nvim -R -
 [pull]
-	ff = true
+	  ff = true
 [rerere]
-	enabled = true
+	  enabled = true
