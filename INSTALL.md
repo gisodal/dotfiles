@@ -6,6 +6,14 @@
 	> install bash
 	> install git
 
+## update terminfo for alacritty
+
+    > curl -O https://raw.githubusercontent.com/alacritty/alacritty/master/extra/alacritty.info
+    > sudo tic -xe alacritty,alacritty-direct alacritty.info
+
+echo properties with:
+
+    > infocmp -L alacritty alacritty-direct
 
 ## Full install (on Fedora 39 (GNOME))
    
