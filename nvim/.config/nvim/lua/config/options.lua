@@ -13,3 +13,7 @@ opt.diffopt = opt.diffopt + 'context:99999'
 
 require("config.custom.whitespace")
 require("config.custom.diffcolors")
+
+-- disable lsp log
+vim.lsp.set_log_level("off")
+-- vim.lsp.set_log_level("debug")
