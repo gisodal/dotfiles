@@ -18,8 +18,3 @@ vim.cmd([[
 
   vnoremap <Esc> "_<Esc>
 ]])
-
-vim.keymap.set("n", "<leader>gb", "<cmd>BlameToggle<CR>", { desc = "Git blame" })
-
--- this does not work when passing it throuhg lazy.nvim keys
-vim.keymap.set("n", "<leader>fe", "<cmd>Noice telescope<cr>", { desc = "Find error", silent = true })

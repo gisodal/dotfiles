@@ -1,36 +1,66 @@
+local builtin = require("telescope.builtin")
+
 return {
   {
     "nvim-telescope/telescope.nvim",
     keys = {
-      { "<leader>fh", "<cmd>Telescope highlights<cr>", desc = "Find highlights" },
       {
         "<leader>/",
         function()
           local root = string.gsub(vim.fn.system("git rev-parse --show-toplevel"), "\n", "")
           if vim.v.shell_error == 0 then
-            require("telescope.builtin").live_grep({ cwd = root })
+            builtin.live_grep({ cwd = root })
           else
-            require("telescope.builtin").live_grep({ root = true })
+            builtin.live_grep({ root = true })
           end
         end,
-        desc = "Grep (Root Dir)",
+        desc = "Grep (Git Dir)",
       },
       {
         "<leader><space>",
         function()
           local root = string.gsub(vim.fn.system("git rev-parse --show-toplevel"), "\n", "")
           if vim.v.shell_error == 0 then
-            require("telescope.builtin").find_files({ cwd = root })
+            builtin.find_files({ cwd = root })
           else
-            require("telescope.builtin").find_files({ root = true })
+            builtin.find_files({ root = true })
           end
         end,
-        desc = "Find File",
+        desc = "Find File (Git Dir)",
       },
       {
         "<leader>;",
-        require("telescope.builtin").resume,
-        desc = "Resume telescope",
+        builtin.resume,
+        desc = "Resume Telescope",
+      },
+      {
+        "<leader>fc",
+        function()
+          builtin.find_files({ cwd = vim.fn.stdpath("config") })
+        end,
+        desc = "[F]ind [C]onfig",
+      },
+      {
+        "<leader>fs",
+        builtin.builtin,
+        desc = "[F]ind [S]elect Telescope",
+      },
+      {
+        "<leader>f/",
+        function()
+          -- You can pass additional configuration to telescope to change theme, layout, etc.
+          builtin.current_buffer_fuzzy_find(require("telescope.themes").get_dropdown({
+            winblend = 10,
+            previewer = false,
+          }))
+        end,
+        desc = "[/] Fuzzily search in current buffer",
+      },
+      {
+        "<leader>sne",
+        "<cmd>Noice telescope<cr>",
+        desc = "Find [E]rror",
+        silent = true,
       },
     },
   },
