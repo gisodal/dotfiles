@@ -6,7 +6,7 @@ return {
     cmd = { "DiffviewOpen", "DiffviewFileHistory" },
     keys = {
       { "<Leader>gd", "<cmd>DiffviewFileHistory %<CR>", desc = "Diff File" },
-      { "<Leader>gv", "<cmd>DiffviewOpen<CR>",          desc = "Diff View" },
+      { "<Leader>gv", "<cmd>DiffviewOpen<CR>", desc = "Diff View" },
     },
     opts = function()
       local actions = require("diffview.actions")
@@ -19,11 +19,10 @@ return {
         end,
       })
 
-
       return {
         use_icons = true,
         enhanced_diff_hl = true, -- See ':h diffview-config-enhanced_diff_hl'
-        icons = {                -- Only applies when use_icons is true.
+        icons = { -- Only applies when use_icons is true.
           folder_closed = "",
           folder_open = "",
         },
@@ -40,20 +39,20 @@ return {
         },
         keymaps = {
           view = {
-            { "n", "q",              actions.close },
-            { "n", "<Tab>",          actions.select_next_entry },
-            { "n", "<S-Tab>",        actions.select_prev_entry },
+            { "n", "q", actions.close },
+            { "n", "<Tab>", actions.select_next_entry },
+            { "n", "<S-Tab>", actions.select_prev_entry },
             { "n", "<LocalLeader>a", actions.focus_files },
             { "n", "<LocalLeader>e", actions.toggle_files },
           },
           file_panel = {
-            { "n", "q",              actions.close },
-            { "n", "h",              actions.prev_entry },
-            { "n", "o",              actions.focus_entry },
-            { "n", "gf",             actions.goto_file },
-            { "n", "sg",             actions.goto_file_split },
-            { "n", "st",             actions.goto_file_tab },
-            { "n", "<C-r>",          actions.refresh_files },
+            { "n", "q", actions.close },
+            { "n", "h", actions.prev_entry },
+            { "n", "o", actions.focus_entry },
+            { "n", "gf", actions.goto_file },
+            { "n", "sg", actions.goto_file_split },
+            { "n", "st", actions.goto_file_tab },
+            { "n", "<C-r>", actions.refresh_files },
             { "n", "<LocalLeader>e", actions.toggle_files },
           },
           file_history_panel = {
@@ -71,9 +70,12 @@ return {
   {
     "FabijanZulj/blame.nvim",
     -- keybinding is set in config/keymaps.lua
+    keys = {
+      { "<leader>gb", "<cmd>BlameToggle<CR>", desc = "Git blame" },
+    },
     config = function()
       require("blame").setup({ date_format = "%d-%m-%Y %H:%M" })
-    end
+    end,
   },
 
   -- -----------------------------------------------------------------------------
@@ -90,6 +92,4 @@ return {
   --     vim.g.git_messenger_floating_win_opts = { border = "rounded" }
   --   end,
   -- },
-
-
 }
