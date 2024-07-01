@@ -9,7 +9,7 @@ opt.sidescrolloff = 10
 
 -- disable all folding
 opt.foldenable = false
-opt.diffopt = opt.diffopt + 'context:99999'
+opt.diffopt = opt.diffopt + "context:99999"
 
 require("config.custom.whitespace")
 require("config.custom.diffcolors")

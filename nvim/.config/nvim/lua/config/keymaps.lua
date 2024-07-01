@@ -21,8 +21,5 @@ vim.cmd([[
 
 vim.keymap.set("n", "<leader>gb", "<cmd>BlameToggle<CR>", { desc = "Git blame" })
 
-vim.keymap.set("n", "<leader>;", require("telescope.builtin").resume, {
-  noremap = true,
-  silent = true,
-  desc = "Resume telescope",
-})
+-- this does not work when passing it throuhg lazy.nvim keys
+vim.keymap.set("n", "<leader>fe", "<cmd>Noice telescope<cr>", { desc = "Find error", silent = true })
