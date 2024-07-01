@@ -19,4 +19,10 @@ vim.cmd([[
   vnoremap <Esc> "_<Esc>
 ]])
 
-vim.keymap.set('n', '<leader>gb', '<cmd>BlameToggle<CR>', { desc = 'Git blame' })
+vim.keymap.set("n", "<leader>gb", "<cmd>BlameToggle<CR>", { desc = "Git blame" })
+
+vim.keymap.set("n", "<leader>;", require("telescope.builtin").resume, {
+  noremap = true,
+  silent = true,
+  desc = "Resume telescope",
+})
