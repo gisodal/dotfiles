@@ -65,7 +65,7 @@ dynamic_padding = false  # Default: false
 decorations = "Full"  # Default: "Full"
 
 # Opacity
-opacity = 0.9  # Default: 1.0
+opacity = 1  # Default: 1.0
 
 # Blur (macOS/KDE Wayland only)
 blur = false  # Default: false
@@ -148,7 +148,7 @@ draw_bold_text_with_bright_colors = false  # Default
 # Primary colors
 [colors.primary]
 #foreground = "#d8d8d8"  # Default
-#background = "#181818"  # Default
+background = "#000000"  # Default
 #dim_foreground = "#828482"  # Default
 #bright_foreground = "None"  # Default
 
