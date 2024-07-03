@@ -17,4 +17,5 @@ vim.cmd([[
   vnoremap dd "_dd
 
   vnoremap <Esc> "_<Esc>
+  vnoremap <C-r> "hy:%s/<C-r>h//gc<left><left><left>
 ]])
