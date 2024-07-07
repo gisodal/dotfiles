@@ -5,6 +5,7 @@
 # -----------------------------------------------------------------------------
 [ -x "$(command -v fdfind)" ] && alias fd='fdfind'
 
+alias ls='ls -A --color=auto --group-directories-first'
 alias cp="rsync -ahv"
 alias cp%="rsync -ahv --progress"
 alias grep='grep --line-number --color=auto'
