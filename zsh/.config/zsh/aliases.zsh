@@ -9,17 +9,20 @@ alias vim='nvim'
 alias vimdiff='nvim -d -c "norm ]c[c"' # jump to first difference on startup
 alias md=ghostwriter
 
-alias ls='eza --icons --git --time-style=long-iso --group-directories-first -a'
-alias ll='ls -l'
-alias lt='ls --tree --level=2'
-alias grep='rg'
-alias find='fd'
+if [ is_installed eza ]; then
+    alias ls='eza --icons --git --time-style=long-iso --group-directories-first -a'
+else
+	alias ls='ls -A --color=auto --group-directories-first'
+fi
+
 alias top='btop'
 alias du='duf'
 alias df='dust'
 alias http='xh'
 alias cat='bat'
-alias man='tldr'
-alias cd='() { z $@ && ls }'
-alias cdi='zi'
+if [ is_installed z ]; then
+	alias cd='() { z $@ && ls }'
+else
+	alias cd='() { cd $@ && ls }'
+fi
 
