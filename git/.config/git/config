@@ -29,8 +29,8 @@
 [difftool "echo"]
     cmd = echo "local: $LOCAL -- remote: $REMOTE -- merge: $MERGE"
 [alias]
-    branchmain = branch -l master main
-    base = !git merge-base $(git branchmain) HEAD
+	branch-main = ! git branch --sort=-committerdate -l main master | sed 's/[* ]*//' | head -1
+    base-commit = !git merge-base $(git branch-main) HEAD
     name = !sh -c 'basename $(git root)'
     zip = !sh -c 'git archive --format zip --output \"$(git name).zip\" HEAD' -
     basetree = log --author-date-order --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %x09%C(auto)%d%C(reset) %<(16,trunc)%C(dim magenta)%an%C(reset) %C(dim white)%s%C(reset)\n%x09%x09%C(blue) [%ar on %cd]%C(reset)' --date=format:'%A %d %B %Y %H:%M:%S'
@@ -61,10 +61,12 @@
     dd = diffview-uno
     dda = diffview
 
-    branchdiff = !git diffview-uno $(git base)
-    bd = branchdiff
+    branch-diff = !git diffview-uno $(git base-commit)
+    bd = branch-diff
   
     search = !git rev-list --all | xargs git grep
+	#search in lib/util: git grep <regexp> $(git rev-list --all -- lib/util) -- lib/util
+
     mt = mergetool
 
 	  skipped = "!f(){ git ls-files -v ${1} | grep ^S;};f"
