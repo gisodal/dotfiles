@@ -13,5 +13,23 @@ return {
         never_show = { ".git", ".DS_Store", "thumbs.db", ".nx", ".cache", "node_modules" },
       },
     },
+    window = {
+      mappings = {
+        ["g"] = {
+          function(state)
+            local node = state.tree:get_node()
+            local path = node:get_id()
+
+            if vim.fn.isdirectory(path) == 0 then
+              path = vim.fs.dirname(path)
+            end
+
+            local builtin = require("telescope.builtin")
+            builtin.live_grep({ cwd = path })
+          end,
+          desc = "Grep selected dir",
+        },
+      },
+    },
   },
 }
