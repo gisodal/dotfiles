@@ -68,3 +68,6 @@ if vim.fn.hostname() == "rts" then
     },
   })
 end
+
+local snippet_dir = vim.fn.stdpath("config") .. "/snippets"
+require("luasnip.loaders.from_lua").load({ paths = { snippet_dir } })
