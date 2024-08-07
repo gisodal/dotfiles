@@ -18,4 +18,11 @@ vim.cmd([[
 
   vnoremap <Esc> "_<Esc>
   vnoremap <C-r> "hy:%s/<C-r>h//gc<left><left><left>
+
+  xnoremap p P
 ]])
+
+-- fix line moving with <esc>+jk
+-- https://github.com/LunarVim/LunarVim/issues/1857
+vim.keymap.del({ "n", "i", "v" }, "<A-j>")
+vim.keymap.del({ "n", "i", "v" }, "<A-k>")
