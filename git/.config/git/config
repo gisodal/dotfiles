@@ -61,7 +61,6 @@
     dd = diffview-uno
     dda = diffview
 
-    branch-diff = !git diffview-uno $(git base-commit)
     bd = branch-diff
   
     search = !git rev-list --all | xargs git grep
