@@ -5,7 +5,7 @@ require("config.lazy")
 -- see docs at https://github.com/neovim/nvim-lspconfig/blob/master/doc/lspconfig.txt
 -- see clangd options at : https://manpages.debian.org/experimental/clangd-18/clangd-18.1.en.html
 -- see lspconfig clangd options at: https://github.com/neovim/nvim-lspconfig/blob/master/lua/lspconfig/server_configurations/clangd.lua
-if vim.fn.hostname() == "rts" then
+if vim.fn.hostname() == "rts" or vim.fn.hostname() == "gdal" then
   local root_files = {
     ".git",
     ".clangd",

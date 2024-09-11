@@ -28,6 +28,10 @@ Examples:
 
 For more specific instructions go to [INSTALL](INSTALL.md).
 
+## My minimal setup
+
+    > ./install bash local tmux-legacy git
+ 
 ## Install applications
 
 These are modern replacements for common applications, and a few that are just very usefull.
