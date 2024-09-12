@@ -174,3 +174,10 @@ fi
 #else
 #    export TERM='xterm-256color'
 #fi
+
+# setup direnv if it is available
+if command -v direnv &> /dev/null
+then
+    eval "$(direnv hook bash)"
+fi
+

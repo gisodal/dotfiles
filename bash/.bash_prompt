@@ -74,7 +74,7 @@ function __prompt_command(){
     PS2=$(prompt_ps2)
 }
 
-export PROMPT_COMMAND=__prompt_command
+#export PROMPT_COMMAND=__prompt_command # don't use promt_command in favor of direnv
 export PROMPT_DEFAULT_COLOR=$COLOR_FG_ORANGE
 export PROMPT_COLOR=$COLOR_FG_ORANGE
 export PROMPT_BOX_DEFAULT_COLOR=$(create_color 252)
