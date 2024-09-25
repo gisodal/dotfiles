@@ -146,6 +146,14 @@ if [ -z "$BASH_CUSTOM_ENVIRONMENT" ]; then
 	export DOCKER_HOST=unix:///run/user/1000/docker.sock # allow rootless docker
 	export DOCKER_BUILDKIT=1
 
+	if command -v fdfind &>/dev/null; then
+		export FZF_DEFAULT_COMMAND="fdfind --hidden"
+	elif command -v fd &>/dev/null; then
+		export FZF_DEFAULT_COMMAND="fd --hidden"
+	elif command -v find &>/dev/null; then
+		export FZF_DEFAULT_COMMAND="find ."
+	fi
+
 	add-prefix-path CLASSPATH . # scala path
 
 	if [[ -n $CORES ]] && [ $CORES -gt 1 ]; then
@@ -166,3 +174,10 @@ fi
 #else
 #    export TERM='xterm-256color'
 #fi
+
+# setup direnv if it is available
+if command -v direnv &> /dev/null
+then
+    eval "$(direnv hook bash)"
+fi
+

@@ -1,0 +1,325 @@
+#!/bin/bash
+
+# check bash version
+BASH_VERSION_REQUIRED="4.2"
+if ! printf "$BASH_VERSION_REQUIRED\n$BASH_VERSION" | sort -V -C; then
+	echo "Bash version >= $BASH_VERSION_REQUIRED is required. Found version $BASH_VERSION."
+	exit 1
+fi
+
+# stop execution on failed commands
+set -e
+
+# sensible defaults
+KEY_SIZE=4096
+KEY_TYPE=rsa
+SSH_HOME="$HOME/.ssh"
+KEY_STORE="$SSH_HOME/keys"
+SCRIPT=$(basename $(readlink -f "${BASH_SOURCE:-$0}"))
+SSH_KEYGEN=$(which ssh-keygen)
+SSH=$(which ssh)
+SSH_COPY_ID=$(which ssh-copy-id)
+
+# ============================================================================
+# Usage functions for all (sub) commands
+# ============================================================================
+
+function usage() {
+	[[ -n $1 ]] && echo "$@" 1>&2 && echo
+
+	echo "${SCRIPT} [options] <command> ..."
+	echo
+	echo "Commands are:"
+	echo
+	echo "  create  - create a SSH key"
+	echo "  install - install a ssh key on a remote host"
+	echo "  fix     - fix the rights of the key files / ssh config"
+	echo
+	echo "Options are:"
+	echo
+	echo "  -h (--help) "
+
+	[[ ${1+x} ]] && exit 1 || exit 0
+}
+
+function create-usage() {
+	[[ -n $1 ]] && echo "$@" 1>&2 && echo
+
+	echo "${SCRIPT} create [OPTIONS] <keyname>"
+
+	echo
+	echo "Options are:"
+	echo
+	echo "  -s (--size)       <size>,           default: ${KEY_SIZE}"
+	echo "  -t (--type)       <type>,           default: ${KEY_TYPE}"
+	echo "  -p (--passphrase) <key-passphrase>"
+	echo "  -h (--help) "
+
+	[[ ${1+x} ]] && exit 1 || exit 0
+}
+
+function install-usage() {
+	[ $# -ne 0 ] && echo "$@" 1>&2 && echo
+
+	echo "${SCRIPT} install <host> <key>"
+
+	[[ ${1+x} ]] && exit 1 || exit 0
+}
+
+function fix-usage() {
+	[ $# -ne 0 ] && echo "$@" 1>&2 && echo
+
+	echo "${SCRIPT} fix <action> ..."
+
+	echo
+	echo "Actions are:"
+	echo
+	echo "  local         - fix authorization on local host"
+	echo "  remote <host> - fix authorization on remote host"
+	echo
+
+	[ $# -ne 0 ] && exit 1 || exit 0
+}
+
+# ============================================================================
+# The create command functions
+# ============================================================================
+
+function get-password() {
+	unset PASSWORD
+	unset CHARCOUNT
+
+	echo -n "Enter password: " 1>&2
+
+	stty -echo
+
+	CHARCOUNT=0
+	while IFS= read -p "$PROMPT" -r -s -n 1 CHAR; do
+		# Enter - accept password
+		if [[ $CHAR == $'\0' ]]; then
+			break
+		fi
+		# Backspace
+		if [[ $CHAR == $'\177' ]]; then
+			if [ $CHARCOUNT -gt 0 ]; then
+				CHARCOUNT=$((CHARCOUNT - 1))
+				PROMPT=$'\b \b'
+				PASSWORD="${PASSWORD%?}"
+			else
+				PROMPT=''
+			fi
+		else
+			CHARCOUNT=$((CHARCOUNT + 1))
+			PROMPT='*'
+			PASSWORD+="$CHAR"
+		fi
+	done
+	echo "" 1>&2
+
+	stty echo
+
+	echo "$PASSWORD"
+}
+
+function keygen() {
+	if [ -z "${SSH_KEYGEN}" ]; then
+		echo "Could not find the 'ssh-keygen' executable"
+		exit 1
+	fi
+
+	KEY="$KEY_STORE/$1"
+
+	if [ -f "$KEY" ]; then
+		echo "Key '$KEY' already exists" 1>&2
+		exit 1
+	fi
+
+	# get a passphrase
+	if [[ -z ${PASSPHRASE+z} ]]; then
+		while [ 1 ]; do
+			read -p "Add password? (y/N)? " -n 1 -r INPUT 2>&1
+			echo
+			case "$INPUT" in
+			y | Y)
+				PASSPHRASE=$(get-password)
+				break
+				;;
+			n | N | '') break ;;
+			esac
+		done
+	fi
+
+	# create the key
+	mkdir -p "$SSH_HOME"
+	mkdir -p "$KEY_STORE"
+	local COMMENT="$KEY $(date '+%Y-%m-%d %H:%M:%S')"
+	${SSH_KEYGEN} -t ${KEY_TYPE} -b ${KEY_SIZE} -N "$PASSPHRASE" -f "$KEY" -C "$COMMENT"
+}
+
+function create() {
+	[ $# -eq 0 ] && create-usage
+
+	while [[ $# > 0 ]]; do
+		ARG="$1"
+		shift
+		case $ARG in
+		-s* | --size)
+			[[ -z $1 ]] && create-usage "No key size provided"
+			KEY_SIZE="$1"
+			shift
+			;;
+		-t* | --type)
+			[[ -z $1 ]] && create-usage "No key type provided"
+			KEY_TYPE="$1"
+			shift
+			;;
+		-p* | --passphrase)
+			PASSPHRASE="$1"
+			shift
+			;;
+		-h* | --help)
+			create-usage
+			;;
+		-*)
+			# unknown option
+			create-usage "unknown parameter: $ARG"
+			;;
+		*)
+			[[ ! -z "$KEY_NAME" ]] && create-usage "Multiple keyname provide: $ARG"
+			KEY_NAME=$ARG
+			;;
+		esac
+	done
+
+	# create the key
+	keygen "$KEY_NAME"
+
+	# adjust rights
+	chmod u=rw,go= "${KEY}" "${KEY}.pub"
+}
+
+# ============================================================================
+# The install command functions
+# ============================================================================
+
+function install-key() {
+	local HOST=$1
+
+	[ -f "${KEY_STORE}/$2" ] && KEY="${KEY_STORE}/$2.pub"
+	[ -f "$2.pub" ] && KEY="$2.pub"
+	[[ "$2" =~ .*'.pub' ]] && [ -f "$2" ] && KEY="$2"
+
+	[ ! -f $KEY ] && install-usage "Could not find key: $2"
+
+	echo "Selected key: $KEY"
+
+	if [ -z "${SSH}" ]; then
+		echo Could not find the 'ssh' executable
+		exit 1
+	fi
+
+	echo Copying the key to the remote machine ${HOST}, this usually will ask for the password
+	if [ -z "${SSH_COPY_ID}" ]; then
+		echo Could not find the 'ssh-copy-id' executable, using manual copy instead
+		cat "${KEY}" | ssh ${SSH_OPTS} ${HOST} 'cat >> ~/.ssh/authorized_keys'
+	else
+		${SSH_COPY_ID} ${SSH_OPTS} -i ${KEY} ${HOST}
+	fi
+}
+
+function install() {
+	[ $# -ne 2 ] && install-usage "A host and key are required, i.e., user@ip keyname"
+
+	install-key $@
+}
+
+# ============================================================================
+# The fix command functions
+# ============================================================================
+
+function fix-remote() {
+	[ $# -ne 1 ] && fix-usage "No host provided."
+
+	local HOST=$1
+
+	if [ -z "${SSH}" ]; then
+		echo Could not find the 'ssh' executable
+		exit 1
+	fi
+
+	${SSH} ${SSH_OPTS} ${HOST} "chmod go-w ~ && chmod 700 ~/.ssh && chmod 600 ~/.ssh/authorized_keys"
+
+	echo
+	echo "Remote rights fixed."
+}
+
+function fix-local() {
+	local AUTH=~/.ssh/authorized_keys
+	PRIVATE_KEYS=$(find ${KEY_STORE} -maxdepth 1 -type f -not -name '*.pub' ! -executable | xargs echo)
+	PUBLIC_KEYS=$(find ${KEY_STORE} -maxdepth 1 -type f -name '*.pub' ! -executable | xargs echo)
+
+	set -x
+	chmod go-w ~
+
+	mkdir -p ~/.ssh
+	chmod a=,u+rwx ~/.ssh
+
+	[ ! -f $AUTH ] && touch -f $AUTH
+	chmod a=,u+rwx $AUTH
+
+	[ -d ${KEY_STORE} ] && chmod a=rx,u+w ${KEY_STORE}
+
+	chmod a=,u+rw $PRIVATE_KEYS
+	chmod u=rw,go=r $PUBLIC_KEYS
+
+	set +x
+
+	echo
+	echo "Local rights fixed."
+}
+
+function fix() {
+	[ $# -lt 1 ] && fix-usage && exit 1
+
+	ARG="$1"
+	shift
+	case $ARG in
+	local)
+		fix-local "$@"
+		;;
+	remote)
+		fix-remote "$@"
+		;;
+	*)
+		# unknown option
+		usage "Unknown subcommand: $ARG"
+		;;
+	esac
+}
+
+# ============================================================================
+# The main function
+# ============================================================================
+
+if [[ $# < 1 ]]; then
+	usage
+	exit 0
+fi
+
+ARG="$1"
+shift
+case $ARG in
+create)
+	create "$@"
+	;;
+install)
+	install "$@"
+	;;
+fix)
+	fix "$@"
+	;;
+*)
+	# unknown option
+	usage "Unknown subcommand: $ARG"
+	;;
+esac

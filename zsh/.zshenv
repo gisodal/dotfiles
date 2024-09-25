@@ -185,3 +185,12 @@ ex=:\
 *.nix=:\
 "
 export LC_ALL=en_US.UTF-8
+
+# configure fzf
+if command -v fdfind &>/dev/null; then
+	export FZF_DEFAULT_COMMAND="fdfind --hidden"
+elif command -v fd &>/dev/null; then
+	export FZF_DEFAULT_COMMAND="fd --hidden"
+elif command -v find &>/dev/null; then
+	export FZF_DEFAULT_COMMAND="find ."
+fi

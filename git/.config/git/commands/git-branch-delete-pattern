@@ -1,0 +1,14 @@
+#!/bin/bash
+
+echo "Branches matching pattern:"
+git branch --list "$1" 
+
+TIME=$(date -d "$@")
+read -p "Do you want to delete the found branches? (y/N) " -r REPLY
+
+if [ "$REPLY" = "y" ]; then
+    git branch --list "$1" | xargs -r git branch -d
+else
+    echo Operation canceled
+fi
+  
