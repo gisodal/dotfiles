@@ -48,6 +48,7 @@ function keygen(){
     if [ -f "$KEYS/$KEY" ]; then
         echo "KEY '$KEY' already exists in '$KEYS/'" 1>&2
     else
+        # set a password
         PASSWORD=""
         while [ 1 ]; do
             read -p "Add password? (y/N)? " -n 1 -r INPUT 2>&1; echo
@@ -60,9 +61,25 @@ function keygen(){
             esac
         done
 
+        # select key encryption
+        while [ 1 ]; do
+          read -p $'Select encryption:\n    1) ED25519 (default)\n    2) RSA\n\n[1-2]? ' -n 1 -r INPUT 2>&1; echo
+            case "$INPUT" in
+                2 )
+                    ENCRYPTION="-t rsa -b 4096"
+                    break;
+                    ;;
+                1|'' )
+                    ENCRYPTION="-t ed25519"
+                    break;;
+            esac
+        done
 
-        COMMENT="$KEY $(date '+%Y-%m-%d %H:%M:%S')"
-        ssh-keygen -q -t rsa -b 4096 -N "$PASSWORD" -f "$KEYS/$KEY" -C "$COMMENT"
+        read -p "Provided a comment (keyname by default): " -r COMMENT 2>&1; echo
+        if [[ -z $COMMENT ]]; then 
+            COMMENT="$KEY $(date '+%Y-%m-%d %H:%M:%S')"
+        fi
+        ssh-keygen -q $ENCRYPTION -N "$PASSWORD" -f "$KEYS/$KEY" -C "$COMMENT"
         chmod 600 "$KEYS/$KEY"
         echo -e "Key '$KEY' created in '$KEYS/'...\n"
 
