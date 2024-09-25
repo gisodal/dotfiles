@@ -63,7 +63,7 @@ function keygen(){
 
         # select key encryption
         while [ 1 ]; do
-          read -p $'Select encryption:\n    1) ED25519 (default)\n    2) RSA\n\n[1-2]? ' -n 1 -r INPUT 2>&1; echo
+          read -p $'Select encryption:\n    1) ED25519 (default)\n    2) RSA (for PEM)\n[1-2]? ' -n 1 -r INPUT 2>&1; echo
             case "$INPUT" in
                 2 )
                     ENCRYPTION="-t rsa -b 4096"
@@ -75,14 +75,23 @@ function keygen(){
             esac
         done
 
-        read -p "Provided a comment (keyname by default): " -r COMMENT 2>&1; echo
-        if [[ -z $COMMENT ]]; then 
+        # add a key comment
+        read -p "Provided a comment (keyname by default): " -r COMMENT 2>&1
+        if [[ -z $COMMENT ]]; then
             COMMENT="$KEY $(date '+%Y-%m-%d %H:%M:%S')"
         fi
-        ssh-keygen -q $ENCRYPTION -N "$PASSWORD" -f "$KEYS/$KEY" -C "$COMMENT"
+
+        # create the actual key
+        ssh-keygen -q -m pem $ENCRYPTION -N "$PASSWORD" -f "$KEYS/$KEY" -C "$COMMENT"
         chmod 600 "$KEYS/$KEY"
         echo -e "Key '$KEY' created in '$KEYS/'...\n"
 
+        # create PEM file
+        PEM="$KEYS/$KEY.pub.pem"
+        ssh-keygen -f "$KEYS/$KEY.pub" -m pem -e >> "$PEM"
+        [[ $? -ne 0 ]] && echo "Could not generate PEM file" 1>&2 || echo "Generated PEM file: $PEM"
+
+        # add to authorized keys
         while [ 1 ]; do
             read -p "Add to authorized keys (Y/n)? " -n 1 -r INPUT 2>&1; echo
             case "$INPUT" in
