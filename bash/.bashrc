@@ -1,47 +1,38 @@
 #!/bin/bash
 
-case "$-" in
-    *i*) # shell is interactive
+# stop if this is not an interactive shell
+[[ $- != *i* ]] && return
 
-        source $HOME/.bash_map
+export BASH_CONFIG_HOME="$HOME/.config/bash"
+export SHELL_CONFIG_HOME="$HOME/.config/shell"
 
-        source $HOME/.bash_environment
+source $SHELL_CONFIG_HOME/functions.sh
 
-        source $HOME/.bash_alias
+source $SHELL_CONFIG_HOME/environment.sh
 
-        source $HOME/.bash_functions
+source $BASH_CONFIG_HOME/environment.sh
 
-        source $HOME/.bash_terminal
+source $SHELL_CONFIG_HOME/alias.sh
 
-        source $HOME/.bash_prompt
+source $SHELL_CONFIG_HOME/keymaps.sh
 
-        test -f "$HOME/.bash-completion/bash_completion" && . $_
+source $BASH_CONFIG_HOME/readline.sh
 
-        test -f "$HOME/$GIT_CONFIG_DIR/git-completion.bash" && . $_
+source $BASH_CONFIG_HOME/prompt.sh
 
-        if [ -f $HOME/.bash_local ]; then
-            source $HOME/.bash_local
-        fi
+test -f "$HOME/.bash-completion/bash_completion" && . $_
 
-        if  [ -z "$SSH_TTY" ]           && \
-            [ -z "$SSH_CONNECTION" ]    && \
-            [ -z "$SSH_CLIENT" ]        && \
-            [ -n "$DISPLAY" ]           && \
-            [ -z "$TMUX"  ]; then
-            tmux
-        fi
+test -f "$HOME/$GIT_CONFIG_DIR/git-completion.bash" && . $_
 
-        ;;
-    *) # shell is not interactive
-    ;;
-esac
+if [ -f $HOME/.bash_local ]; then
+  source $HOME/.bash_local
+fi
 
+if [ -z "$SSH_TTY" ] &&
+  [ -z "$SSH_CONNECTION" ] &&
+  [ -z "$SSH_CLIENT" ] &&
+  [ -n "$DISPLAY" ] &&
+  [ -z "$TMUX" ]; then
+  tmux
+fi
 
-# pnpm
-export PNPM_HOME="$HOME/.local/share/pnpm"
-export PATH="$PNPM_HOME:$PATH"
-# pnpm end
-
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion

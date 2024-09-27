@@ -4,6 +4,11 @@
 # bash functions
 # -----------------------------------------------------------------------------
 
+function exists() {
+  command -v $1 &>/dev/null
+  return $?
+}
+
 # get script directory
 function script_dir() {
     (cd "$(dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd)
@@ -17,26 +22,6 @@ function detach(){
     else
         echo "Command '$COMMAND' does not exist" 1>&2
         return 1
-    fi
-}
-
-# go into a directory if there is only 1 to choose from.
-function d() {
-    NOTHIDDEN=$(find . -maxdepth 1 -mindepth 1 -type d -not -path '*/\.*')
-    NOTHIDDENCOUNT=$(find . -maxdepth 1 -mindepth 1 -type d -not -path '*/\.*' -printf '.' | wc -c)
-
-    if [ $NOTHIDDENCOUNT -eq 1 ]; then
-        cd $NOTHIDDEN
-    elif [ $NOTHIDDENCOUNT -eq 0 ]; then
-        HIDDEN=$(find . -maxdepth 1 -mindepth 1 -type d -path '*/\.*')
-        HIDDENCOUNT=$(find . -maxdepth 1 -mindepth 1 -type d -path '*/\.*' -printf '.' | wc -c)
-        if [ $HIDDENCOUNT -eq 1 ]; then
-            cd $HIDDEN
-        else
-            echo "No directories to go in to"
-        fi
-    else
-        echo "More than one directories to choose from"
     fi
 }
 
@@ -64,40 +49,14 @@ function time-limit(){
     fi
 }
 
-# generate ssh key
-function keygen(){
-    DIR="$HOME/.ssh"
-    KEYS="$DIR/keys"
-    KEY="$KEYS/id_rsa"
-    OLDKEY="${KEY}_old"
-    AUTH="$DIR/authorized_keys"
-    mkdir -p "$KEYS"
 
-    COMMENT="masterkey $(date '+%Y-%m-%d %H:%M:%S')"
-    PUBKEY=$(cat "${KEY}.pub" 2>/dev/null)
-    ssh-keygen -t rsa -b 4096 -N '' -f "$KEY" -C "$COMMENT"
-    if [ ! -z "$PUBKEY" ]; then
-        echo "Removing old key..."
-        grep -v "$PUBKEY" "$AUTH" > "${AUTH}_new"
-        cp "${AUTH}_new" "${AUTH}"
-        rm "${AUTH}_new"
-    fi
-    cat "${KEY}.pub" >> "$AUTH"
-}
-
-# custom ls
-function ls(){
-    local cls="command ls --color=auto -v -h --group-directories-first"
-    local options="-a -I .. -I . -I .git"
-    [ $# -ne 0 ] && options=$@
-    $cls $options
-}
 
 # perform ls after cd and put on stack, go back with ..
 function cd(){
     local DIR=$@
     [ $# -eq 0 ] && DIR="$HOME"
-    pushd "$DIR" 1>/dev/null 2>/dev/null && ls || echo "Directory '$DIR' does not exist" 1>&2 ;
+    local LS="ls --color=auto -v -h --group-directories-first -a -I .. -I . -I .git"
+    pushd "$DIR" 1>/dev/null 2>/dev/null && $LS || echo "Directory '$DIR' does not exist" 1>&2 ;
 }
 # to pop: alias ..='popd &>/dev/null'
 

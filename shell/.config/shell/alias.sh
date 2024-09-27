@@ -3,30 +3,25 @@
 # -----------------------------------------------------------------------------
 # Aliases
 # -----------------------------------------------------------------------------
-[ -x "$(command -v fdfind)" ] && alias fd='fdfind'
 
-alias ls='ls -A --color=auto --group-directories-first'
+exists fdfind && alias fd='fdfind'
+
+alias ls='ls --color=auto -v -h --group-directories-first -a -I .. -I . -I .git'
 alias grep='grep --line-number --color=auto'
-alias tmux='tmux -2 -u'                        # force 256 colors AND UTF-8
-alias ll='ls -al'
-alias xcopy='xclip -selectionclipboard'        # copy to clipboard
-alias xpaste='xclip -selection clipboard -o'   # paste from clipboard
+alias tmux='tmux -2 -u'                      # force 256 colors AND UTF-8
+alias xcopy='xclip -selectionclipboard'      # copy to clipboard
+alias xpaste='xclip -selection clipboard -o' # paste from clipboard
 alias sshnokey='ssh -Y -o PreferredAuthentications=password -o PubkeyAuthentication=no'
 alias ..='popd &>/dev/null'
 alias vim='vim -O'
 alias vimdiff='vim -d -c "norm ]c[c"' # jump to first difference on startup
 alias unspoof='spoof x'
 alias vgdb='valgrind --vgdb=yes --vgdb-error=0 --leak-check=full --show-reachable=yes --track-origins=yes --num-callers=20 --track-fds=yes -s'
-alias gdb='gdb -q'
 alias evince='env -i DISPLAY=$DISPLAY evince'
 alias lock='lxlock' # sudo apt-get install lxsession
 alias callgrind='valgrind --tool=callgrind'
 alias profgrind='valgrind --tool=kcachegrind'
 alias blank='sleep 1; xset dpms force off'
 alias suspend='systemctl suspend'
-alias previous-command='fc -s'
-alias k='previous-command'
+alias k='fc -s'
 alias ports='netstat -tulpn'
-
-[ -n "$(which htop 2>/dev/null)" ] && alias top='(TERM=xterm-256color; htop)'
-

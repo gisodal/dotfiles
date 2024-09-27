@@ -10,7 +10,6 @@ TARGET=$HOME
 SOURCE=$(cd "$(dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd)
 CONFIG="$SOURCE/.stownofolding"
 PACKAGES=$(find "$SOURCE" -maxdepth 1 ! -path . ! -path '*.git' -type d | xargs -l1 basename | xargs)
-XDG_CONFIG_HOME=${XDG_CONFIG_HOME:=$HOME/.config}
 
 if [ $# -gt 0 ]; then
     PACKAGES=$@
