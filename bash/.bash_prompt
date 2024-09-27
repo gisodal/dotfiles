@@ -1,148 +1,42 @@
 #!/bin/bash
 
 # -----------------------------------------------------------------------------
-# ANSI color codes
-# -----------------------------------------------------------------------------
-
-export STYLE_RESET="\033[0m"        #  reset
-export STYLE_BRIGHT="\033[1m"       #  hicolor
-export STYLE_UNDERLINE="\033[4m"    #  underline
-export STYLE_INVERSE="\033[7m"      #  inverse     background  and  foreground
-export COLOR_FG_BLACK="\033[30m"    #  foreground  black
-export COLOR_FG_RED="\033[31m"      #  foreground  red
-export COLOR_FG_GREEN="\033[32m"    #  foreground  green
-export COLOR_FG_YELLOW="\033[33m"   #  foreground  yellow
-export COLOR_FG_BLUE="\033[34m"     #  foreground  blue
-export COLOR_FG_MAGENTA="\033[35m"  #  foreground  magenta
-export COLOR_FG_CYAN="\033[36m"     #  foreground  cyan
-export COLOR_FG_WHITE="\033[37m"    #  foreground  white
-export COLOR_BG_BLACK="\033[40m"    #  background  black
-export COLOR_BG_RED="\033[41m"      #  background  red
-export COLOR_BG_GREEN="\033[42m"    #  background  green
-export COLOR_BG_YELLOW="\033[43m"   #  background  yellow
-export COLOR_BG_BLUE="\033[44m"     #  background  blue
-export COLOR_BG_MAGENTA="\033[45m"  #  background  magenta
-export COLOR_BG_CYAN="\033[46m"     #  background  cyan
-export COLOR_BG_WHITE="\033[47m"    #  background  white
-
-# -----------------------------------------------------------------------------
 # 256 colors
 # -----------------------------------------------------------------------------
 
-function tmux-colors () {
+function print-colors () {
     for i in {0..255}; do
         printf "\x1b[38;5;${i}mcolour${i}\x1b[0m\n"
     done | column
 }
-export -f tmux-colors
-
-function create_color () { printf '%s%d%s' '\033[38;5;' "${1:=0}" 'm'; }
-export -f create_color
-
-export COLOR_FG_ORANGE=$(create_color 172)
-export COLOR_FG_GREY=$(create_color 233)
-
-# -----------------------------------------------------------------------------
-# set prompt color
-# -----------------------------------------------------------------------------
-
-function set_terminal_title() {
-    printf "\e]2;%s\a" "$1"
-}
-
-function __prompt_command(){
-    export RETURN_VALUE=$?
-
-    # do not store duplicate commands in history
-    history -a
-
-    # reset terminal title when this shell is run inside TMUX (this is used in TMUX/VIM)
-    if [ -n "$TMUX" ]; then
-        set_terminal_title ""
-    fi
-
-    # set the prompt color based on the previous return value
-    if [ $RETURN_VALUE -eq 0 ]; then
-        export PROMPT_BOX_COLOR=$PROMPT_BOX_DEFAULT_COLOR
-        export PROMPT_COLOR=$PROMPT_DEFAULT_COLOR
-    else
-        export PROMPT_BOX_COLOR=$COLOR_FG_RED
-        export PROMPT_COLOR=$COLOR_FG_RED
-    fi
-
-    PS1=$(prompt_ps1)
-    PS2=$(prompt_ps2)
-}
-
-#export PROMPT_COMMAND=__prompt_command # don't use promt_command in favor of direnv
-export PROMPT_DEFAULT_COLOR=$COLOR_FG_ORANGE
-export PROMPT_COLOR=$COLOR_FG_ORANGE
-export PROMPT_BOX_DEFAULT_COLOR=$(create_color 252)
-export PROMPT_BOX_COLOR=$PROMPT_BOX_DEFAULT_COLOR
+export -f print-colors
 
 # -----------------------------------------------------------------------------
 # prompt appearance
 # -----------------------------------------------------------------------------
 
-
-function unicode() {
-    printf "\u${1}"
+function prompt_exit_code() {
+  [ $1 -ne 0 ] && printf "$(tput bold)$(tput setaf 160)${1#0} $(tput sgr0)"
 }
 
-function prompt_wrap() {
-    printf '%s%s%s' '\[' "$1" '\]'
+function prompt_location() {
+  echo -n "\[$(tput setaf 2)\]\w\[$(tput sgr0)\]"
 }
 
-function prompt_style() {
-    printf '%s%s%s' "$(prompt_wrap $1)" "$2" "$(prompt_wrap $STYLE_RESET)"
+function prompt_git_info() {
+  if git rev-parse --show-toplevel 2>/dev/null 1>&2; then
+    local REPO=$(basename $(git rev-parse --show-toplevel))
+    local CHANGES=$(git diff-index --quiet HEAD -- && echo "" || echo "*")
+    local BRANCH=$(git symbolic-ref HEAD 2>/dev/null)
+    BRANCH=${BRANCH##refs/heads/}
+    BRANCH=${BRANCH:-detached}
+
+    echo -e "$(tput setaf 4)$REPO $(tput setaf 214)$BRANCH${CHANGES}$(tput sgr0)"
+  fi
 }
 
-function prompt_box() {
-    printf '%s' "$(prompt_style "$PROMPT_BOX_COLOR" $(unicode $1))"
-}
+PROMPT_DIRTRIM=2
+export PS1="\n\$(prompt_exit_code \$?)$(prompt_location) \$(prompt_git_info)\n> "
+export PS2='> '
 
-function prompt_element() {
-    printf '%s%s%s' "$(prompt_box 2500)$(prompt_box 005B)" "$1" "$(prompt_box 005D)"
-}
-
-function prompt_primary() {
-    printf '%s' "$(prompt_style "$PROMPT_COLOR" "$PROMPT_PRIMARY")"
-}
-
-function prompt_secondary() {
-    printf '%s' "$(prompt_style "$PROMPT_COLOR" "$PROMPT_SECONDARY")"
-}
-
-function prompt_git_context() {
-    local context=$(git context)
-    if [ ! -z "$context" ]; then
-        local repository=$(prompt_style "$COLOR_FG_BLUE" "${context%%:*}")
-        local branch=$(prompt_style "$COLOR_FG_GREEN" "${context#*:}")
-        printf '%s%s' "$(prompt_element $repository)" "$(prompt_element $branch)"
-    fi
-}
-
-function prompt_pwd_context() {
-    printf "%s" "$(prompt_element "$(pwd-context)")"
-}
-
-function prompt_return_code() {
-    if [ "$RETURN_VALUE" != "0" ]; then
-        printf "%s" "$(prompt_element "$(prompt_style "$STYLE_BRIGHT" "$RETURN_VALUE")")"
-    fi
-}
-
-function prompt_ps1() {
-    printf "%s" "\n$(prompt_box 250c)$(prompt_pwd_context)$(prompt_git_context)$(prompt_return_code)\n$(prompt_box 2514)$(prompt_primary) "
-}
-
-function prompt_ps2() {
-    printf "%s" " $(prompt_secondary) "
-}
-
-PROMPT_PRIMARY=$(unicode 25CF)
-PROMPT_SECONDARY=$(unicode 25CB)
-
-PS1=$(prompt_ps1)
-PS2=$(prompt_ps2)
 
