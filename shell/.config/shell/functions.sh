@@ -49,12 +49,24 @@ function time-limit() {
   fi
 }
 
+function ls() {
+  local LS
+  if exists eza; then
+    LS='eza --icons --git --ignore-glob='**/.git' --time-style=long-iso --group-directories-first -a'
+  elif [ $(uname) == "Darwin" ]; then
+    LS='ls --color=auto -v -h -a -I .. -I . -I .git'
+  else
+    LS='ls --color=auto -v -h -a -I .. -I . -I .git --group-directories-first'
+  fi
+
+  $LS $@
+}
+
 # perform ls after cd and put on stack, go back with ..
 function cd() {
   local DIR=$@
   [ $# -eq 0 ] && DIR="$HOME"
-  local LS="ls --color=auto -v -h --group-directories-first -a -I .. -I ."
-  pushd "$DIR" 1>/dev/null 2>/dev/null && $LS || echo "Directory '$DIR' does not exist" 1>&2
+  pushd "$DIR" 1>/dev/null 2>/dev/null && ls || echo "Directory '$DIR' does not exist" 1>&2
 }
 # to pop: alias ..='popd &>/dev/null'
 

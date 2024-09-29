@@ -6,7 +6,6 @@
 
 exists fdfind && alias fd='fdfind'
 
-alias ls='ls --color=auto -v -h --group-directories-first -a -I .. -I . -I .git'
 alias grep='grep --line-number --color=auto'
 alias tmux='tmux -2 -u'                      # force 256 colors AND UTF-8
 alias xcopy='xclip -selectionclipboard'      # copy to clipboard
