@@ -3,29 +3,31 @@
 # stop if this is not an interactive shell
 [[ $- != *i* ]] && return
 
-export BASH_CONFIG_HOME="$HOME/.config/bash"
-export SHELL_CONFIG_HOME="$HOME/.config/shell"
+export BASH_CONFIG_DIR="$HOME/.config/bash"
+export SHELL_CONFIG_DIR="$HOME/.config/shell"
 
-source $SHELL_CONFIG_HOME/functions.sh
+set -o allexport
+source $SHELL_CONFIG_DIR/functions.sh
 
-source $SHELL_CONFIG_HOME/environment.sh
+source $SHELL_CONFIG_DIR/environment.sh
 
-source $BASH_CONFIG_HOME/environment.sh
+source $BASH_CONFIG_DIR/environment.sh
+set +o allexport
 
-source $SHELL_CONFIG_HOME/alias.sh
+source $SHELL_CONFIG_DIR/alias.sh
 
-source $SHELL_CONFIG_HOME/keymaps.sh
+source $SHELL_CONFIG_DIR/keymaps.sh
 
-source $BASH_CONFIG_HOME/readline.sh
+source $BASH_CONFIG_DIR/readline.sh
 
-source $BASH_CONFIG_HOME/prompt.sh
+source $BASH_CONFIG_DIR/prompt.sh
 
 test -f "$HOME/.bash-completion/bash_completion" && . $_
 
 test -f "$HOME/$GIT_CONFIG_DIR/git-completion.bash" && . $_
 
-if [ -f $HOME/.bash_local ]; then
-  source $HOME/.bash_local
+if [ -f $HOME/.bashrc.local ]; then
+  source $HOME/.bashrc.local
 fi
 
 if [ -z "$SSH_TTY" ] &&
@@ -35,4 +37,3 @@ if [ -z "$SSH_TTY" ] &&
   [ -z "$TMUX" ]; then
   tmux
 fi
-

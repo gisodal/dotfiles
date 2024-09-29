@@ -1,6 +1,7 @@
 #!/bin/bash
 
 [ -n "$SHELL_CUSTOM_ENVIRONMENT" ] && return
+SHELL_CUSTOM_ENVIRONMENT="set"
 
 XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
 
@@ -8,7 +9,7 @@ PATH="$XDG_CONFIG_HOME/git/commands:$PATH"
 PATH="$HOME/.local/bin:$PATH"
 
 XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
-GIT_CONFIG_DIR="$HOME/.config/git"
+GIT_CONFIG_PATH="$HOME/.config/git"
 PKG_CONFIG_PATH="$USR_LOCAL/lib/pkgconfig"
 EDITOR="nvim"
 VISUAL="nvim"
@@ -20,20 +21,20 @@ HISTCONTROL="ignoredups"        # dont record duplicate commands
 HISTIGNORE="&:ls:cd:[bf]g:exit" # dont record simple commands like ls
 
 # pnpm
-export PNPM_HOME="$HOME/.local/share/pnpm"
-export PATH="$PNPM_HOME:$PATH"
+PNPM_HOME="$HOME/.local/share/pnpm"
+PATH="$PNPM_HOME:$PATH"
 # pnpm end
 
-export NVM_DIR="$HOME/.nvm"
+NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"                   # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion" # This loads nvm bash_completion
 
 if exists fdfind; then
-  export FZF_DEFAULT_COMMAND="fdfind --hidden"
+  FZF_DEFAULT_COMMAND="fdfind --hidden"
 elif exists fd; then
-  export FZF_DEFAULT_COMMAND="fd --hidden"
+  FZF_DEFAULT_COMMAND="fd --hidden"
 elif exists find; then
-  export FZF_DEFAULT_COMMAND="find ."
+  FZF_DEFAULT_COMMAND="find ."
 fi
 
 if exists dircolors; then
@@ -45,7 +46,7 @@ if exists direnv; then
 fi
 
 # setup git user
-export GIT_USER_FILE="$HOME/.config/git/.gituser"
+GIT_USER_FILE="$HOME/.config/git/.gituser"
 if [ ! -z "$PS1" -a ! -f "$GIT_USER_FILE" ]; then
   GITUSER=$USER@$HOSTNAME
   echo "Configure a git user and email:"
@@ -61,5 +62,3 @@ if [ ! -z "$PS1" -a ! -f "$GIT_USER_FILE" ]; then
 fi
 
 ulimit -c unlimited
-
-export SHELL_CUSTOM_ENVIRONMENT="set"

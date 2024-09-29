@@ -4,10 +4,10 @@
 # 256 colors
 # -----------------------------------------------------------------------------
 
-function print-colors () {
-    for i in {0..255}; do
-        printf "\x1b[38;5;${i}mcolour${i}\x1b[0m\n"
-    done | column
+function print-colors() {
+  for i in {0..255}; do
+    printf "\x1b[38;5;${i}mcolour${i}\x1b[0m\n"
+  done | column
 }
 export -f print-colors
 
@@ -38,5 +38,3 @@ function prompt_git_info() {
 PROMPT_DIRTRIM=2
 export PS1="\n\$(prompt_exit_code \$?)$(prompt_location) \$(prompt_git_info)\n> "
 export PS2='> '
-
-
