@@ -27,6 +27,10 @@ SAVEHIST=10000
 HISTFILE=~/.cache/zsh/history
 mkdir -p ~/.cache/zsh
 
+# extend path
+typeset -U path PATH # make path hold unique values
+path=(~/.config/git/commands "$path[@]")
+
 # load git completions
 autoload -Uz compinit && compinit
 
@@ -46,6 +50,7 @@ setopt hist_ignore_space
 setopt hist_verify
 setopt inc_append_history
 setopt share_history
+
 
 source $ZDOTDIR/aliases.zsh
 if [[ $(uname) == "Darwin" ]]; then
