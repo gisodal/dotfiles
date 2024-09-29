@@ -31,15 +31,36 @@ return {
       {
         "<leader>/",
         function()
-          builtin.live_grep({ cwd = vim.loop.cwd() })
+          builtin.live_grep({
+            cwd = vim.loop.cwd(),
+            additional_args = {
+              "--follow",
+              "--hidden",
+              "--glob",
+              "!**/.git/*",
+              "--glob",
+              "!**/node_modules/*",
+            },
+          })
         end,
         desc = "Grep (cwd)",
       },
-
       {
         "<leader><space>",
         function()
-          builtin.find_files({ cwd = vim.loop.cwd() })
+          builtin.find_files({
+            find_command = {
+              "rg",
+              "--files",
+              "--follow",
+              "--hidden",
+              "--glob",
+              "!**/.git/*",
+              "--glob",
+              "!**/node_modules/*",
+            },
+            cwd = vim.loop.cwd(),
+          })
         end,
         desc = "Find File (cwd)",
       },
