@@ -20,7 +20,7 @@ To install the config files, type:
     > ./install [[package] .. [package]]
 
 Examples:
-    > ./install
+    > ./install shell
 
     > ./install bash
 
@@ -30,11 +30,11 @@ For more specific instructions go to [INSTALL](INSTALL.md).
 
 ## My minimal setup
 
-    > ./install bash local tmux-legacy git
- 
+    > ./install shell bash local tmux-legacy git
+
 ## Install applications
 
-These are modern replacements for common applications, and a few that are just very usefull.
+These are modern replacements for common applications, and a few that are just very useful.
 
 |  tool    |  Replacing  |  Github                                         |
 |  --      |  ----     |  --                                             |
@@ -46,10 +46,9 @@ These are modern replacements for common applications, and a few that are just v
 |  ncdu    |  df       |  <https://github.com/rofl0r/ncdu>                 |
 |  duf     |  du       |  <https://github.com/muesli/duf>                  |
 |  sd      |  sed      |  <https://github.com/chmln/sd>                    |
-|  zoxide (z)  |  ch       |  <https://github.com/ajeetdsouza/zoxide>          |
+|  zoxide (z)  |  cd       |  <https://github.com/ajeetdsouza/zoxide>          |
 |  eza     | ls        | <https://github.com/eza-community/eza> |
 |  lsd     | ls        | <https://github.com/lsd-rs/lsd> |
-|  exa     |  ls       |  <https://github.com/ogham/exa>                   |
 |  lf      |  ls       |  <https://github.com/gokcehan/lf>                 |
 |  ranger  |  ls       |  <https://github.com/ranger/ranger>               |
 |  fzf     |  -        |  <https://github.com/junegunn/fzf>                |
@@ -64,8 +63,12 @@ These are modern replacements for common applications, and a few that are just v
 | neovim   | vi        |  <https://github.com/neovim/neovim>               |
 | tmux     | screen    | - |
 | flameshot | - | <https://github.com/flameshot-org/flameshot> |
+| age | gpg | <https://github.com/FiloSottile/age> |
+| termshark | wireshark | <https://github.com/gcla/termshark> |
+| atac | insomnia | <https://github.com/Julien-cpsn/ATAC> |
+| direnv | - | <https://github.com/direnv/direnv> |
 
 ## Install TLDR; pages
 
- > sudo apt-get install tldr
+    > sudo apt-get install tldr
     > tldr --update

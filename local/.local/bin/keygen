@@ -82,7 +82,7 @@ function keygen(){
         fi
 
         # create the actual key
-        ssh-keygen -q -m pem $ENCRYPTION -N "$PASSWORD" -f "$KEYS/$KEY" -C "$COMMENT"
+        ssh-keygen -q $ENCRYPTION -N "$PASSWORD" -f "$KEYS/$KEY" -C "$COMMENT"
         chmod 600 "$KEYS/$KEY"
         echo -e "Key '$KEY' created in '$KEYS/'...\n"
 

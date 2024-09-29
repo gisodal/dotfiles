@@ -1,7 +1,8 @@
 XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
-ZDOTDIR=${ZDOTDIR:-$XDG_CONFIG_HOME/zsh}
-ZSHRC="$ZDOTDIR/.zshrc"
-PLUGINDIR="$ZDOTDIR/plugins"
+ZSH_CONFIG_PATH=${ZSH_CONFIG_PATH:-$XDG_CONFIG_HOME/zsh}
+SHELL_CONFIG_PATH=$XDG_CONFIG_HOME/shell
+ZSHRC="$ZSH_CONFIG_PATH/.zshrc"
+PLUGINDIR="$ZSH_CONFIG_PATH/plugins"
 
 # start TMUX before the p10k is initialized: https://github.com/romkatv/powerlevel10k/issues/1203
 case $- in *i*)
@@ -29,34 +30,29 @@ mkdir -p ~/.cache/zsh
 
 # extend path
 typeset -U path PATH # make path hold unique values
-path=(~/.config/git/commands "$path[@]")
+
+set -o allexport
+source $SHELL_CONFIG_PATH/functions.sh
+
+source $SHELL_CONFIG_PATH/environment.sh
+
+source $ZSH_CONFIG_PATH/functions.zsh
+set +o allexport
+
+source $SHELL_CONFIG_PATH/alias.sh
+
+source $ZSH_CONFIG_PATH/aliases.zsh
+if [[ $(uname) == "Darwin" ]]; then
+    source $ZSH_CONFIG_PATH/aliases.osx.zsh
+fi
+
+source $ZSH_CONFIG_PATH/options.zsh
+
+source $SHELL_CONFIG_PATH/keymaps.sh
 
 # load git completions
 autoload -Uz compinit && compinit
 
-## options
-unsetopt menu_complete
-unsetopt flowcontrol
-
-setopt prompt_subst
-setopt always_to_end
-setopt append_history
-setopt auto_menu
-setopt complete_in_word
-setopt extended_history
-setopt hist_expire_dups_first
-setopt hist_ignore_dups
-setopt hist_ignore_space
-setopt hist_verify
-setopt inc_append_history
-setopt share_history
-
-
-source $ZDOTDIR/aliases.zsh
-if [[ $(uname) == "Darwin" ]]; then
-    source $ZDOTDIR/aliases.osx.zsh
-fi
-source $XDG_CONFIG_HOME/lf/lfcd.sh
 
 source $PLUGINDIR/powerlevel10k/powerlevel10k.zsh-theme
 source $PLUGINDIR/zsh-vi-mode/zsh-vi-mode.plugin.zsh
@@ -72,73 +68,6 @@ zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}'
 
 ZSH_AUTOSUGGEST_STRATEGY=(history completion)
 
-
-# detach function from terminal
-function detach(){
-    COMMAND=$1
-    if [[ -n "$(command -v "$COMMAND")" ]]; then
-        (nohup $@ </dev/null 1>/dev/null 2>&1 &)
-    else
-        echo "Command '$COMMAND' does not exist" 1>&2
-        return 1
-    fi
-}
-
-# go into a directory if there is only 1 to choose from.
-function d() {
-    NOTHIDDEN=$(find . -maxdepth 1 -mindepth 1 -type d -not -path '*/\.*')
-    NOTHIDDENCOUNT=$(find . -maxdepth 1 -mindepth 1 -type d -not -path '*/\.*' -printf '.' | wc -c)
-
-    if [ $NOTHIDDENCOUNT -eq 1 ]; then
-        cd $NOTHIDDEN
-    elif [ $NOTHIDDENCOUNT -eq 0 ]; then
-        HIDDEN=$(find . -maxdepth 1 -mindepth 1 -type d -path '*/\.*')
-        HIDDENCOUNT=$(find . -maxdepth 1 -mindepth 1 -type d -path '*/\.*' -printf '.' | wc -c)
-        if [ $HIDDENCOUNT -eq 1 ]; then
-            cd $HIDDEN
-        else
-            echo "No directories to go in to"
-        fi
-    else
-        echo "More than one directories to choose from"
-    fi
-}
-
-# either op a file with a default program or open a directory in nautilus.
-function o() {
-    if [ $# -eq 0 ]; then
-        o "."
-    elif [ $# -eq 1 -a -d "$@" ]; then
-        detach nautilus "$@"
-    elif [ $# -eq 1 -a -f "$@" ]; then
-        detach open $@
-    else
-        echo "$# arguments are provided."  1>&2
-        echo "Usage: o <filename|dirname>" 1>&2
-        return 1
-    fi
-}
-
-function nvims() {
-  items=("default" "nvim-custom" )
-  config=$(printf "%s\n" "${items[@]}" | fzf --prompt=" Neovim Config  " --height=~50% --layout=reverse --border --exit-0)
-  if [[ -z $config ]]; then
-    echo "Nothing selected"
-    return 0
-  elif [[ $config == "default" ]]; then
-    config=""
-  fi
-  NVIM_APPNAME=$config nvim $@
-}
-
-function rebuild_completions() {
-    rm "$ZDOTDIR/.zcompdump"
-    compinit
-}
-
-# add zoxide. This should be added after 'compinit'.
-eval "$(zoxide init zsh)"
-
 # To customize prompt, run `p10k configure` or edit ~/.config/zsh/.p10k.zsh.
-[[ ! -f $ZDOTDIR/.p10k.zsh ]] || source $ZDOTDIR/.p10k.zsh
+[[ ! -f $ZSH_CONFIG_PATH/.p10k.zsh ]] || source $ZSH_CONFIG_PATH/.p10k.zsh
   
