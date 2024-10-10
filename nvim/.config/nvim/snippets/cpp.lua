@@ -4,6 +4,10 @@ local ret_filename = function()
   return vim.fs.basename(vim.fn.expand("%"))
 end
 
+local header_define_name = function()
+  return ret_filename().upper()
+end
+
 return {
   s("ctrig", t("also loaded!!")),
   s(
@@ -70,8 +74,8 @@ return {
         // 1 - Baseline
         //-----------------------------------------------------------------------------
 
-        #ifndef {filename}
-        #define {filename}
+        #ifndef {define}
+        #define {define}
 
         //-----------------------------------------------------------------------------
         // Included Header Files
@@ -86,6 +90,7 @@ return {
       {
         name = "Giso Dal",
         filename = f(ret_filename),
+        define = f(header_define_name),
         date = f(function()
           return vim.fn.strftime("%d/%m/%y")
         end, {}),
