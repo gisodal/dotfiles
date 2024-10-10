@@ -29,7 +29,7 @@
 [difftool "echo"]
     cmd = echo "local: $LOCAL -- remote: $REMOTE -- merge: $MERGE"
 [alias]
-	branch-main = ! basename $(git rev-parse --abbrev-ref origin/HEAD) || git branch --sort=-committerdate -l main master | sed 's/[* ]*//' | head -1 
+    branch-main = ! basename $(git rev-parse --abbrev-ref origin/HEAD) || git branch --sort=-committerdate -l main master | sed 's/[* ]*//' | head -1 
     base-commit = !git merge-base $(git branch-main) HEAD
     name = !sh -c 'basename $(git root)'
     zip = !sh -c 'git archive --format zip --output \"$(git name).zip\" HEAD' -
@@ -47,10 +47,13 @@
     root = rev-parse --show-toplevel
     ls = ls-files
 
+    push-branch = !git push -u origin $(git rev-parse --abbrev-ref HEAD)
+
     pdfdiff = difftool --tool=pdfdiff
     vimdiff = difftool --tool=vimdiff
     vimmerge = mergetool --tool=vim
 
+    pb = push-branch
     st = status
     co = checkout
     cm = commit
