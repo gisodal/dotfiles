@@ -4,9 +4,14 @@
 SHELL_CUSTOM_ENVIRONMENT="set"
 
 XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
+export XDG_DATA_HOME="$HOME/.local/share"
+export XDG_STATE_HOME="$HOME/.local/state"
+export XDG_CACHE_HOME="$HOME/.cache"
 
 PATH="$XDG_CONFIG_HOME/git/commands:$PATH"
 PATH="$HOME/.local/bin:$PATH"
+LOCALBINS=$(find ~/.local/bin -maxdepth 1 -type d 2>/dev/null | xargs printf "%s:")
+PATH="$PATH:/opt/homebrew/bin:$BREW:$LOCALBINS:~/.local/share/coursier/bin:~/.config/git/commands"
 
 XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
 GIT_CONFIG_PATH="$HOME/.config/git"
@@ -19,6 +24,8 @@ LANGUAGE="en_US.UTF-8"
 HISTTIMEFORMAT="[%Y-%m-%d %T] " # timestamp history commands
 HISTCONTROL="ignoredups"        # dont record duplicate commands
 HISTIGNORE="&:ls:cd:[bf]g:exit" # dont record simple commands like ls
+MANPAGER="less -R --use-color -Dd+r -Du+b"
+LESSHISTFILE="-"
 
 # pnpm
 PNPM_HOME="$HOME/.local/share/pnpm"
@@ -30,9 +37,11 @@ NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion" # This loads nvm bash_completion
 
 if exists fdfind; then
-  FZF_DEFAULT_COMMAND="fdfind --hidden"
+  FZF_DEFAULT_COMMAND="fdfind --type file --hidden --no-ignore"
 elif exists fd; then
-  FZF_DEFAULT_COMMAND="fd --hidden"
+  FZF_DEFAULT_COMMAND='fd --type file --hidden --no-ignore'
+elif exists rg; then
+  FZF_DEFAULT_COMMAND='rg --files --hidden --follow -g "!{.git,node_modules}/*" 2> /dev/null'
 elif exists find; then
   FZF_DEFAULT_COMMAND="find ."
 fi
