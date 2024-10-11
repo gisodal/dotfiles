@@ -23,6 +23,18 @@
 #bind C-d:
 #bind C-s:
 #
+
+# vi mode
+bind "set editing-mode vi"
+bind "set show-mode-in-prompt on"        # show insert mode
+bind "set vi-ins-mode-string \1\e[6 q\2" # line cursor
+bind "set vi-cmd-mode-string \1\e[2 q\2" # block cursor
+
+# optionally:
+# switch to block cursor before executing a command
+bind "set keymap vi-insert"
+bind "RETURN: \"\e\n\""
+
 bind "set completion-ignore-case     on"
 bind "set expand-tilde               off"
 bind "set show-all-if-ambiguous      on"
@@ -38,9 +50,11 @@ bind "set mark-symlinked-directories on" #  append  /  to  symlinked  directorie
 #  stty -ixon # turn off flow control (Ctrl-s: stop & Ctrl-Q: continue)
 #fi
 
-#shopt -s cmdhist      # make multiline commands stay together
-#shopt -s lithist      # history newlines rather than semicolons
-#shopt -s histappend   # append to history instead of rewriting
-#shopt -s cdspell      # spell check when using cd
-shopt -s dotglob # include hidden files with cp, mv, etc.
-#shopt -s checkwinsize # check window size after each command
+shopt -s cmdhist      # Bash attempts to save all lines of a multiple-line command in the same history entry.
+shopt -s lithist      # history newlines rather than semicolons
+shopt -s histappend   # the history list is appended to the file named by the value of the HISTFILE variable when the shell exits, rather than overwriting the file.
+shopt -s cdspell      # correct minor spell errors while using cdspell
+shopt -s dirspell     # Bash attempts spelling correction on directory names during word completion if the directory name initially supplied does not exist.
+shopt -s dotglob      # include hidden files with cp, mv, etc.
+shopt -s checkwinsize # check window size after each command
+shopt -s nocaseglob   # Bash matches filenames in a case-insensitive fashion when performing filename expansion.

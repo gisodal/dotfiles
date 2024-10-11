@@ -27,6 +27,9 @@ HISTIGNORE="&:ls:cd:[bf]g:exit" # dont record simple commands like ls
 MANPAGER="less -R --use-color -Dd+r -Du+b"
 LESSHISTFILE="-"
 
+HISTSIZE=10000
+HISTFILESIZE=10000
+
 # pnpm
 PNPM_HOME="$HOME/.local/share/pnpm"
 PATH="$PNPM_HOME:$PATH"
