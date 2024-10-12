@@ -36,6 +36,8 @@ source $SHELL_CONFIG_PATH/functions.sh
 
 source $SHELL_CONFIG_PATH/environment.sh
 
+source $ZSH_CONFIG_PATH/environment.sh
+
 source $ZSH_CONFIG_PATH/functions.zsh
 set +o allexport
 
