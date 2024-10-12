@@ -3,7 +3,8 @@
 bind r source-file ~/.config/tmux/tmux.conf\; display-message "Config reloaded..."
 
 ## for nested tmux sessions, with prefix 'C-a C-s'
-bind C-s send-prefix
+set -g prefix C-Space
+bind C-Space send-prefix
 
 ## enter scroll back mode
 bind v copy-mode
@@ -29,7 +30,7 @@ bind h select-pane -L\; refresh-client -S
 #unbind ,
 
 # window navigation
-bind -r C-a last-window     \; refresh-client -S
+bind C-Space last-window     \; refresh-client -S
 bind -r C-p previous-window
 bind -r C-n next-window
 bind 0 select-window -t 10  \; refresh-client -S
