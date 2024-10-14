@@ -67,6 +67,7 @@ These are modern replacements for common applications, and a few that are just v
 | termshark | wireshark | <https://github.com/gcla/termshark> |
 | atac | insomnia | <https://github.com/Julien-cpsn/ATAC> |
 | direnv | - | <https://github.com/direnv/direnv> |
+| pwgen | - |
 
 ## Install TLDR; pages
 
