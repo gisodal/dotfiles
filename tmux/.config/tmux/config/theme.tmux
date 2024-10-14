@@ -34,7 +34,7 @@ set -g status-left " "
 
 set -g @catppuccin_date_time_text "%d-%m-%Y %H:%M"
 
-set -g status-right "#{?client_prefix,#[fg=colour214]#[bg=#000000]#[reverse]prefix#[noreverse]  ,}"
+set -g status-right "#{?client_prefix,#[fg=#{@thm_yellow}]#[bg=#000000]#[reverse]prefix#[noreverse]  ,}"
 set -ag status-right "#{E:@catppuccin_status_session}"
 set -ag status-right "#{E:@catppuccin_status_date_time}"
 
