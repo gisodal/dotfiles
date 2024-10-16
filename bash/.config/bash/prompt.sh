@@ -1,22 +1,11 @@
 #!/bin/bash
 
 # -----------------------------------------------------------------------------
-# 256 colors
-# -----------------------------------------------------------------------------
-
-function print-colors() {
-  for i in {0..255}; do
-    printf "\x1b[38;5;${i}mcolour${i}\x1b[0m\n"
-  done | column
-}
-export -f print-colors
-
-# -----------------------------------------------------------------------------
 # prompt appearance
 # -----------------------------------------------------------------------------
 
 function prompt_exit_code() {
-  [ $1 -ne 0 ] && printf "$(tput bold)$(tput setaf 160)${1#0} $(tput sgr0)"
+  [ $1 -ne 0 ] && printf "$(tput bold)$(tput setab 160) ${1#0} $(tput sgr0) "
 }
 
 function prompt_location() {
