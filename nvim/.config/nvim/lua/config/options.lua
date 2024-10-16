@@ -11,6 +11,8 @@ opt.sidescrolloff = 10
 opt.foldenable = false
 opt.diffopt = opt.diffopt + "context:99999"
 
+opt.clipboard = "unnamedplus" -- use the clipboard for all interactions
+
 require("config.custom.whitespace")
 require("config.custom.diffcolors")
 
