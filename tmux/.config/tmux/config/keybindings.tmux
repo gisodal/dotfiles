@@ -2,9 +2,9 @@
 ## force a reload of the config file
 bind r source-file ~/.config/tmux/tmux.conf\; display-message "Config reloaded..."
 
-## for nested tmux sessions, with prefix 'C-a C-s'
+## for nested tmux sessions, with prefix 'C-Space C-s'
 set -g prefix C-Space
-bind C-Space send-prefix
+bind C-s send-prefix
 
 ## enter scroll back mode
 bind v copy-mode
@@ -12,20 +12,20 @@ bind -T copy-mode-vi v send -X begin-selection
 bind -T copy-mode-vi C-v send -X rectangle-toggle
 bind -T copy-mode-vi y send -X copy-selection-and-cancel tmux-yank
 
-## ------------------------------------------------------------------------------
-## navigation
-## ------------------------------------------------------------------------------
-#
 ## session navigation
 bind s   choose-session -F 'session #{session_name} #{?session_attached,(attached),          } : #{session_windows} windows (#{window_name}#{pane_title})' \; refresh-client -S
 bind n   switch-client -n \; refresh-client -S
 bind p   switch-client -p \; refresh-client -S
-#
+
 ## window/pane navigation
 bind k select-pane -U\; refresh-client -S
 bind j select-pane -D\; refresh-client -S
 bind l select-pane -R\; refresh-client -S
 bind h select-pane -L\; refresh-client -S
+bind C-k select-pane -U\; refresh-client -S
+bind C-j select-pane -D\; refresh-client -S
+bind C-l select-pane -R\; refresh-client -S
+bind C-h select-pane -L\; refresh-client -S
 #unbind .
 #unbind ,
 
@@ -36,10 +36,10 @@ bind -r C-n next-window
 bind 0 select-window -t 10  \; refresh-client -S
 
 # window creation/splitting
-bind [ split-window -h -l 50% -p 50 -c "#{pane_current_path}"
-bind ] split-window -v -l 50% -p 50 -c "#{pane_current_path}"
-bind C-[ split-window -h -l 20% -p 20 -c "#{pane_current_path}"
-bind C-] split-window -v -l 20% -p 20 -c "#{pane_current_path}"
+bind C-[ split-window -h -l 50% -p 50 -c "#{pane_current_path}"
+bind C-] split-window -v -l 50% -p 50 -c "#{pane_current_path}"
+bind [ split-window -h -l 20% -p 20 -c "#{pane_current_path}"
+bind ] split-window -v -l 20% -p 20 -c "#{pane_current_path}"
 
 bind c new-window -c "#{pane_current_path}"
 bind C \
@@ -55,6 +55,7 @@ bind -r J resize-pane -D 2
 bind -r L resize-pane -R 2
 bind -r H resize-pane -L 2
 bind    m resize-pane -Z # toggle maximize pane
+bind    C-m resize-pane -Z # toggle maximize pane
 
 ## window manipulations
 bind R command-prompt -p "Rename window:" "rename-window %%"
