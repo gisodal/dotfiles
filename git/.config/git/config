@@ -47,16 +47,18 @@
     root = rev-parse --show-toplevel
     ls = ls-files
 
-    push-branch = !git push -u origin $(git rev-parse --abbrev-ref HEAD)
+    push-remote = !git push -u origin $(git rev-parse --abbrev-ref HEAD)
 
     pdfdiff = difftool --tool=pdfdiff
     vimdiff = difftool --tool=vimdiff
     vimmerge = mergetool --tool=vim
 
-    pb = push-branch
+    pr = push-remote
+    pu = push
     st = status
     co = checkout
-    cm = commit
+    cm = commit -a -m
+    cmm = commit -m
     fd = fetch-diff
 
     dv = difftool --tool=vim
@@ -64,6 +66,7 @@
     dd = diffview-uno
     dda = diffview
 
+    df = diff --stat
     bd = branch-diff
   
     search = !git rev-list --all | xargs git grep
@@ -74,6 +77,7 @@
 	  skipped = "!f(){ git ls-files -v ${1} | grep ^S;};f"
 	  skip = update-index --skip-worktree --
 	  unskip = update-index --no-skip-worktree --
+	adog = log --all --decorate --oneline --graph
 
 [core]
     editor = nvim
