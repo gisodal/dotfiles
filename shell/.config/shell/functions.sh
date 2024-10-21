@@ -4,6 +4,25 @@
 # bash functions
 # -----------------------------------------------------------------------------
 
+function f {
+  CAT=$(exists bat && echo "bat" || exists batcat && echo "batcat" || cat)
+
+  PREVIEWER=$((exists bat || exists batcat) && echo "$CAT --style=numbers --color=always --line-range {2}:500 {1}" || echo "cat {1}")
+
+  RESULT=$(rg --vimgrep --hidden --color ansi "$@" | fzf --ansi --preview 'echo {} | awk -F: "{print \$1, \$2}" | xargs -I {1} {2} '"$PREVIEWER")
+
+  FILE=$(echo "$RESULT" | cut -d : -f 1)
+  LINE=$(echo "$RESULT" | cut -d : -f 2)
+  COLUMN=$(echo "$RESULT" | cut -d : -f 3)
+
+  if [[ -f $FILE ]]; then
+    read -p "Do you want to open $FILE? [Y/n] " response
+    if [[ -z $response || ${response,,} == "y" ]]; then
+      nvim +$LINE +"normal ${COLUMN}|" $FILE
+    fi
+  fi
+}
+
 function exists() {
   command -v $1 &>/dev/null
   return $?

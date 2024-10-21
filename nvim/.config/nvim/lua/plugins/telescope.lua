@@ -29,6 +29,28 @@ return {
       --   desc = "Find File (Git Dir)",
       -- },
       {
+        "<leader>.",
+        function()
+          builtin.grep_string({
+            cwd = vim.loop.cwd(),
+            shorten_path = true,
+            word_match = "-w",
+            only_sort_text = true,
+            search = "",
+            additional_args = {
+              "--follow",
+              "--hidden",
+              "--glob",
+              "!**/.git/*",
+              "--glob",
+              "!**/node_modules/*",
+              "--smart-case",
+            },
+          })
+        end,
+        desc = "Fuzzy Grep (cwd)",
+      },
+      {
         "<leader>/",
         function()
           builtin.live_grep({
@@ -40,6 +62,7 @@ return {
               "!**/.git/*",
               "--glob",
               "!**/node_modules/*",
+              "--smart-case",
             },
           })
         end,
@@ -49,6 +72,7 @@ return {
         "<leader><space>",
         function()
           builtin.find_files({
+            cwd = vim.loop.cwd(),
             find_command = {
               "rg",
               "--files",
@@ -59,7 +83,6 @@ return {
               "--glob",
               "!**/node_modules/*",
             },
-            cwd = vim.loop.cwd(),
           })
         end,
         desc = "Find File (cwd)",

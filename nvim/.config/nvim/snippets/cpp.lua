@@ -1,11 +1,7 @@
 local comment_line = t({ "//-----------------------------------------------------------------------------", "" })
 
-local ret_filename = function()
+local get_filename = function()
   return vim.fs.basename(vim.fn.expand("%"))
-end
-
-local header_define_name = function()
-  return ret_filename().upper()
 end
 
 return {
@@ -50,7 +46,7 @@ return {
       ]],
       {
         name = "Giso Dal",
-        filename = f(ret_filename),
+        filename = f(get_filename),
         date = f(function()
           return vim.fn.strftime("%d/%m/%y")
         end, {}),
@@ -74,8 +70,8 @@ return {
         // 1 - Baseline
         //-----------------------------------------------------------------------------
 
-        #ifndef {define}
-        #define {define}
+        #ifndef {filename}
+        #define {filename}
 
         //-----------------------------------------------------------------------------
         // Included Header Files
@@ -89,8 +85,7 @@ return {
       ]],
       {
         name = "Giso Dal",
-        filename = f(ret_filename),
-        define = f(header_define_name),
+        filename = f(get_filename),
         date = f(function()
           return vim.fn.strftime("%d/%m/%y")
         end, {}),
