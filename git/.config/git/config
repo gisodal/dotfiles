@@ -29,7 +29,7 @@
 [difftool "echo"]
     cmd = echo "local: $LOCAL -- remote: $REMOTE -- merge: $MERGE"
 [alias]
-    branch-main = ! basename $(git rev-parse --abbrev-ref origin/HEAD) || git branch --sort=-committerdate -l main master | sed 's/[* ]*//' | head -1 
+    branch-main = ! basename $(git rev-parse --abbrev-ref origin/HEAD) || git branch --sort=-committerdate -l main master | head -1 | sed 's/^[^a-zA-Z]*//'
     base-commit = !git merge-base $(git branch-main) HEAD
     name = !sh -c 'basename $(git root)'
     zip = !sh -c 'git archive --format zip --output \"$(git name).zip\" HEAD' -

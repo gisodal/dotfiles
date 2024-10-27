@@ -2,7 +2,7 @@
 
 set -e
 
-DEFAULT_BRANCH=$(basename $(git rev-parse --abbrev-ref origin/HEAD) || git branch --sort=-committerdate -l main master | sed 's/[* ]*//' | head -1)
+DEFAULT_BRANCH=$(basename $(git rev-parse --abbrev-ref origin/HEAD) || git branch --sort=-committerdate -l main master | head -1 | sed 's/^[^a-zA-Z]*//')
 
 if [[ -z $DEFAULT_BRANCH ]]; then 
     echo "No default branch found." 1>&2
