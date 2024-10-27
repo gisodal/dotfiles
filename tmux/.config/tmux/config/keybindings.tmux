@@ -41,6 +41,7 @@ bind C-] split-window -v -l 50% -p 50 -c "#{pane_current_path}"
 bind [ split-window -h -l 20% -p 20 -c "#{pane_current_path}"
 bind ] split-window -v -l 20% -p 20 -c "#{pane_current_path}"
 
+bind C-c new-window -c "#{pane_current_path}"
 bind c new-window -c "#{pane_current_path}"
 bind C \
     run-shell 'tmux set-environment -g PANE_CURRENT_PATH #{pane_current_path}' \; \
