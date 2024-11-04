@@ -53,7 +53,7 @@
     vimdiff = difftool --tool=vimdiff
     vimmerge = mergetool --tool=vim
 
-    pr = push-remote
+    pb = push-remote
     pu = push
     st = status
     co = checkout
