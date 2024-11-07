@@ -33,6 +33,9 @@
     base-commit = !git merge-base $(git branch-main) HEAD
     name = !sh -c 'basename $(git root)'
     zip = !sh -c 'git archive --format zip --output \"$(git name).zip\" HEAD' -
+
+    ta = log --author-date-order --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %C(auto)%d%C(reset) %<(16,trunc)%C(dim magenta)%an%C(reset) %C(dim white)%s%C(reset) %C(blue)[%ar]%C(reset)' --date=format:'%A %d %B %Y %H:%M:%S'
+    t = log --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %C(auto)%d%C(reset) %<(16,trunc)%C(dim magenta)%an%C(reset) %C(dim white)%s%C(reset) %C(blue)[%ar]%C(reset)' --date=format:'%A %d %B %Y %H:%M:%S'
     basetree = log --author-date-order --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %x09%C(auto)%d%C(reset) %<(16,trunc)%C(dim magenta)%an%C(reset) %C(dim white)%s%C(reset)\n%x09%x09%C(blue) [%ar on %cd]%C(reset)' --date=format:'%A %d %B %Y %H:%M:%S'
     tree = !bash -c '"git basetree --all"'
 
