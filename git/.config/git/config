@@ -47,13 +47,13 @@
     root = rev-parse --show-toplevel
     ls = ls-files
 
-    push-remote = !git push -u origin $(git rev-parse --abbrev-ref HEAD)
+    push-branch = !git push -u origin $(git rev-parse --abbrev-ref HEAD)
 
     pdfdiff = difftool --tool=pdfdiff
     vimdiff = difftool --tool=vimdiff
     vimmerge = mergetool --tool=vim
 
-    pb = push-remote
+    pb = push-branch
     pu = push
     st = status
     co = checkout
