@@ -60,6 +60,7 @@
     pu = push
     st = status
     co = checkout
+    cd = checkout-delete
     cm = commit -a -m
     cmm = commit -m
     fd = fetch-diff
