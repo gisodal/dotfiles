@@ -22,10 +22,10 @@ bind k select-pane -U\; refresh-client -S
 bind j select-pane -D\; refresh-client -S
 bind l select-pane -R\; refresh-client -S
 bind h select-pane -L\; refresh-client -S
-bind C-k select-pane -U\; refresh-client -S
-bind C-j select-pane -D\; refresh-client -S
-bind C-l select-pane -R\; refresh-client -S
-bind C-h select-pane -L\; refresh-client -S
+bind -r C-k select-pane -U\; refresh-client -S
+bind -r C-j select-pane -D\; refresh-client -S
+bind -r C-l select-pane -R\; refresh-client -S
+bind -r C-h select-pane -L\; refresh-client -S
 #unbind .
 #unbind ,
 
