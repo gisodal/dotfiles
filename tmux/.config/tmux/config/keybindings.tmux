@@ -26,8 +26,20 @@ bind -r C-k select-pane -U\; refresh-client -S
 bind -r C-j select-pane -D\; refresh-client -S
 bind -r C-l select-pane -R\; refresh-client -S
 bind -r C-h select-pane -L\; refresh-client -S
-#unbind .
-#unbind ,
+
+# and now unbind keys
+unbind Up
+unbind Down
+unbind Left
+unbind Right
+
+unbind C-Up
+unbind C-Down
+unbind C-Left
+unbind C-Right
+
+unbind .
+unbind ,
 
 # window navigation
 bind C-Space last-window     \; refresh-client -S
