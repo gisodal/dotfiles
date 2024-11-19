@@ -31,7 +31,7 @@
 [alias]
     branch-main = ! basename $(git rev-parse --abbrev-ref origin/HEAD) || git branch --sort=-committerdate -l main master | head -1 | sed 's/^[^a-zA-Z]*//'
     base-commit = !git merge-base $(git branch-main) HEAD
-    name = !sh -c 'basename $(git root)'
+    name = !sh -c obasename $(git root)'
     zip = !sh -c 'git archive --format zip --output \"$(git name).zip\" HEAD' -
 
     ta = log --all --author-date-order --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %C(auto)%d%C(reset) %<(16,trunc)%C(dim magenta)%an%C(reset) %C(dim white)%s%C(reset) %C(blue)[%ar]%C(reset)' --date=format:'%A %d %B %Y %H:%M:%S'
@@ -73,12 +73,14 @@
     df = diff --stat
     bd = branch-diff
   
+    sr = skip-restore
+
     search = !git rev-list --all | xargs git grep
 	#search in lib/util: git grep <regexp> $(git rev-list --all -- lib/util) -- lib/util
 
     mt = mergetool
 
-	  skipped = "!f(){ git ls-files -v ${1} | grep ^S;};f"
+	  skipped = "!f(){ git ls-files -v ${1} | grep ^S | awk '{print $2}';};f"
 	  skip = update-index --skip-worktree --
 	  unskip = update-index --no-skip-worktree --
 	adog = log --all --decorate --oneline --graph
@@ -99,3 +101,5 @@
 	  ff = true
 [rerere]
 	  enabled = true
+[init]
+	defaultBranch = main

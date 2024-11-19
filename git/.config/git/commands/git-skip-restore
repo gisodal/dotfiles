@@ -1,0 +1,26 @@
+#!/bin/bash
+
+set -e
+
+ROOT=$(git rev-parse --show-toplevel)
+SKIPPED=$(git skipped)
+
+if [[ -z "$SKIPPED" ]]; then
+  echo "No skipped files"
+  exit 0
+fi
+
+# Loop through each skipped file
+while IFS= read -r file; do
+  echo "Restore skipped file: $file"
+
+  # unskip the file
+  git update-index --no-skip-worktree -- "$ROOT/$file"
+
+  # revert file
+  git checkout -- "$ROOT/$file"
+
+  # skip the file again
+  git update-index --skip-worktree -- "$ROOT/$file"
+
+done <<<"$SKIPPED"
