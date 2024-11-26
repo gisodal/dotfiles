@@ -86,7 +86,7 @@
 	adog = log --all --decorate --oneline --graph
 
 [color "decorate"]
-    head = reverse bold italic yellow
+    head = reverse bold blink ul italic yellow
 
 [core]
     editor = nvim
