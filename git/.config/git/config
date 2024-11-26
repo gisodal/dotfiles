@@ -85,6 +85,9 @@
 	  unskip = update-index --no-skip-worktree --
 	adog = log --all --decorate --oneline --graph
 
+[color "decorate"]
+    head = reverse bold italic yellow
+
 [core]
     editor = nvim
     excludesfile = ~/.config/git/.gitignore
