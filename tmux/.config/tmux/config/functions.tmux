@@ -1,6 +1,4 @@
 # kill pane/window/session
-bind x confirm-before -p 'Kill pane (y/N)?' kill-pane
-
 bind C-x command-prompt -p 'Windows to kill:' '             \
     run-shell "                                             \
         for w in \$(echo %% | sort -n -r); do               \

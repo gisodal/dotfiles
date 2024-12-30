@@ -1,4 +1,3 @@
-##  tmux confirm-before -p "Proceed to kill server (y/N)?" kill-server
 ## force a reload of the config file
 bind r source-file ~/.config/tmux/tmux.conf\; display-message "Config reloaded..."
 
@@ -6,11 +5,15 @@ bind r source-file ~/.config/tmux/tmux.conf\; display-message "Config reloaded..
 set -g prefix C-Space
 bind C-s send-prefix
 
-## enter scroll back mode
+## copy mode stuff
 bind v copy-mode
 bind -T copy-mode-vi v send -X begin-selection
 bind -T copy-mode-vi C-v send -X rectangle-toggle
-bind -T copy-mode-vi y send -X copy-selection-and-cancel tmux-yank
+bind -T copy-mode-vi y send -X copy-selection tmux-yank
+
+# don't quit copy mode after mouse drag
+bind -T copy-mode MouseDragEnd1Pane send -X copy-selection -x
+bind -T copy-mode-vi MouseDragEnd1Pane send -X copy-selection -x
 
 ## session navigation
 bind s   choose-session -F 'session #{session_name} #{?session_attached,(attached),          } : #{session_windows} windows (#{window_name}#{pane_title})' \; refresh-client -S
@@ -75,4 +78,5 @@ bind R command-prompt -p "Rename window:" "rename-window %%"
 #bind A command-prompt -p "Rename session:" "rename-session %%"
 bind M command-prompt -p "Move window to:" "move-window -t %%"
 
+bind x confirm-before -p 'Kill pane (y/N)?' kill-pane
 

@@ -16,7 +16,7 @@ if vim.fn.hostname() == "rts" or vim.fn.hostname() == "gdal" then
       "clangd-18",
       "--background-index",
       "-j=4",
-      "--query-driver=/usr/bin/**/clang-*,/bin/clang,/bin/clang++,/usr/bin/gcc,/usr/bin/*g++*,usr/bin/g++,/user/bin/c++",
+      "--query-driver=/usr/bin/g++,/usr/bin/*g++*,usr/bin/g++,/usr/bin/c++,/usr/bin/gcc,/usr/bin/**/clang-*,/bin/clang,/bin/clang++",
       "--clang-tidy",
       -- "--clang-tidy-checks=*", -- depricated, use .clang-tidy
       "--all-scopes-completion",

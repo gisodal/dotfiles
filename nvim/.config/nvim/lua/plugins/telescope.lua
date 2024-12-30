@@ -28,6 +28,20 @@ return {
       --   end,
       --   desc = "Find File (Git Dir)",
       -- },
+      --
+      --
+      -- config = function()
+      --       require("telescope").setup({
+      --           defaults = {
+      --               mappings = {
+      --                   i = {
+      --                       ["<C-f>"] = require("telescope.actions").to_fuzzy_refine,
+      --                   },
+      --               },
+      --           },
+      --       })
+      --       require("telescope").load_extension("fzf")
+      --   end
       {
         "<leader>.",
         function()

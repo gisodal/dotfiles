@@ -1,3 +1,7 @@
+## always use zsh :)
+#set -g default-shell /bin/zsh
+#set -g default-command "zsh"
+
 # Address vim mode switching delay (http://superuser.com/a/252717/65504)
 set -s escape-time 0
 
@@ -27,16 +31,7 @@ set -g focus-events on
 setw -g aggressive-resize on
 ## act like gnu screen
 
-
-unbind C-b
-set -g prefix C-a
- 
 set-option -g status-position top
-
-
-## always use zsh :)
-#set -g default-shell /bin/zsh
-#set -g default-command "zsh"
 
 ## set 1 as default first window/pane number
 set -g base-index 1
