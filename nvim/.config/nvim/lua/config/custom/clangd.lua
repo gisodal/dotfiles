@@ -36,9 +36,12 @@ if vim.fn.hostname() == "rts" or vim.fn.hostname() == "gdal" then
         { desc = "Switch Source/Header (C/C++)", buffer = bufnr, silent = true }
       )
     end,
-    capabilities = {
-      offsetEncoding = { "utf-16" },
-    },
+    capabilities = require("blink.cmp").get_lsp_capabilities({
+      textDocument = { completion = { completionItem = { snippetSupport = false } } },
+    }),
+    --capabilities = {
+    --  offsetEncoding = { "utf-16" },
+    --},
     -- show the current directory that the lsp is running at
     --on_new_config = function(_, root)
     --  require("notify")("LSP root: " .. root)
