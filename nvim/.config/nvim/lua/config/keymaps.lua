@@ -34,12 +34,12 @@ wk.add({
   "<leader>u<space>",
   whitespace.toggle_whitespace,
   desc = function()
-    return _G.whitespace_enabled and "Disable Whitespace" or "Enable Whitespace"
+    return vim.opt.list:get() and "Disable Whitespace" or "Enable Whitespace"
   end,
   mode = "n",
   noremap = true,
   silent = true,
   icon = function()
-    return _G.whitespace_enabled and { icon = "", color = "green" } or { icon = " ", color = "yellow" }
+    return vim.opt.list:get() and { icon = "", color = "green" } or { icon = " ", color = "yellow" }
   end,
 })

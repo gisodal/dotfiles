@@ -46,11 +46,9 @@ function M.toggle_whitespace()
   if opt.list:get() then
     opt.list = false
     vim.cmd([[match none]])
-    _G.whitespace_enabled = false
   else
     opt.list = true
     vim.cmd([[match TrailingWhitespace /\s\+$/]])
-    _G.whitespace_enabled = true
   end
 end
 
