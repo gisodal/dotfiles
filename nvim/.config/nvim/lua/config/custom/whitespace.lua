@@ -9,7 +9,7 @@ opt.list = true
 
 -- visualize spaces and tabs
 local space = "·"
-opt.listchars:append {
+opt.listchars:append({
   tab = "·┈",
   multispace = space,
   lead = space,
@@ -18,23 +18,40 @@ opt.listchars:append {
   precedes = "◀",
   nbsp = "‿",
   -- eol = "⏎"
-}
+})
 
 -- trailing whitespaces become red
+_G.whitespace_enabled = true
 cmd([[match TrailingWhitespace /\s\+$/]])
 nvim_set_hl(0, "TrailingWhitespace", { link = "Error" })
-
 
 nvim_create_autocmd("InsertEnter", {
   callback = function()
     opt.listchars.trail = nil
     nvim_set_hl(0, "TrailingWhitespace", { link = "Whitespace" })
-  end
+  end,
 })
 
 nvim_create_autocmd("InsertLeave", {
   callback = function()
     opt.listchars.trail = space
     nvim_set_hl(0, "TrailingWhitespace", { link = "Error" })
-  end
+  end,
 })
+
+local M = {}
+
+function M.toggle_whitespace()
+  local opt = vim.opt
+  if opt.list:get() then
+    opt.list = false
+    vim.cmd([[match none]])
+    _G.whitespace_enabled = false
+  else
+    opt.list = true
+    vim.cmd([[match TrailingWhitespace /\s\+$/]])
+    _G.whitespace_enabled = true
+  end
+end
+
+return M

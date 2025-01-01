@@ -26,3 +26,20 @@ vim.cmd([[
 -- https://github.com/LunarVim/LunarVim/issues/1857
 vim.keymap.del({ "n", "i", "v" }, "<A-j>")
 vim.keymap.del({ "n", "i", "v" }, "<A-k>")
+
+-- add toggle to show and hide whitespaces
+local whitespace = require("config.custom.whitespace")
+local wk = require("which-key")
+wk.add({
+  "<leader>u<space>",
+  whitespace.toggle_whitespace,
+  desc = function()
+    return _G.whitespace_enabled and "Disable Whitespace" or "Enable Whitespace"
+  end,
+  mode = "n",
+  noremap = true,
+  silent = true,
+  icon = function()
+    return _G.whitespace_enabled and { icon = "", color = "green" } or { icon = " ", color = "yellow" }
+  end,
+})
