@@ -15,9 +15,7 @@ return {
     keys = {
       {
         "<leader>;",
-        function()
-          fzf.files({ resume = true })
-        end,
+        fzf.resume,
         desc = "Resume picker",
       },
     },
