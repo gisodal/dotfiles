@@ -10,21 +10,25 @@
 
 local M = {}
 
-function M.Merge_tables(...)
-  local function merge(tbl1, tbl2)
-    for k, v in pairs(tbl2) do
-      if type(v) == "table" and type(tbl1[k]) == "table" then
-        tbl1[k] = merge(tbl1[k], v)
+function M.Merge_table_into(t1, t2)
+  for k, v in pairs(t2) do
+    if type(v) == "table" then
+      if type(t1[k] or false) == "table" then
+        M.Merge_table_into(t1[k] or {}, t2[k] or {})
       else
-        tbl1[k] = v
+        t1[k] = v
       end
+    else
+      t1[k] = v
     end
-    return tbl1
   end
+  return t1
+end
 
+function M.Merge_tables(...)
   local result = {}
   for _, tbl in ipairs({ ... }) do
-    merge(result, tbl)
+    M.Merge_table_into(result, tbl)
   end
   return result
 end
