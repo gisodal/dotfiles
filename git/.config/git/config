@@ -67,6 +67,7 @@
     cmm = commit -m
     fd = fetch-diff
     af = add-files
+    cb = checkout-branch
 
     dv = difftool --tool=vim
     dn = difftool --tool=nvim
@@ -76,6 +77,9 @@
     df = diff --stat
     bd = branch-diff
   
+    bde = branch-description-edit
+    bds = branch-description-show
+
     sr = skip-restore
 
     search = !git rev-list --all | xargs git grep

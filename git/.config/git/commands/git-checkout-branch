@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# get branches and other stuff
+FORMAT='%(if)%(HEAD)%(then)*%(else)%(end)##%(refname:short)##%(committerdate:relative)##%(committername)'
+BRANCHES=$(git for-each-ref --sort=-committerdate --format="$FORMAT" refs/heads)
+
+# Get the list of branch descriptions
+DESCRIPTIONS=$(for BRANCH in $(git for-each-ref --sort=-committerdate --format='%(refname:short)' refs/heads); do
+  echo $(git config branch."$BRANCH".description | head -1)
+done)
+
+# Combine the branches and descriptions
+COMBINED=$(paste -d '##' <(echo "$BRANCHES") <(echo "$DESCRIPTIONS"))
+
+echo "$COMBINED" |
+  column -s '##' -t |
+  fzf |
+  awk '{print $1}' |
+  grep -v '^*' |
+  xargs -r -I {} sh -c 'echo "git checkout {}"; git checkout "{}"'

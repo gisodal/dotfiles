@@ -1,0 +1,25 @@
+#!/bin/bash
+
+set -e
+
+if [ $# -eq 0 ]; then
+  BRANCH=$(git rev-parse --abbrev-ref HEAD)
+elif [ $# -eq 1 ]; then
+  BRANCH=$1
+else
+  echo "Only optional input expected. The branch name" 1>&2
+  exit 1
+fi
+
+if [ "$BRANCH" == "HEAD" ]; then
+  echo "Cannot use a detached branch." 1>&2
+  exit 1
+fi
+
+# verify the branch
+if ! git show-ref --verify --quiet refs/heads/$BRANCH; then
+  echo "Branch '$BRANCH' does not exist." 1>&2
+  exit 1
+fi
+
+git branch --edit-description $BRANCH
