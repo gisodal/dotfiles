@@ -15,6 +15,8 @@
     prompt = false
     keepBackup = false
 [mergetool "diffview"]
+    directory = true
+    trustExitCode = true
     cmd = nvim -n -c "DiffviewOpen" "$MERGE"
 [mergetool "echo"]
     cmd = echo "local: $LOCAL -- remote: $REMOTE -- merge: $MERGE"
@@ -64,6 +66,7 @@
     cm = commit -a -m
     cmm = commit -m
     fd = fetch-diff
+    af = add-files
 
     dv = difftool --tool=vim
     dn = difftool --tool=nvim
@@ -86,7 +89,7 @@
 	adog = log --all --decorate --oneline --graph
 
 [color "decorate"]
-    head = reverse bold blink ul italic yellow
+    head = reverse bold ul italic yellow
 
 [core]
     editor = nvim

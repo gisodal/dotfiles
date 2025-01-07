@@ -1,0 +1,3 @@
+#!/bin/bash
+
+git ls-files --others --exclude-standard | fzf -m --cycle --no-height | xargs -r -I {} sh -c 'echo "git add {}"; git add "{}"'
