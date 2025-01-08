@@ -14,6 +14,7 @@ bind -T copy-mode-vi y send -X copy-selection tmux-yank
 # don't quit copy mode after mouse drag
 bind -T copy-mode MouseDragEnd1Pane send -X copy-selection -x
 bind -T copy-mode-vi MouseDragEnd1Pane send -X copy-selection -x
+bind -T copy-mode-vi DoubleClick1Pane send-keys -X cancel
 
 ## session navigation
 bind s   choose-session -F 'session #{session_name} #{?session_attached,(attached),          } : #{session_windows} windows (#{window_name}#{pane_title})' \; refresh-client -S
