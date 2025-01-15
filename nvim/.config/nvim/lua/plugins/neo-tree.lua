@@ -15,6 +15,7 @@ return {
     },
     window = {
       mappings = {
+        ["ctrl-v"] = "open",
         ["g"] = {
           function(state)
             local node = state.tree:get_node()
@@ -24,8 +25,8 @@ return {
               path = vim.fs.dirname(path)
             end
 
-            local builtin = require("telescope.builtin")
-            builtin.live_grep({ cwd = path })
+            local fzf = require("fzf-lua")
+            fzf.live_grep({ cwd = path })
           end,
           desc = "Grep selected dir",
         },
