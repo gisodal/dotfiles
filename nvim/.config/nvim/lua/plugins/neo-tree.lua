@@ -15,7 +15,6 @@ return {
     },
     window = {
       mappings = {
-        ["ctrl-v"] = "open",
         ["g"] = {
           function(state)
             local node = state.tree:get_node()
