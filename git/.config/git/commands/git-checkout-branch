@@ -15,7 +15,7 @@ COMBINED=$(paste -d '##' <(echo "$BRANCHES") <(echo "$DESCRIPTIONS"))
 # move current branch to the top
 CURRENT=$(echo "$COMBINED" | grep -o "*.*")
 COMBINED=$(echo "$COMBINED" | grep -v "*.*")
-COMBINED=$(echo "$CURRENT\n$COMBINED")
+COMBINED=$(echo -e "$CURRENT\n$COMBINED")
 
 echo "$COMBINED" |
   column -s '##' -t |
