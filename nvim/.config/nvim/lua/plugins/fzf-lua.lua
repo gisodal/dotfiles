@@ -45,7 +45,7 @@ return {
       { "<leader>/", LazyVim.pick("live_grep", { root = false }), desc = "Grep (cwd)" },
       { "<leader><space>", LazyVim.pick("files", { root = false }), desc = "Find Files (cwd)" },
       {
-        "<leader>.",
+        "<leader><",
         LazyVim.pick("oldfiles", { cwd = vim.uv.cwd(), include_current_session = true, only_cwd = true }),
         desc = "Recent (cwd)",
       },
