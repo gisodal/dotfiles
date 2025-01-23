@@ -20,7 +20,7 @@ function prompt_git_info() {
     BRANCH=${BRANCH##refs/heads/}
     BRANCH=${BRANCH:-detached}
 
-    echo -e "$(tput setaf 4)$REPO $(tput setaf 214)$BRANCH${CHANGES}$(tput sgr0)"
+    echo -e "$(tput setaf 4)$REPO $(tput setaf 214)$BRANCH${CHANGES} $(tput setaf 242)$(git config branch."$BRANCH".description)$(tput sgr0)"
   fi
 }
 
