@@ -21,14 +21,15 @@ VISUAL="nvim"
 LC_ALL="en_US.UTF-8" # use UTF-8 character set
 LANG="en_US.UTF-8"
 LANGUAGE="en_US.UTF-8"
-HISTTIMEFORMAT="[%Y-%m-%d %T] " # timestamp history commands
-HISTCONTROL="ignoredups"        # dont record duplicate commands
-HISTIGNORE="&:ls:cd:[bf]g:exit" # dont record simple commands like ls
-MANPAGER="less -R --use-color -Dd+r -Du+b"
-LESSHISTFILE="-"
 
+HISTTIMEFORMAT="[%Y-%m-%d %T] "    # timestamp history commands
+HISTCONTROL="ignoredups:erasedups" # dont record duplicate commands
+HISTIGNORE="&:ls:cd:[bf]g:exit"    # dont record simple commands like ls
 HISTSIZE=10000
 HISTFILESIZE=10000
+
+MANPAGER="less -R --use-color -Dd+r -Du+b"
+LESSHISTFILE="-"
 
 # pnpm
 PNPM_HOME="$HOME/.local/share/pnpm"
