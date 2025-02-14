@@ -45,3 +45,8 @@ set -g window-status-activity-style default
 
 # █   󰂞 󱅫 󰂛 󰁌 ↕
 # limit variable length example: #{=21:pane_title}
+
+## colors to see pane focus
+set-option -g pane-active-border-style bg="#fab387",fg="#fab387"
+set -g window-style 'fg=colour247,bg=colour234'
+set -g window-active-style 'fg=colour250,bg=#000000'

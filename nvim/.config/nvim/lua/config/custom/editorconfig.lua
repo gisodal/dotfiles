@@ -42,7 +42,7 @@ end
 if git_root_path ~= "" then
   local wk = require("which-key")
   wk.add({
-    "<leader>ua",
+    "<leader>uN",
     add_to_editorconfig,
     desc = "Add to .editorconfig",
     mode = "n",
