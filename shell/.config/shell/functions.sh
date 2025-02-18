@@ -72,9 +72,9 @@ function ls() {
   if exists eza; then
     eza --icons --git --ignore-glob='**/.git' --time-style=long-iso --group-directories-first -a $@
   elif [ $(uname) == "Darwin" ]; then
-    ls --color=auto -v -h -a -I .. -I . -I .git $@
+    command ls --color=auto -v -h -a -I .. -I . -I .git $@
   else
-    ls --color=auto -v -h -a -I .. -I . -I .git --group-directories-first $@
+    command ls --color=auto -v -h -a -I .. -I . -I .git --group-directories-first $@
   fi
 }
 

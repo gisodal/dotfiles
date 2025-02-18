@@ -1,28 +1,67 @@
-#!/bin/bash
+#!/bin/bash -e
 
-if ! [ -x "$(command -v stow)" ]; then
-	echo 'Error: GNU Stow is not installed.' >&2
-	exit 1
+[ $# -ne 1 ] && echo "Usage: ./install <package name>" 1>&2 && exit 1
+
+if ! command -v stow 1>/dev/null; then
+  echo 'Error: GNU Stow is not installed.' >&2
+  exit 1
 fi
 
-[ $# -eq 0 ] && echo "Usage: ./install <package name>" 1>&2 && exit 1
+PACKAGE=${1%/}
+if [ ! -d $PACKAGE ]; then
+  echo "Package $PACKAGE not found" 1>&2
+  exit 1
+fi
 
+function install-stow() {
+  local TARGET=$HOME
+  local SOURCE=$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+  local PACKAGES=$1
+
+  # determine run arguments
+  case $PACKAGE in
+  "local")
+    OPT="--no-folding"
+    ;;
+  "media")
+    OPT="--no-folding"
+    SUDO=sudo
+    TARGET="/"
+    ;;
+  *)
+    :
+    ;;
+  esac
+
+  echo "Install $PACKAGE"
+
+  # modify ownership if necessary
+  if [[ -n $SUDO ]]; then
+    sudo chown -R root:root $PACKAGE
+  fi
+
+  # install the pacakge
+  $SUDO stow $OPT -vt "$TARGET" "$PACKAGE"
+
+  if [ $? -ne 0 ]; then
+    exit 1
+  fi
+}
+
+function install-post() {
+  sudo systemctl enable inactive-shutdown.service
+  sudo systemctl enable inactive-shutdown.timer
+  sudo systemctl start inactive-shutdown.service
+  sudo systemctl start inactive-shutdown.timer
+}
+
+# set defaults
 XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
-TARGET=$HOME
-SOURCE=$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-CONFIG="$SOURCE/.stownofolding"
-PACKAGES=$@
 
+# setup some directories
 mkdir -p "$XDG_CONFIG_HOME"
 mkdir -p "$HOME/.local/bin"
-for package in $PACKAGES; do
-	package=${package%%+(/)}
-	if grep -q -x -F "$package" "$CONFIG"; then
-		OPT="--no-folding"
-	else
-		OPT=""
-	fi
 
-	echo "Install $package"
-	stow $OPT -vt "$TARGET" "$package"
-done
+install-stow $PACKAGES
+
+install-post $PACKAGE

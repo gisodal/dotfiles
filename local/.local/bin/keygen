@@ -89,7 +89,7 @@ function keygen(){
         # create PEM file
         PEM="$KEYS/$KEY.pub.pem"
         ssh-keygen -f "$KEYS/$KEY.pub" -m pem -e >> "$PEM"
-        [[ $? -ne 0 ]] && echo "Could not generate PEM file" 1>&2 || echo "Generated PEM file: $PEM"
+        [[ $? -ne 0 ]] && echo "Could not generate PEM file" 1>&2 && rm "$PEM" || echo "Generated PEM file: $PEM"
 
         # add to authorized keys
         while [ 1 ]; do

@@ -6,6 +6,16 @@
 export BASH_CONFIG_PATH="$HOME/.config/bash"
 export SHELL_CONFIG_PATH="$HOME/.config/shell"
 
+if [ ! -d $SHELL_CONFIG_PATH ]; then
+  echo "Could not find shell configuration: ${SHELL_CONFIG_PATH}" 1>&2
+  return 0
+fi
+
+if [ ! -d $BASH_CONFIG_PATH ]; then
+  echo "Could not find bash configuration: ${BASH_CONFIG_PATH}" 1>&2
+  return 0
+fi
+
 set -o allexport
 source $SHELL_CONFIG_PATH/functions.sh
 
@@ -30,17 +40,17 @@ if [ -f $HOME/.bashrc.local ]; then
   source $HOME/.bashrc.local
 fi
 
-if [ -z "$SSH_TTY" ] &&
-  [ -z "$SSH_CONNECTION" ] &&
-  [ -z "$SSH_CLIENT" ] &&
-  [ -n "$DISPLAY" ] &&
-  [ -z "$TMUX" ]; then
-  tmux
-fi
-
 # Generated for envman. Do not edit.
 [ -s "$HOME/.config/envman/load.sh" ] && source "$HOME/.config/envman/load.sh"
 
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+export NVM_DIR=${NVM_DIR:-$HOME/.nvm}
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"                   # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" # This loads nvm bash_completion
+[ -f ~/.fzf.bash ] && source ~/.fzf.bash
+
+if [ -z "$SSH_TTY" ] &&
+  [ -z "$SSH_CONNECTION" ] &&
+  [ -z "$SSH_CLIENT" ] &&
+  [ -z "$TMUX" ]; then
+  tmux
+fi

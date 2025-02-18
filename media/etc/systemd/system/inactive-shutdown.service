@@ -1,0 +1,10 @@
+[Unit]
+Description=Check system activity and shutdown if inactive
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/check_activity.sh
+
+[Install]
+WantedBy=multi-user.target
