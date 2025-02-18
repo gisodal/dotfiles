@@ -43,3 +43,24 @@ wk.add({
     return vim.opt.list:get() and { icon = "", color = "green" } or { icon = " ", color = "yellow" }
   end,
 })
+
+-- function to store the current buffer if it is modified
+local function store_buffer_if_modified()
+  if vim.bo.readonly then
+    vim.notify("Buffer is readonly", vim.log.levels.WARN)
+  elseif vim.bo.modified and vim.bo.filetype ~= "neo-tree" and vim.bo.filetype ~= "aerial" then
+    vim.cmd("write")
+  else
+    vim.notify("Buffer is not modified or is a special buffer", vim.log.levels.INFO)
+  end
+end
+
+wk.add({
+  "<leader><CR>",
+  store_buffer_if_modified,
+  desc = "Store buffer if modified",
+  mode = "n",
+  noremap = true,
+  silent = true,
+  icon = "💾",
+})

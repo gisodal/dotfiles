@@ -76,7 +76,7 @@ bind    C-m resize-pane -Z # toggle maximize pane
 
 ## window manipulations
 bind R command-prompt -p "Rename window:" "rename-window %%"
-#bind A command-prompt -p "Rename session:" "rename-session %%"
+bind A command-prompt -p "Rename session:" "rename-session %%"
 bind M command-prompt -p "Move window to:" "move-window -t %%"
 
 bind x confirm-before -p 'Kill pane (y/N)?' kill-pane
