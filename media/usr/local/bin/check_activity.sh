@@ -1,7 +1,5 @@
 #!/bin/bash
 
-[ -f /etc/environment ] && source /etc/environment
-
 SCRIPT_DIR=$(dirname "$(realpath "$0")")
 SCRIPT_NAME=$(basename "$0")
 PREFIX="[$SCRIPT_DIR/$SCRIPT_NAME]"
