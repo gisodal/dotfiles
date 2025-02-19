@@ -59,7 +59,11 @@ function install-post() {
 
   # prevent: System is going down. Unprivileged users are not permitted to log in anymore.
   # For technical details, see pam_nologin(8).
-  sudo rm /etc/nologin
+  sudo rm -f /etc/nologin
+  if [[ -n $(sed -n 's/^account.*required.*pam_nologin.so/#&/p' /etc/pam.d/sshd) ]]; then
+    sudo sed -i 's/^account.*required.*pam_nologin.so/#&/' /etc/pam.d/sshd
+    sudo systemctl restart sshd
+  fi
 }
 
 # set defaults
