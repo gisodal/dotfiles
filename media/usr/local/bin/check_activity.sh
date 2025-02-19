@@ -31,7 +31,8 @@ if [[ -z $ACTIVE ]]; then
   # No active streams, schedule shutdown
   if [ ! -f /run/systemd/shutdown/scheduled ]; then
     logger "No activity, shutting down in 5 minutes."
-    sudo shutdown -h +5 >/dev/null 2>&1
+    # add 3 second grace.. cannot deactivate in the 5th minute otherwise
+    sleep 3 && sudo shutdown -h +5 >/dev/null 2>&1
   else
     logger "No activity, shutting down timer active."
   fi
