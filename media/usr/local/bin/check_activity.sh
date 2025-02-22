@@ -26,6 +26,13 @@ if [[ -n "$SSH_CONNECTIONS" ]]; then
   ACTIVE="$ACTIVE ssh"
 fi
 
+for APP in $ACTIVITY_APPS; do
+  if pgrep "$APP" >/dev/null; then
+    echo "$APP is active"
+    ACTIVE="$ACTIVE $APP"
+  fi
+done
+
 logger "Server activity with:$ACTIVE"
 if [[ -z $ACTIVE ]]; then
   # No active streams, schedule shutdown
