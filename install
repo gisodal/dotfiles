@@ -3,67 +3,78 @@
 [ $# -ne 1 ] && echo "Usage: ./install <package name>" 1>&2 && exit 1
 
 if ! command -v stow 1>/dev/null; then
-  echo 'Error: GNU Stow is not installed.' >&2
-  exit 1
+	echo 'Error: GNU Stow is not installed.' >&2
+	exit 1
 fi
 
 PACKAGE=${1%/}
 if [ ! -d $PACKAGE ]; then
-  echo "Package $PACKAGE not found" 1>&2
-  exit 1
+	echo "Package $PACKAGE not found" 1>&2
+	exit 1
 fi
 
 function install-stow() {
-  local TARGET=$HOME
-  local SOURCE=$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-  local PACKAGES=$1
+	local TARGET=$HOME
+	local SOURCE=$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+	local PACKAGES=$1
 
-  # determine run arguments
-  case $PACKAGE in
-  "local")
-    OPT="--no-folding"
-    ;;
-  "media")
-    OPT="--no-folding"
-    SUDO=sudo
-    TARGET="/"
-    ;;
-  *)
-    :
-    ;;
-  esac
+	# determine run arguments
+	case $PACKAGE in
+	"local")
+		OPT="--no-folding"
+		;;
+	"media")
+		OPT="--no-folding"
+		SUDO=sudo
+		TARGET="/"
+		;;
+	*)
+		:
+		;;
+	esac
 
-  echo "Install $PACKAGE"
+	echo "Install $PACKAGE"
 
-  # modify ownership if necessary
-  if [[ -n $SUDO ]]; then
-    sudo chown -R root:root $PACKAGE
-  fi
+	# modify ownership if necessary
+	if [[ -n $SUDO ]]; then
+		sudo chown -R root:root $PACKAGE
+	fi
 
-  # install the pacakge
-  $SUDO stow $OPT -vt "$TARGET" "$PACKAGE"
+	# install the pacakge
+	$SUDO stow $OPT -vt "$TARGET" "$PACKAGE"
 
-  if [ $? -ne 0 ]; then
-    exit 1
-  fi
+	if [ $? -ne 0 ]; then
+		exit 1
+	fi
 }
 
 function install-post() {
-  sudo systemctl enable inactive-shutdown.service
-  sudo systemctl enable inactive-shutdown.timer
-  sudo systemctl start inactive-shutdown.service
-  sudo systemctl start inactive-shutdown.timer
+	local PACKAGES=$1
 
-  # reload system to see changes (only needed when changeing service files)
-  sudo systemctl daemon-reload
+	# determine run arguments
+	case $PACKAGE in
+	"media")
+		sudo systemctl enable inactive-shutdown.service
+		sudo systemctl enable inactive-shutdown.timer
+		sudo systemctl start inactive-shutdown.service
+		sudo systemctl start inactive-shutdown.timer
 
-  # prevent: System is going down. Unprivileged users are not permitted to log in anymore.
-  # For technical details, see pam_nologin(8).
-  sudo rm -f /etc/nologin
-  if [[ -n $(sed -n 's/^account.*required.*pam_nologin.so/#&/p' /etc/pam.d/sshd) ]]; then
-    sudo sed -i 's/^account.*required.*pam_nologin.so/#&/' /etc/pam.d/sshd
-    sudo systemctl restart sshd
-  fi
+		# reload system to see changes (only needed when changeing service files)
+		sudo systemctl daemon-reload
+
+		# prevent: System is going down. Unprivileged users are not permitted to log in anymore.
+		# For technical details, see pam_nologin(8).
+		sudo rm -f /etc/nologin
+		if [[ -n $(sed -n 's/^account.*required.*pam_nologin.so/#&/p' /etc/pam.d/sshd) ]]; then
+			sudo sed -i 's/^account.*required.*pam_nologin.so/#&/' /etc/pam.d/sshd
+			sudo systemctl restart sshd
+		fi
+
+		;;
+	*)
+		:
+		;;
+	esac
 }
 
 # set defaults
