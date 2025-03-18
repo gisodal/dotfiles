@@ -1,12 +1,18 @@
 #!/bin/bash -e
 
+ME="$(basename "$(test -L "$0" && readlink "$0" || echo "$0")")"
 DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-DEPS_SCRIPT=$DIR/.install/deps.sh
+ROOT="$DIR"
 LOGLEVEL=debug
 
-if [ -f $DEPS_SCRIPT ]; then
-  source $DIR/.install/deps.sh
-fi
+SRC="$DIR/src"
+INSTALLERS="$SRC/installers.sh"
+IO="$SRC/io.sh"
+
+[ $LOGLEVEL == "verbose" ] && set -x
+
+[ -f "$IO" ] && source "$IO" || (echo "Failed to load io" && exit 1)
+[ -f "$INSTALLERS" ] && source "$INSTALLERS" || (log error "Failed to load installers" && exit 1)
 
 install $1
 
@@ -23,18 +29,6 @@ if [ ! -d $PACKAGE ]; then
   echo "Package $PACKAGE not found" 1>&2
   exit 1
 fi
-
-function install-powerups() {
-  mkdir -p "$HOME/src"
-
-  cd "$HOME/src"
-  wget https://invisible-island.net/archives/lynx/tarballs/lynx2.9.2.tar.gz
-  cd lynx2.9.2
-  sudo ./configure
-  sudo make
-  sudo make install
-
-}
 
 function install-stow() {
   local TARGET=$HOME
@@ -77,22 +71,7 @@ function install-post() {
   # determine run arguments
   case $PACKAGE in
   "media")
-    sudo systemctl enable inactive-shutdown.service
-    sudo systemctl enable inactive-shutdown.timer
-    sudo systemctl start inactive-shutdown.service
-    sudo systemctl start inactive-shutdown.timer
-
-    # reload system to see changes (only needed when changeing service files)
-    sudo systemctl daemon-reload
-
-    # prevent: System is going down. Unprivileged users are not permitted to log in anymore.
-    # For technical details, see pam_nologin(8).
-    sudo rm -f /etc/nologin
-    if [[ -n $(sed -n 's/^account.*required.*pam_nologin.so/#&/p' /etc/pam.d/sshd) ]]; then
-      sudo sed -i 's/^account.*required.*pam_nologin.so/#&/' /etc/pam.d/sshd
-      sudo systemctl restart sshd
-    fi
-
+    install media-post
     ;;
   *)
     :
@@ -110,3 +89,26 @@ mkdir -p "$HOME/.local/bin"
 install-stow $PACKAGES
 
 install-post $PACKAGE
+
+case "$1" in
+'show') ;;
+'install') ;;
+*)
+  echo "Usage: $ME <command> [args]:
+
+  Commands                    Description
+  --------                    -----------
+  stow                        List all stowable packages
+  stow <package>              Stow <package> 
+  install                     List all installers
+  install <installer>         Run the installer
+
+  Examples:
+
+  $ME stow
+  $ME stow nvim
+  $ME install
+  $ME install lynx
+  "
+  ;;
+esac

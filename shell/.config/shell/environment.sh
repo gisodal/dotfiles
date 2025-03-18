@@ -22,9 +22,9 @@ LC_ALL="en_US.UTF-8" # use UTF-8 character set
 LANG="en_US.UTF-8"
 LANGUAGE="en_US.UTF-8"
 
-HISTTIMEFORMAT="[%Y-%m-%d %T] "    # timestamp history commands
-HISTCONTROL="ignoredups:erasedups" # dont record duplicate commands
-HISTIGNORE="&:ls:cd:[bf]g:exit"    # dont record simple commands like ls
+HISTTIMEFORMAT="[%Y-%m-%d %T] " # timestamp history commands
+HISTCONTROL="erasedups"         # dont record duplicate commands
+HISTIGNORE="&:ls:cd:[bf]g:exit" # dont record simple commands like ls
 HISTSIZE=10000
 HISTFILESIZE=10000
 
@@ -35,6 +35,8 @@ LESSHISTFILE="-"
 PNPM_HOME="$HOME/.local/share/pnpm"
 PATH="$PNPM_HOME:$PATH"
 # pnpm end
+
+[ -s "$HOME/.cargo/env" ] && source "$HOME/.cargo/env"
 
 NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"                   # This loads nvm

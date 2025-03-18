@@ -16,8 +16,9 @@
     keepBackup = false
 [mergetool "diffview"]
     directory = true
+    prompt = false
     trustExitCode = true
-    cmd = nvim -n -c "DiffviewOpen" "$MERGE"
+    cmd = nvim -c "DiffviewOpen" "$MERGED"
 [mergetool "echo"]
     cmd = echo "local: $LOCAL -- remote: $REMOTE -- merge: $MERGE"
 [difftool]
@@ -85,7 +86,9 @@
     search = !git rev-list --all | xargs git grep
 	#search in lib/util: git grep <regexp> $(git rev-list --all -- lib/util) -- lib/util
 
-    mt = mergetool
+    #mt = mergetool
+    mt = !nvim -c "DiffviewOpen"
+    mtd = !git add $(git diff --name-only --diff-filter=U) && echo "All conflicts marked as resolved."
 
 	  skipped = "!f(){ git ls-files -v ${1} | grep ^S | awk '{print $2}';};f"
 	  skip = update-index --skip-worktree --
