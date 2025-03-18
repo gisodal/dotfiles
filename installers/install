@@ -6,13 +6,13 @@ ROOT="$DIR"
 LOGLEVEL=debug
 
 SRC="$DIR/src"
-INSTALLERS="$SRC/installers.sh"
+INSTALL="$SRC/install.sh"
 IO="$SRC/io.sh"
 
 [ $LOGLEVEL == "verbose" ] && set -x
 
 [ -f "$IO" ] && source "$IO" || (echo "Failed to load io" && exit 1)
-[ -f "$INSTALLERS" ] && source "$INSTALLERS" || (log error "Failed to load installers" && exit 1)
+[ -f "$INSTALL" ] && source "$INSTALL" || (log error "Failed to load install script" && exit 1)
 
 install $1
 
