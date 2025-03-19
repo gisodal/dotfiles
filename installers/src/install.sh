@@ -5,11 +5,31 @@ INSTALLERS="$SRC/installers.sh"
 
 [ -f "$INSTALLERS" ] && source "$INSTALLERS" || (log error "Failed to load installers" && exit 1)
 
+function filter-installable() {
+  local -n results="$1" # Name reference to the array
+  local -a filtered=()
+
+  for pkg in "${results[@]}"; do
+    # Keep packages that either have an installer or don't have dependency files
+    if have-installer "$pkg" || ! have-deps "$pkg"; then
+      filtered+=("$pkg")
+    else
+      log debug "Filtered out $pkg (is not installable)"
+    fi
+  done
+
+  # Replace results with filtered array
+  results=("${filtered[@]}")
+
+}
+
 function install() {
   log debug "Install $1"
 
+  # determine what to install
   declare -a packages
   get-packages "$1" packages
+  filter-installable packages
 
   log debug "Install packages:"
   for pkg in "${packages[@]}"; do
@@ -18,11 +38,28 @@ function install() {
 
   return 0
 
-  # check if we have an installer for the dependency
-  if ! have-installer $1; then
-    log error "There is no installer for '$1'"
-    return 1
-  fi
+  for dep in "${packages[@]}"; do
+
+    # check if the dependency is already installed
+    if have-check $1; then
+      if eval "$(get-check $1)"; then
+        log info "Dependency '$1' already installed"
+        return 0
+      fi
+
+    # we don't have a custom check, so default to checking for the binary
+    elif command -v $1 1>/dev/null; then
+      log info "Dependency '$1' already installed: $(which $1)"
+      return 0
+    fi
+
+    # check if we have an installer for the dependency
+    if ! have-installer $1; then
+      log error "There is no installer for '$1'"
+      return 1
+    fi
+
+  done
 
   # check if the dependency is already installed
   if have-check $1; then
