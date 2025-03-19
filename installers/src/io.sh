@@ -51,6 +51,18 @@ function log() {
   local level=$1
   shift
 
+  local -A log_priority=(
+    ["verbose"]=1
+    ["debug"]=2
+    ["info"]=3
+    ["warn"]=4
+    ["error"]=5
+  )
+  LOGLEVEL=${LOGLEVEL:-info}
+  if [[ ${log_priority[$level]:-0} -lt ${log_priority[$LOGLEVEL]:-2} ]]; then
+    return
+  fi
+
   case $level in
   debug)
     echo -e "\e[34m[$level] $@\e[0m"

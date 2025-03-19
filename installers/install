@@ -1,13 +1,27 @@
 #!/bin/bash -e
 
+if [[ "$1" == "-v" ]]; then
+  LOGLEVEL=debug
+  shift
+else
+  LOGLEVEL=info
+fi
+
+echo "LOGLEVEL: $LOGLEVEL"
 ME="$(basename "$(test -L "$0" && readlink "$0" || echo "$0")")"
 DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 ROOT="$DIR"
-LOGLEVEL=debug
 
 SRC="$DIR/src"
 INSTALL="$SRC/install.sh"
 IO="$SRC/io.sh"
+
+# set defaults
+XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
+
+# setup some directories
+mkdir -p "$XDG_CONFIG_HOME"
+mkdir -p "$HOME/.local/bin"
 
 [ $LOGLEVEL == "verbose" ] && set -x
 
@@ -33,7 +47,7 @@ fi
 function install-stow() {
   local TARGET=$HOME
   local SOURCE=$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-  local PACKAGES=$1
+  local PACKAGE=$1
 
   # determine run arguments
   case $PACKAGE in
@@ -66,7 +80,7 @@ function install-stow() {
 }
 
 function install-post() {
-  local PACKAGES=$1
+  local PACKAGE=$1
 
   # determine run arguments
   case $PACKAGE in
@@ -79,19 +93,13 @@ function install-post() {
   esac
 }
 
-# set defaults
-XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
-
-# setup some directories
-mkdir -p "$XDG_CONFIG_HOME"
-mkdir -p "$HOME/.local/bin"
-
-install-stow $PACKAGES
+install-stow $PACKAGE
 
 install-post $PACKAGE
 
 case "$1" in
-'show') ;;
+'stow') ;;
+
 'install') ;;
 *)
   echo "Usage: $ME <command> [args]:

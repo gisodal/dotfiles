@@ -53,7 +53,7 @@ function install() {
       return 0
     fi
 
-    # check if we have an installer for the dependency
+    # check if we have an installer
     if ! have-installer $1; then
       log error "There is no installer for '$1'"
       return 1
