@@ -20,7 +20,6 @@ function filter-installable() {
 
   # Replace results with filtered array
   results=("${filtered[@]}")
-
 }
 
 function install() {
@@ -31,60 +30,48 @@ function install() {
   get-packages "$1" packages
   filter-installable packages
 
-  log debug "Install packages:"
+  log info "Install packages:"
   for pkg in "${packages[@]}"; do
-    log debug "  - $pkg"
+    log info "  - $pkg"
   done
 
-  return 0
-
-  for dep in "${packages[@]}"; do
+  for pkg in "${packages[@]}"; do
+    log info "Install package: $pkg"
 
     # check if the dependency is already installed
-    if have-check $1; then
-      if eval "$(get-check $1)"; then
-        log info "Dependency '$1' already installed"
-        return 0
+    if have-check $pkg; then
+      if (
+        set -e
+        source "$(get-check $pkg)"
+      ); then
+        log info "Package '$pkg' already installed"
+        continue
       fi
 
     # we don't have a custom check, so default to checking for the binary
-    elif command -v $1 1>/dev/null; then
-      log info "Dependency '$1' already installed: $(which $1)"
-      return 0
+    elif command -v $pkg 1>/dev/null; then
+      log info "Package '$pkg' already installed: $(which $pkg)"
+      continue
     fi
 
     # check if we have an installer
-    if ! have-installer $1; then
-      log error "There is no installer for '$1'"
+    if ! have-installer $pkg; then
+      log error "There is no installer for '$pkg'"
       return 1
     fi
 
-  done
+    # run the installer
+    (
+      set -e
+      source "$(get-installer $pkg)"
+    )
 
-  # check if the dependency is already installed
-  if have-check $1; then
-    if eval "$(get-check $1)"; then
-      log info "Dependency '$1' already installed"
-      return 0
+    # check if the dependency was installed
+    if [ $? -eq 0 ]; then
+      log info "Package '$pkg' installed"
+    else
+      log error "Package '$pkg' failed to install"
+      return 1
     fi
-
-  # we don't have a custom check, so default to checking for the binary
-  elif command -v $1 1>/dev/null; then
-    log info "Dependency '$1' already installed: $(which $1)"
-    return 0
-  fi
-
-  # run the installer
-  (
-    set -e
-    eval "$(get-installer $1)"
-  )
-
-  # check if the dependency was installed
-  if [ $? -eq 0 ]; then
-    log info "Dependency '$1' installed"
-  else
-    log error "Dependency '$1' failed to install"
-    return 1
-  fi
+  done
 }

@@ -20,7 +20,7 @@ function get-installer() {
 }
 
 function get-check() {
-  echo "$CHECK/$1.sh"
+  echo "$CHECKS/$1.sh"
 }
 
 function get-installer-list() {
