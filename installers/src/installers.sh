@@ -13,6 +13,7 @@ command cd "$BUILD"
 
 # grab the utils
 source "$DIR/utils.sh"
+source "$DIR/deps.sh"
 
 function get-installer() {
   echo "$INSTALLERS/$1.sh"
@@ -20,10 +21,6 @@ function get-installer() {
 
 function get-check() {
   echo "$CHECK/$1.sh"
-}
-
-function get-deps() {
-  echo "$DEPS/$1"
 }
 
 function get-installer-list() {
@@ -47,75 +44,4 @@ function have-check() {
   else
     return 1
   fi
-}
-
-function have-deps() {
-  if [ -f $(get-deps $1) ]; then
-    return 0
-  else
-    return 1
-  fi
-}
-
-function parse_dependency_file() {
-  local parent=$1
-  local file=$2
-  local -n result="$3" # Name reference to the array
-
-  # Clear the result array
-  result=()
-
-  while IFS= read -r line || [ -n "$line" ]; do
-    # Skip empty lines and comments
-    [[ -z "$line" || "$line" =~ ^# ]] && continue
-
-    # Split line into array of dependencies
-    read -ra deps <<<"$line"
-
-    # Skip if line is empty after parsing
-    [ ${#deps[@]} -eq 0 ] && continue
-
-    # create dependency result
-    for ((i = 0; i < ${#deps[@]}; i++)); do
-      if [ $i -eq $((${#deps[@]} - 1)) ]; then
-        results+=("${deps[$i]}:$parent")
-      else
-        results+=("${deps[$i]}:${deps[$i + 1]}")
-      fi
-    done
-  done <"$file"
-
-  # sort the results. remove duplicates
-  sort_array_unique results
-}
-
-function get-dependencies() {
-  local -n results="$2" # Name reference to the array
-  results=()
-
-  log debug "Checking dependencies for $1 at $(get-deps $1)"
-  if [ ! -f $(get-deps $1) ]; then
-    return 0
-  fi
-
-  parse_dependency_file $1 $(get-deps $1) results
-
-  for ((i = 0; i < ${#results[@]}; i++)); do
-    local dep=$(pair_left "${results[$i]}")
-    local parent=$(pair_right "${results[$i]}")
-    log debug "Dependency: $dep → $parent"
-  done
-
-  # sort the dependencies
-  local -a sorted_deps
-  topo_sort_deps results sorted_deps "$1"
-
-  # copy back to result. exclude the last element, i.e., $1
-  if [[ ${#sorted_deps[@]} -gt 0 ]]; then
-    results=("${sorted_deps[@]:0:${#sorted_deps[@]}-1}")
-  else
-    results=()
-  fi
-
-  return 0
 }

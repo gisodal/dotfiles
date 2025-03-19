@@ -8,11 +8,11 @@ INSTALLERS="$SRC/installers.sh"
 function install() {
   log debug "Install $1"
 
-  declare -a dependencies
-  get-dependencies "$1" dependencies
+  declare -a packages
+  get-packages "$1" packages
 
-  log debug "Dependencies in installation order:"
-  for pkg in "${dependencies[@]}"; do
+  log debug "Install packages:"
+  for pkg in "${packages[@]}"; do
     log debug "  - $pkg"
   done
 
