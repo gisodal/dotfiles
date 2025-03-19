@@ -1,0 +1,40 @@
+#!/bin/bash -e
+
+MAIN="origin/$(basename $(git rev-parse --abbrev-ref origin/HEAD) || git branch --sort=-committerdate -l main master | head -1 | sed 's/^[^a-zA-Z]*//')"
+
+# Go to the repository root
+command cd $(git rev-parse --show-toplevel)
+
+# Get current branch name
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+# Create diff with main branch and save it
+PATCH=/tmp/pr-diff.patch
+git diff $MAIN..."$CURRENT_BRANCH" >$PATCH
+
+# Get list of changed files compared to main
+CHANGED_FILES=$(git diff --name-only $MAIN..."$CURRENT_BRANCH")
+
+# If no files changed, exit
+if [ -z "$CHANGED_FILES" ]; then
+  echo "No files changed compared to $MAIN"
+  exit 1
+fi
+
+# Store prompt in temporary file
+PROMPT_FILE=$(mktemp)
+cat >$PROMPT_FILE <<EOF
+> /COPILOT_REVIEW
+> #buffers
+
+Please review this PR with the following focus:
+1. Potential bugs or edge cases
+2. Code style and best practices
+3. Performance considerations
+4. Security implications
+EOF
+
+# Open nvim with the changed files, the diff, and launch Copilot Chat to review the changes
+nvim -R $PATCH $CHANGED_FILES -c "CopilotChat" -c "CopilotChatOpen" -c "r $PROMPT_FILE" -c "stopinsert"
+
+rm $PROMPT_FILE
