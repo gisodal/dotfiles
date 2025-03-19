@@ -27,7 +27,10 @@ cat >$PROMPT_FILE <<EOF
 > /COPILOT_REVIEW
 > #buffers
 
-Please review this PR with the following focus:
+Please review this PR. Try to use actual code file locations rather than diff line numbers.
+
+focus on the following:
+
 1. Potential bugs or edge cases
 2. Code style and best practices
 3. Performance considerations
