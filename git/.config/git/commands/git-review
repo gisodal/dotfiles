@@ -36,7 +36,7 @@ PATCH=/tmp/pr-diff.patch
 git diff $BASE_COMMIT >$PATCH
 
 # Get list of changed files compared to the base commit
-CHANGED_FILES=$(git diff --name-only $BASE_COMMIT) # or $BASE_COMMIT..."$CURRENT_BRANCH"
+CHANGED_FILES=$(git diff --name-only $BASE_COMMIT)
 
 # If no files changed, exit
 if [ -z "$CHANGED_FILES" ]; then

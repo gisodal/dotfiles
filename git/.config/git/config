@@ -68,6 +68,7 @@
     cmm = commit -m
     fd = fetch-diff
     af = add-files
+    sf = stash-files
     cb = checkout-branch
 
     dv = difftool --tool=vim
