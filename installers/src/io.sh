@@ -58,9 +58,10 @@ function log() {
     ["warn"]=4
     ["error"]=5
   )
+
   LOGLEVEL=${LOGLEVEL:-info}
   if [[ ${log_priority[$level]:-0} -lt ${log_priority[$LOGLEVEL]:-2} ]]; then
-    return
+    log error "Invalid log level: $level"
   fi
 
   case $level in
@@ -77,7 +78,7 @@ function log() {
     echo -e "\e[31m[$level] $@\e[0m"
     ;;
   *)
-    echo -e "xx\e[31m[$level] $@\e[0m"
+    echo -e "\e[31m[$level] $@\e[0m"
     ;;
   esac
 }

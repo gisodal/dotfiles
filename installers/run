@@ -1,0 +1,113 @@
+#!/bin/bash -e
+
+LOGLEVEL=info
+DRYRUN=false
+XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
+ME="$(basename "$(test -L "$0" && readlink "$0" || echo "$0")")"
+DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+ROOT="$DIR"
+SRC="$DIR/src"
+INSTALL="$SRC/install.sh"
+STOW="$SRC/stow.sh"
+IO="$SRC/io.sh"
+
+function usage() {
+  cat <<EOF
+Usage: $ME [-v|-vv|-d] <command> [args]:
+
+  Commands                    Description
+  --------                    -----------
+  stow                        List (and select) stowable packages
+  stow <package>              Stow <package>
+  install                     List (and select) installers
+  install <installer>         Run the installer
+
+  Flags
+  -----
+  -v                          Debug output
+  -vv                         Verbose output
+  -d                          Dry run
+
+  Examples
+  --------
+  $ME stow
+  $ME stow nvim
+  $ME install
+  $ME install lynx
+EOF
+}
+
+# process flags
+while [[ $# -gt 0 && "$1" == -* ]]; do
+  case "$1" in
+  -v)
+    LOGLEVEL=debug
+    ;;
+  -vv)
+    LOGLEVEL=verbose
+    ;;
+  -d)
+    DRYRUN=true
+    ;;
+  *)
+    usage
+    exit 1
+    ;;
+  esac
+  shift
+done
+
+# activate verbosity
+[ $LOGLEVEL == "verbose" ] && set -x
+
+# setup some directories we want anyway
+mkdir -p "$XDG_CONFIG_HOME"
+mkdir -p "$HOME/.local/bin"
+
+# load scripts
+[ -f "$IO" ] && source "$IO" || (echo "Failed to load io" && exit 1)
+[ -f "$INSTALL" ] && source "$INSTALL" || (log error "Failed to load install script" && exit 1)
+[ -f "$STOW" ] && source "$STOW" || (log error "Failed to load stow script" && exit 1)
+
+if ! have-command stow; then
+  echo 'Error: GNU Stow is not installed.' >&2
+  exit 1
+fi
+
+function run() {
+  case "$1" in
+  'stow')
+    shift
+    if [[ $# -eq 0 ]]; then
+      if have-command fzf; then
+        PKG=$(get-stow-list | fzf --header "Select a package stow")
+        [[ -n $PKG ]] && stow-install $PKG
+      else
+        stow-list
+      fi
+    else
+      stow-install $1
+    fi
+    ;;
+
+  'install')
+    shift
+    if [[ $# -eq 0 ]]; then
+      if have-command fzf; then
+        PKG=$(get-installer-list | fzf --header "Select what you want to install")
+        [[ -n $PKG ]] && install $PKG
+      else
+        get-installer-list
+      fi
+    else
+      install $1
+    fi
+    ;;
+
+  *)
+    usage
+    ;;
+  esac
+}
+
+run $@

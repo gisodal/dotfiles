@@ -29,7 +29,7 @@ function is-installed() {
       set -e
       source "$(get-check $pkg)"
     ); then
-      log info "Package '$pkg' already installed"
+      log info "Package '$pkg' already installed (checked with $(get-check $pkg))"
       return 0
     fi
 
@@ -39,6 +39,36 @@ function is-installed() {
     return 0
   fi
 
+  return 1
+}
+
+install-fallback() {
+  local pkg="$1"
+  log warn "Fallback to default installer for '$pkg'"
+
+  # Check if snap is available
+  if have-command snap; then
+    log info "Trying to install '$pkg' with snap..."
+    if $DRYRUN; then
+      log warn "Dry run: sudo snap install $pkg"
+    else
+      sudo snap install "$pkg" && return 0
+    fi
+  fi
+
+  # If snap fails or isn't available, try apt
+  if have-command apt; then
+    log info "Trying to install '$pkg' with apt..."
+    if $DRYRUN; then
+      log warn "Dry run: sudo apt install -y $pkg"
+    else
+      sudo apt update && sudo apt install -y "$pkg" && return 0
+    fi
+  fi
+
+  [ $DRYRUN ] && exit 0
+
+  log error "Failed to install '$pkg'. No suitable package manager found."
   return 1
 }
 
@@ -64,22 +94,26 @@ function install() {
 
     # check if we have an installer
     if ! have-installer $pkg; then
-      log error "There is no installer for '$pkg'"
-      return 1
+      log warn "There is no installer for '$pkg'"
+      install-fallback $pkg && exit 1
     fi
 
     # run the installer
-    (
-      set -e
-      source "$(get-installer $pkg)"
-    )
-
-    # check if the dependency was installed
-    if [ $? -eq 0 ]; then
-      log info "Package '$pkg' installed"
+    if $DRYRUN; then
+      log warn "Dry run: $(get-installer $pkg)"
     else
-      log error "Package '$pkg' failed to install"
-      return 1
+      (
+        set -e
+        source "$(get-installer $pkg)"
+      )
+
+      # check if the dependency was installed
+      if [ $? -eq 0 ]; then
+        log info "Package '$pkg' installed"
+      else
+        log error "Package '$pkg' failed to install"
+        return 1
+      fi
     fi
   done
 }

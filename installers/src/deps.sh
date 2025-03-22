@@ -14,8 +14,10 @@ function get-deps-file() {
 
 function have-deps() {
   if [ -f $(get-deps-file $1) ]; then
+
     return 0
   else
+    echo "no $(get-deps-file $1)"
     return 1
   fi
 }
@@ -113,7 +115,26 @@ function get-install-order() {
   result=("${sorted[@]}")
 }
 
+function filter-installable() {
+  local -n results="$1" # Name reference to the array
+  local -a filtered=()
+
+  for pkg in "${results[@]}"; do
+    # Keep packages that either have an installer or don't have dependency files
+    if have-installer "$pkg" || ! have-deps "$pkg"; then
+      filtered+=("$pkg")
+    else
+      log debug "Filtered out $pkg (is not installable)"
+    fi
+  done
+
+  # Replace results with filtered array
+  results=("${filtered[@]}")
+
+}
+
 function get-packages() {
+  log debug "Determine dependencies for: $1"
   local -n results="$2" # Name reference to the array
   results=()
 
@@ -132,6 +153,7 @@ function get-packages() {
 
     # is there a dependency file?
     if ! have-deps $current; then
+      log debug "No dependency file found for: $current"
       continue
     fi
 
