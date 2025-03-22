@@ -1,5 +1,5 @@
 #!/bin/bash
 
-sudo apt install git-delta
+sudo apt install -y git-delta
 
-sudo apt install git
+sudo apt install -y git

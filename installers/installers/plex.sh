@@ -4,7 +4,7 @@ sudo apt install dirmngr ca-certificates software-properties-common apt-transpor
 curl -fsSL https://downloads.plex.tv/plex-keys/PlexSign.key | sudo gpg --dearmor | sudo tee /usr/share/keyrings/plex.gpg
 echo deb [signed-by=/usr/share/keyrings/plex.gpg] https://downloads.plex.tv/repo/deb public main | sudo tee /etc/apt/sources.list.d/plexmediaserver.list
 sudo apt update
-sudo apt install plexmediaserver
+sudo apt install -y plexmediaserver
 
 sudo systemctl start plexmediaserver
 sudo systemctl enable plexmediaserver
