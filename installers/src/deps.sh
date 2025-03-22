@@ -14,10 +14,8 @@ function get-deps-file() {
 
 function have-deps() {
   if [ -f $(get-deps-file $1) ]; then
-
     return 0
   else
-    echo "no $(get-deps-file $1)"
     return 1
   fi
 }
@@ -145,6 +143,8 @@ function get-packages() {
     local current=${queue[0]}
     queue=("${queue[@]:1}")
 
+    log debug "Processing: $current : ${#queue[@]} ${queue[@]}"
+
     # Skip if already processed
     if [[ " ${processed[*]} " == *" $current "* ]]; then
       continue
@@ -158,9 +158,11 @@ function get-packages() {
     fi
 
     # get file dependencies
-    local -a file_deps
+    log debug "Process dependencies for: $current"
+    local -a file_deps=()
     parse-deps-file $current $(get-deps-file $current) file_deps
 
+    log debug "add  $current: ${file_deps[@]}"
     # get all parents for further dependency processing
     for dep in "${file_deps[@]}"; do
       queue+=("$(get-dep-parent $dep)")

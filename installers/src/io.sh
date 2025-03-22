@@ -61,7 +61,7 @@ function log() {
 
   LOGLEVEL=${LOGLEVEL:-info}
   if [[ ${log_priority[$level]:-0} -lt ${log_priority[$LOGLEVEL]:-2} ]]; then
-    log error "Invalid log level: $level"
+    return
   fi
 
   case $level in
