@@ -22,6 +22,26 @@ function filter-installable() {
   results=("${filtered[@]}")
 }
 
+function is-installed() {
+  # check if the dependency is already installed
+  if have-check $pkg; then
+    if (
+      set -e
+      source "$(get-check $pkg)"
+    ); then
+      log info "Package '$pkg' already installed"
+      return 0
+    fi
+
+  # we don't have a custom check, so default to checking for the binary
+  elif have-command $pkg; then
+    log info "Package '$pkg' already installed: $(which $pkg)"
+    return 0
+  fi
+
+  return 1
+}
+
 function install() {
   log debug "Install $1"
 
@@ -38,19 +58,7 @@ function install() {
   for pkg in "${packages[@]}"; do
     log info "Install package: $pkg"
 
-    # check if the dependency is already installed
-    if have-check $pkg; then
-      if (
-        set -e
-        source "$(get-check $pkg)"
-      ); then
-        log info "Package '$pkg' already installed"
-        continue
-      fi
-
-    # we don't have a custom check, so default to checking for the binary
-    elif command -v $pkg 1>/dev/null; then
-      log info "Package '$pkg' already installed: $(which $pkg)"
+    if is-installed $pkg; then
       continue
     fi
 

@@ -1,21 +1,27 @@
 #!/bin/bash
 
-[ -n "$SHELL_CUSTOM_ENVIRONMENT" ] && return
-SHELL_CUSTOM_ENVIRONMENT="set"
+[ -n "$_SHELL_CUSTOM_ENVIRONMENT" ] && return
+_SHELL_CUSTOM_ENVIRONMENT="set"
+
+function add-to-path() {
+  if [[ -n $1 ]] && [[ ":$PATH:" != *":$1:"* ]]; then
+    export PATH="$1:$PATH"
+  fi
+}
 
 XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
-export XDG_DATA_HOME="$HOME/.local/share"
-export XDG_STATE_HOME="$HOME/.local/state"
-export XDG_CACHE_HOME="$HOME/.cache"
+XDG_DATA_HOME="$HOME/.local/share"
+XDG_STATE_HOME="$HOME/.local/state"
+XDG_CACHE_HOME="$HOME/.cache"
 
-PATH="$XDG_CONFIG_HOME/git/commands:$PATH"
-PATH="$HOME/.local/bin:$PATH"
 LOCALBINS=$(find ~/.local/bin -maxdepth 1 -type d 2>/dev/null | xargs printf "%s:")
-PATH="$PATH:/opt/homebrew/bin:$BREW:$LOCALBINS:~/.local/share/coursier/bin:~/.config/git/commands"
+GIT_CONFIG_PATH="$XDG_CONFIG_HOME/git"
 
-XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
-GIT_CONFIG_PATH="$HOME/.config/git"
-PKG_CONFIG_PATH="$USR_LOCAL/lib/pkgconfig"
+add-to-path "$GIT_CONFIG_PATH/commands"
+add-to-path "$LOCALBINS"
+add-to-path "$HOME/.local/bin"
+add-to-path "/opt/homebrew/bin"
+
 EDITOR="nvim"
 VISUAL="nvim"
 LC_ALL="en_US.UTF-8" # use UTF-8 character set
@@ -24,13 +30,13 @@ LANGUAGE="en_US.UTF-8"
 
 HISTTIMEFORMAT="[%Y-%m-%d %T] " # timestamp history commands
 HISTCONTROL="erasedups"         # dont record duplicate commands
-HISTIGNORE="&:ls:cd:[bf]g:exit" # dont record simple commands like ls
+HISTIGNORE="&:ls:cd:exit"       # dont record simple commands like ls
 HISTSIZE=10000
 HISTFILESIZE=10000
 
 MANPAGER="less -R --use-color -Dd+r -Du+b"
-LESSHISTFILE="-"
 
+# ================= application specific ==================
 # pnpm
 PNPM_HOME="$HOME/.local/share/pnpm"
 PATH="$PNPM_HOME:$PATH"
@@ -53,15 +59,15 @@ elif exists find; then
 fi
 
 if exists dircolors; then
-  test -r $HOME/.lsrc && eval "$(dircolors --sh "$HOME/.lsrc")"
+  test -r $XDG_CONFIG_HOME/shell/.lsrc && eval "$(dircolors --sh "$XDG_CONFIG_HOME/shell/.lsrc")"
 fi
 
 if exists direnv; then
   eval "$(direnv hook bash)"
 fi
 
-# setup git user
-GIT_USER_FILE="$HOME/.config/git/.gituser"
+# git config
+GIT_USER_FILE="$GIT_CONFIG_PATH/.gituser"
 if [ ! -z "$PS1" -a ! -f "$GIT_USER_FILE" ]; then
   GITUSER=$USER@$HOSTNAME
   echo "Configure a git user and email:"

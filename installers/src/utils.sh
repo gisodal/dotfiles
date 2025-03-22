@@ -1,5 +1,22 @@
 #!/bin/bash
 
+function has_service() {
+  if systemctl list-unit-files --type=service | grep -q "$1.service"; then
+    echo "Service is already installed"
+    return 0
+  else
+    return 1
+  fi
+}
+
+function have-command() {
+  if command -v "$1" >/dev/null 2>&1; then
+    return 0
+  else
+    return 1
+  fi
+}
+
 function sort_array_unique() {
   local -n arr="$1" # Name reference to the array
   local sorted_arr
