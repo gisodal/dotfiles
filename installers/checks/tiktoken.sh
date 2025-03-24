@@ -1,3 +1,3 @@
 #!/bin/bash
 
-lua -e 'local ok = pcall(require, "tiktoken_core"); os.exit(ok and 0 or 1)' 2>/dev/null
+luarocks --lua-version 5.1 list | grep tiktoken_core

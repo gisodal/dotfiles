@@ -1,5 +1,6 @@
 #!/bin/bash -e
 
+PROJECT_PATH="$(git rev-parse --show-toplevel)/installers"
 LOGLEVEL=info
 DRYRUN=false
 XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
@@ -21,6 +22,7 @@ Usage: $ME [-v|-vv|-d] <command> [args]:
   stow <package>              Stow <package>
   install                     List (and select) installers
   install <installer>         Run the installer
+  test                        Run tests
 
   Flags
   -----
@@ -102,6 +104,14 @@ function run() {
     else
       install $1
     fi
+    ;;
+
+  'test')
+    shift
+    (
+      DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+      . $DIR/test/framework.sh
+    )
     ;;
 
   *)

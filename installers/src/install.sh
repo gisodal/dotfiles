@@ -60,9 +60,9 @@ install-fallback() {
   if have-command apt; then
     log info "Trying to install '$pkg' with apt..."
     if $DRYRUN; then
-      log warn "Dry run: sudo apt install -y $pkg"
+      log warn "Dry run: sudo apt-get install -y $pkg"
     else
-      sudo apt update && sudo apt install -y "$pkg" && return 0
+      sudo apt-get update && sudo apt-get install -y "$pkg" && return 0
     fi
   fi
 
@@ -74,6 +74,11 @@ install-fallback() {
 
 function install() {
   log debug "Install $1"
+
+  # go to build directory to install stuff
+  BUILD="$HOME/.local/opt"
+  mkdir -p "$BUILD"
+  command cd "$BUILD"
 
   # determine what to install
   declare -a packages
@@ -95,7 +100,8 @@ function install() {
     # check if we have an installer
     if ! have-installer $pkg; then
       log warn "There is no installer for '$pkg'"
-      install-fallback $pkg && exit 1
+      install-fallback $pkg || return 1
+      continue
     fi
 
     # run the installer
@@ -103,6 +109,9 @@ function install() {
       log warn "Dry run: $(get-installer $pkg)"
     else
       (
+        # disable alias expansion
+        \unalias -a 2>/dev/null || true
+
         set -e
         source "$(get-installer $pkg)"
       )

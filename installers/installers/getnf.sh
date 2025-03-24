@@ -5,4 +5,4 @@
 curl -fsSL https://raw.githubusercontent.com/getnf/getnf/main/install.sh | bash
 
 # install jetbrains
-getnf -i JetBrainsMono
+$HOME/.local/bin/getnf -i JetBrainsMono

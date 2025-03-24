@@ -2,14 +2,9 @@
 
 DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 
-BUILD="$ROOT/build"
 DEPS="$ROOT/deps"
 CHECKS="$ROOT/checks"
 INSTALLERS="$ROOT/installers"
-
-# go to build directory to install stuff
-mkdir -p "$BUILD"
-command cd "$BUILD"
 
 # grab the utils
 source "$DIR/utils.sh"
