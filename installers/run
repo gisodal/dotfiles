@@ -108,10 +108,45 @@ function run() {
 
   'test')
     shift
-    (
-      DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-      . $DIR/test/framework.sh
-    )
+
+    debug_mode=0
+    attach_mode=0
+    if [[ $# -gt 0 && "$1" == -* ]]; then
+      case "$1" in
+      -d)
+        debug_mode=1
+        ;;
+      -a)
+        attach_mode=1
+        ;;
+      *)
+        usage
+        exit 1
+        ;;
+      esac
+      shift
+    fi
+
+    {
+      if [ "$debug_mode" -eq 1 ]; then
+        log warn "Running in debug mode"
+        export CONTAINER_DEBUG=1
+      fi
+
+      if [ "$attach_mode" -eq 1 ]; then
+        # After tests finish, if container still exists, connect to it
+        container_id=$(sudo docker ps -q --filter "ancestor=dotfiles-test")
+        if [ -n "$container_id" ]; then
+          echo "Connecting to test container for debugging..."
+          sudo docker exec -it $container_id /bin/bash
+        else
+          echo "Failed to get container id" && exit 1
+        fi
+      else
+        DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+        . $DIR/test/tests.sh
+      fi
+    }
     ;;
 
   *)
