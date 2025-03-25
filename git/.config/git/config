@@ -89,7 +89,7 @@
 
     #mt = mergetool
     mt = !nvim -c "DiffviewOpen"
-    mtd = !git add $(git diff --name-only --diff-filter=U) && echo "All conflicts marked as resolved."
+    mtr = !git add $(git diff --name-only --diff-filter=U) && echo "All conflicts marked as resolved."
 
 	  skipped = "!f(){ git ls-files -v ${1} | grep ^S | awk '{print $2}';};f"
 	  skip = update-index --skip-worktree --
