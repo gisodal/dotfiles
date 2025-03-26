@@ -1,3 +1,2 @@
-node
-libncurses-dev lynx
+node libncurses-dev lynx
 tiktoken

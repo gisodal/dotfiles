@@ -16,12 +16,12 @@ if [ $INSTALL_EXIT -eq 0 ]; then
   echo "✓ Installation completed successfully"
 else
   echo "✗ Installation failed with exit code $INSTALL_EXIT"
-  echo "debug: $CONTAINER_DEBUG"
   exit 1
 fi
 
 echo
 echo "2. Verifying dependency installations..."
+nvm --version
 for cmd in npm node rg fzf nvim; do
   if command -v $cmd >/dev/null 2>&1; then
     echo "✓ $cmd is installed"
