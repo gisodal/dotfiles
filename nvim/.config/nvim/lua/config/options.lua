@@ -22,6 +22,7 @@ vim.lsp.set_log_level("off")
 -- absolute numbering
 vim.opt.relativenumber = false
 
+vim.opt.completeopt = { "menu", "menuone", "noselect", "noinsert", "popup" } -- remove noinsert and noinsert for nvim 11+
 -- the command:
 -- :LazyRoot
 -- will show you the available roots that LazyVim detects and you can change the LSP server accordingly.
