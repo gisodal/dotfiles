@@ -1,16 +1,5 @@
 #!/bin/bash -e
 
-DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-DEPS_SCRIPT=$DIR/.install/deps.sh
-LOGLEVEL=debug
-
-if [ -f $DEPS_SCRIPT ]; then
-  source $DIR/.install/deps.sh
-fi
-
-install $1
-
-exit 0
 [ $# -ne 1 ] && echo "Usage: ./install <package name>" 1>&2 && exit 1
 
 if ! command -v stow 1>/dev/null; then
@@ -71,35 +60,6 @@ function install-stow() {
   fi
 }
 
-function install-post() {
-  local PACKAGES=$1
-
-  # determine run arguments
-  case $PACKAGE in
-  "media")
-    sudo systemctl enable inactive-shutdown.service
-    sudo systemctl enable inactive-shutdown.timer
-    sudo systemctl start inactive-shutdown.service
-    sudo systemctl start inactive-shutdown.timer
-
-    # reload system to see changes (only needed when changeing service files)
-    sudo systemctl daemon-reload
-
-    # prevent: System is going down. Unprivileged users are not permitted to log in anymore.
-    # For technical details, see pam_nologin(8).
-    sudo rm -f /etc/nologin
-    if [[ -n $(sed -n 's/^account.*required.*pam_nologin.so/#&/p' /etc/pam.d/sshd) ]]; then
-      sudo sed -i 's/^account.*required.*pam_nologin.so/#&/' /etc/pam.d/sshd
-      sudo systemctl restart sshd
-    fi
-
-    ;;
-  *)
-    :
-    ;;
-  esac
-}
-
 # set defaults
 XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
 
@@ -107,6 +67,4 @@ XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
 mkdir -p "$XDG_CONFIG_HOME"
 mkdir -p "$HOME/.local/bin"
 
-install-stow $PACKAGES
-
-install-post $PACKAGE
+install-stow $PACKAGE
