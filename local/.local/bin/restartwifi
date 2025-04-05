@@ -1,7 +1,0 @@
-#!/bin/bash
-
-#sudo /etc/init.d/networking restart
-#sudo systemd restart network-manager.service
-#sudo systemctl restart network-manager
-sudo systemctl restart NetworkManager
-

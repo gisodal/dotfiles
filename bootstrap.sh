@@ -48,14 +48,15 @@ function create_user() {
 }
 
 function install_config() {
-  sudo apt install -y git stow
+  sudo apt install -y git stow tmux
+  sudo snap install nvim --classic
 
   sudo runuser -l $USERNAME -c "cat << 'EOF' | bash -e
 rm -f .bash* .profile
 mkdir -p .config
 cd .config
 [ ! -d dotfiles ] && git clone --depth=1 https://github.com/gisodal/dotfiles.git
-cd dotfiles
+cd dotfiles/config
 ./install git
 ./install tmux
 ./install shell

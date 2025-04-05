@@ -38,7 +38,7 @@ function stow-core() {
   local STOW_DRYRUN
   $DRYRUN && STOW_DRYRUN="--no -v" # stow the pacakge
   CMD="$SUDO stow $OPT -vt $TARGET -d $STOW_SOURCE $PACKAGE"
-  $DRYRYN && log warn "Dry run: $CMD" || echo $CMD
+  $DRYRUN && log warn "Dry run: $CMD" || echo $CMD
 
   $CMD $STOW_DRYRUN
 

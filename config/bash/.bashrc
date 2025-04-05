@@ -32,7 +32,7 @@ source $BASH_CONFIG_PATH/readline.sh
 
 source $BASH_CONFIG_PATH/prompt.sh
 
-test -f "$HOME/.bash-completion/bash_completion" && . $_
+test -f "/etc/bash_completion" && . $_
 
 test -f "$HOME/$GIT_CONFIG_PATH/git-completion.bash" && . $_
 
