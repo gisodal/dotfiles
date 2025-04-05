@@ -1,0 +1,121 @@
+#[user]
+    #name = username
+    #email = email
+[include] # add file containing user info
+    path = ~/.config/git/.gituser
+[push]
+    default = matching
+[merge]
+    defaultToUpstream = true
+    tool = diffview
+	  ff = false
+[log]
+    decorate = short
+[mergetool]
+    prompt = false
+    keepBackup = false
+[mergetool "diffview"]
+    directory = true
+    prompt = false
+    trustExitCode = true
+    cmd = nvim -c "DiffviewOpen" "$MERGED"
+[mergetool "echo"]
+    cmd = echo "local: $LOCAL -- remote: $REMOTE -- merge: $MERGE"
+[difftool]
+    prompt = false
+[difftool "pdfdiff"]
+    cmd = diffpdf "$LOCAL" "$REMOTE"
+[difftool "vim"]
+    cmd = vim -d -c 'wincmd =' -c 'norm ]c[c' "$LOCAL" "$REMOTE"
+[difftool "nvim"]
+    cmd = nvim -d -c 'wincmd =' -c 'norm ]c[c' "$LOCAL" "$REMOTE"
+[difftool "echo"]
+    cmd = echo "local: $LOCAL -- remote: $REMOTE -- merge: $MERGE"
+[alias]
+    branch-main = ! basename $(git rev-parse --abbrev-ref origin/HEAD) || git branch --sort=-committerdate -l main master | head -1 | sed 's/^[^a-zA-Z]*//'
+    base-commit = !git merge-base $(git branch-main) HEAD
+    name = !sh -c obasename $(git root)'
+    zip = !sh -c 'git archive --format zip --output \"$(git name).zip\" HEAD' -
+
+    ta = log --all --author-date-order --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %C(auto)%d%C(reset) %<(16,trunc)%C(dim magenta)%an%C(reset) %C(dim white)%s%C(reset) %C(blue)[%ar]%C(reset)' --date=format:'%A %d %B %Y %H:%M:%S'
+    t = log --all --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %C(auto)%d%C(reset) %<(16,trunc)%C(dim magenta)%an%C(reset) %C(dim white)%s%C(reset) %C(blue)[%ar]%C(reset)' --date=format:'%A %d %B %Y %H:%M:%S'
+    l = log --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %C(auto)%d%C(reset) %<(16,trunc)%C(dim magenta)%an%C(reset) %C(dim white)%s%C(reset) %C(blue)[%ar]%C(reset)' --date=format:'%A %d %B %Y %H:%M:%S' HEAD main
+
+    basetree = log --author-date-order --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %x09%C(auto)%d%C(reset) %<(16,trunc)%C(dim magenta)%an%C(reset) %C(dim white)%s%C(reset)\n%x09%x09%C(blue) [%ar on %cd]%C(reset)' --date=format:'%A %d %B %Y %H:%M:%S'
+    tree = !bash -c '"git basetree --all"'
+
+    mtree = log --author-date-order --author="gdal*" --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %x09%C(auto)%d%C(reset) %<(16,trunc)%C(dim magenta)%an%C(reset) %C(dim white)%s%C(reset)\n%x09%x09%C(blue) [%ar on %cd]%C(reset)' --date=format:'%A %d %B %Y %H:%M:%S'
+    atree = log --all --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %x09%C(auto)%d%C(reset) %<(16,trunc)%C(dim magenta)%an%C(reset) %C(dim white)%s%C(reset)\n%x09%x09%C(blue) [%ar on %cd]%C(reset)' --date=format:'%A %d %B %Y %H:%M:%S'
+    ltree = log --author-date-order --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %x09%C(auto)%d%C(reset) %<(16,trunc)%C(dim magenta)%an%C(reset) %C(dim white)%s%C(reset)\n%x09%x09%C(blue) [%ar on %cd]%C(reset)' --date=format:'%A %d %B %Y %H:%M:%S'
+    stree = log --author-date-order --all --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %x09%C(auto)%d%C(reset) %C(blue)%s%C(reset)\n'
+
+    pull-submodules = submodule foreach git pull
+    status-submodules = submodule foreach git status -uno
+    branchname = rev-parse --abbrev-ref HEAD
+    root = rev-parse --show-toplevel
+    ls = ls-files
+
+    push-branch = !git push -u origin $(git rev-parse --abbrev-ref HEAD)
+
+    pdfdiff = difftool --tool=pdfdiff
+    vimdiff = difftool --tool=vimdiff
+    vimmerge = mergetool --tool=vim
+
+    pb = push-branch
+    pu = push
+    st = status
+    co = checkout
+    cd = checkout-delete
+    cm = commit -a -m
+    cmm = commit -m
+    fd = fetch-diff
+    af = add-files
+    sf = stash-files
+    cb = checkout-branch
+
+    dv = difftool --tool=vim
+    dn = difftool --tool=nvim
+    dd = diffview-uno
+    dda = diffview
+
+    df = diff --stat
+    bd = branch-diff
+  
+    bde = branch-description-edit
+    bds = branch-description-show
+
+    sr = skip-restore
+
+    search = !git rev-list --all | xargs git grep
+	#search in lib/util: git grep <regexp> $(git rev-list --all -- lib/util) -- lib/util
+
+    #mt = mergetool
+    mt = !nvim -c "DiffviewOpen"
+    mtr = !git add $(git diff --name-only --diff-filter=U) && echo "All conflicts marked as resolved."
+
+	  skipped = "!f(){ git ls-files -v ${1} | grep ^S | awk '{print $2}';};f"
+	  skip = update-index --skip-worktree --
+	  unskip = update-index --no-skip-worktree --
+	adog = log --all --decorate --oneline --graph
+
+[color "decorate"]
+    head = reverse bold ul italic yellow
+
+[core]
+    editor = nvim
+    excludesfile = ~/.config/git/.gitignore
+[merge "ours"]
+	  driver = true
+[status]
+	  submoduleSummary = true
+[http]
+    postBuffer = 524288000
+[pager]
+	  color = false
+	  show = nvim -R -
+[pull]
+	  ff = true
+[rerere]
+	  enabled = true
+[init]
+	defaultBranch = main

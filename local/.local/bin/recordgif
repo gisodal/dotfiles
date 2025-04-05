@@ -1,0 +1,53 @@
+#!/bin/bash
+
+message(){
+    killall notify-osd
+    notify-send "GIFRecorder" "$@" &
+}
+
+# Time and date
+TIME=$(date +"%Y-%m-%d_%H%M%S")
+
+# Delay before starting
+DELAY=3
+
+# Standard screencast folder
+FOLDER="$HOME"
+
+# Default recording duration
+DEFDUR=10
+
+# Custom recording duration as set by user
+USERDUR=$(gdialog --title "Duration?" --inputbox "Please enter the screencast duration in seconds" 200 100 2>&1)
+
+# Duration and output file
+if [ $USERDUR -gt 0 ]; then
+    D=$USERDUR
+else
+    D=$DEFDUR
+fi
+
+# Window geometry
+XWININFO=$(xwininfo)
+read X < <(awk -F: '/Absolute upper-left X/{print $2}' <<< "$XWININFO")
+read Y < <(awk -F: '/Absolute upper-left Y/{print $2}' <<< "$XWININFO")
+read W < <(awk -F: '/Width/{print $2}' <<< "$XWININFO")
+read H < <(awk -F: '/Height/{print $2}' <<< "$XWININFO")
+
+
+#Delay
+for((i = 0; i < $DELAY; i++)); do
+    SECONDS=$((DELAY-$i))
+    echo $SECONDS
+    message "Recording in $SECONDS"
+    sleep 1
+done
+
+# Actual recording
+message  "Recording for $D seconds"
+stdbuf -o 0 byzanz-record -c --verbose --delay=0 --duration=$D --x=$X --y=$Y --width=$W --height=$H "$FOLDER/GIFrecord_$TIME.gif"
+
+# Notify the user of end of recording.
+message "Recording stored at $FOLDER/GIFrecord_$TIME.gif"
+echo "Recording stored at $FOLDER/GIFrecord_$TIME.gif"
+

@@ -1,0 +1,27 @@
+#!/bin/bash
+
+function commit-exists() {
+  git cat-file -e "$1^{commit}" 2>/dev/null
+  return $?
+}
+
+# validate the arguments
+if [ $# -ge 1 ] && ! commit-exists "$1"; then
+  echo "Value '$1' is not a commit"
+  exit 1
+fi
+
+if [ $# -ge 2 ] && ! commit-exists "$2"; then
+  echo "Value '$2' is not a commit" 1>&2
+  exit 1
+fi
+
+# the -uno option hides the untracked files
+if [ $# -le 1 ]; then
+  nvim -n -c "DiffviewOpen $@"
+elif [ $# -eq 2 ]; then
+  nvim -n -c "DiffviewOpen $1..$2"
+else
+  echo "Provide arguments in the form [<commit> [<commit>]]" 1>&2
+  exit 1
+fi

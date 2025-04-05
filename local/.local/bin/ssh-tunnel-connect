@@ -1,0 +1,14 @@
+#!/bin/bash
+
+if [ $# -eq 1 ] || [ $# -eq 2 ]; then
+    PORT=$1
+    SSH_USER=$2
+    if [ "$SSH_USER" == "" ]; then
+        ssh localhost -p $PORT -o ForwardX11=no
+    else
+        ssh $SSH_USER@localhost -p $PORT -o ForwardX11=no
+    fi
+else
+    echo "Usage: ssh-tunnel <port> [user]" 1>&2
+fi
+

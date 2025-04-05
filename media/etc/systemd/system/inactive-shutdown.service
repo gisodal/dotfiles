@@ -1,0 +1,16 @@
+[Unit]
+Description=Check system activity and shutdown if inactive
+# it needs network cababilities to be up.
+After=network.target
+
+[Service]
+# run this script 1 time. it will not run in the background.
+Type=oneshot
+# the script to run
+ExecStart=/usr/local/bin/check_activity.sh
+# load the environment variables from this file
+EnvironmentFile=/etc/environment
+
+[Install]
+# the default run group 
+WantedBy=multi-user.target

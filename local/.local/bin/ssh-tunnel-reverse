@@ -1,0 +1,11 @@
+#!/bin/bash
+
+if [ $# -eq 2 ]; then
+    PORT=$1
+    SERVER=$2
+    SSH_OP="-o ExitOnForwardFailure=yes -o ServerAliveInterval=60"
+    ssh ${SSH_OP} -fN -R ${PORT}:localhost:22 ${SERVER}
+else
+    echo "Usage: ssh-tunnel-reverse <port> <server>" 1>&2
+fi
+

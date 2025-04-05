@@ -1,0 +1,130 @@
+#!/bin/bash
+
+# ANSI color codes
+RS="\033[0m"         #  reset
+HC="\033[1m"     #  hicolor
+UL="\033[4m"     #  underline
+INV="\033[7m"    #  inverse     background  and  foreground
+FBLK="\033[30m"  #  foreground  black
+FRED="\033[31m"  #  foreground  red
+FGRN="\033[32m"  #  foreground  green
+FYEL="\033[33m"  #  foreground  yellow
+FBLE="\033[34m"  #  foreground  blue
+FMAG="\033[35m"  #  foreground  magenta
+FCYN="\033[36m"  #  foreground  cyan
+FWHT="\033[37m"  #  foreground  white
+BBLK="\033[40m"  #  background  black
+BRED="\033[41m"  #  background  red
+BGRN="\033[42m"  #  background  green
+BYEL="\033[43m"  #  background  yellow
+BBLE="\033[44m"  #  background  blue
+BMAG="\033[45m"  #  background  magenta
+BCYN="\033[46m"  #  background  cyan
+BWHT="\033[47m"  #  background  white
+
+SCRIPT="${0##*/}"
+if [ $# -gt 1 -a "$2" != "1" ]; then
+    echo "Usage:" 1>&2
+    echo "  $SCRIPT [filename [show pdf: 1] ] " 1>&2
+    exit
+else
+    FILE=($1)
+    if [ ${#FILE[@]} -eq 0 ]; then
+        FILE=($(find . -maxdepth 1 -type f | grep '.tex$'))
+    fi
+    if [ ${#FILE[@]} -eq 1 ]; then
+        FILE="$(echo ${FILE[0]} | sed 's:.tex$::' | sed 's:\.$::')"
+    else
+        echo "Specify tex filename.." 1>&2
+        exit
+    fi
+fi
+
+WRD="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+DIR="$(pwd)/build"
+FCOLOR=$FBLK
+BCOLOR=$BGRN
+
+if [ -f "$FILE.tex" ]; then
+    mkdir -p $DIR
+    echo -e "${FCOLOR} ${BCOLOR}"
+    echo "----------------------------[ Processing Diagrams ]----------------------------"
+    echo -e "$RS"
+
+    if [ -d "$(pwd)/diagrams" ]; then
+        for f in $(find "$(pwd)/diagrams" -name '*.tex' -type f); do
+            echo processing $f...
+            REPLACE=$(grep -ric '\\ensuremath{\\backslash}' $f)
+            sed -i 's:\\ensuremath{\\backslash}:\\:g' $f
+            if [ "$(cat $f | grep '\\begin{tikzpicture}\[scale=')" == "" ]; then
+                sed -i 's:\\begin{tikzpicture}:\\begin{tikzpicture}[scale=\\tikzscale]:g' $f
+                ((REPLACE++))
+            fi
+
+            if [ $REPLACE -gt 0 ]; then
+                echo "  replacements: $REPLACE"
+            fi
+        done
+    else
+        echo "Directory \"$(pwd)/diagrams\" does not exist"
+    fi
+
+    echo -e "$FCOLOR $BCOLOR"
+    echo "----------------------------[ Processing Plots    ]----------------------------"
+    echo -e "$RS"
+
+    if [ -d "$(pwd)/plots" ]; then
+        for f in $(find "$(pwd)/plots" -name '*.tex' -type f); do
+            echo processing $f...
+            REPLACE=0
+            if [ "$(cat $f | grep '\\begin{tikzpicture}\[gnuplot,scale=')" == "" ]; then
+                sed -i 's:\\begin{tikzpicture}\[gnuplot\]:\\begin{tikzpicture}[gnuplot,scale=\\tikzscale]:g' $f
+                ((REPLACE++))
+            fi
+
+            if [ $REPLACE -gt 0 ]; then
+                echo "  replacements: $REPLACE"
+            fi
+        done
+    else
+        echo "Directory \"$(pwd)/plots\" does not exist"
+    fi
+
+    echo -e "$FCOLOR $BCOLOR"
+    echo "----------------------------[ Processing BibTex   ]----------------------------"
+    echo -e "$RS"
+
+    if [ -d "$(pwd)/build" ]; then
+        cp *.bib $DIR
+        cd $DIR
+        if [ $? -eq 0 ]; then
+            while read f; do
+                bibtex ${f%.*}
+                # biber ${f%.*}
+            done < <(find . -type f -name '*.bib' | grep -v "\-blx.bib\$")
+            cd ..
+        else
+            echo "LaTeX needs to run first"
+        fi
+    else
+        echo "LaTeX needs to run first"
+    fi
+
+    echo -e "$FCOLOR $BCOLOR"
+    echo "----------------------------[ Processing LaTeX    ]----------------------------"
+    echo -e "$RS"
+
+    pdflatex -output-directory=$DIR $FILE # -interaction=nonstopmode
+
+    if [ -f "$DIR/$FILE.pdf" ]; then
+        cp $DIR/$FILE.pdf .
+        if [ "$2" == "1" ]; then
+            evince "$FILE.pdf" 2>/dev/null &
+        fi
+    else
+        echo "Compilation failed!"
+    fi
+else
+    echo "File \"$FILE.tex\" not found!"
+fi
+

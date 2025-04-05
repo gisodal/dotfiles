@@ -1,0 +1,35 @@
+#!/bin/bash
+
+function is_git_repository() {
+    git rev-parse >/dev/null 2>&1
+    echo $?
+}
+
+function git_repository_name() {
+    gitdir=$(git rev-parse --show-toplevel 2>&1)
+    if [ ! -z "$gitdir" ]; then
+        echo "$gitdir" | sed "s:$HOME:home:" | xargs basename -- 2>/dev/null
+    else
+        gitparent=$(pwd | sed "s:\(.*\)/.git.*:\1:")
+        if [ "$gitparent" != "$(pwd)" ]; then
+            (command cd $gitparent 2>/dev/null && git_repository_name)
+        else
+            echo ""
+        fi
+    fi
+}
+
+function git_context(){
+    if [ $(is_git_repository) -eq 0 ]; then
+        local branch
+        branch=$(git symbolic-ref HEAD 2>/dev/null)
+        branch=${branch##refs/heads/}
+        branch=${branch:-detached}
+        local repository
+        repository=$(git_repository_name)
+        repository=${repository:-?}
+        echo -en "$repository:$branch"
+    fi
+}
+
+git_context

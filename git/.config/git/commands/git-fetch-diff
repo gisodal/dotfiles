@@ -1,0 +1,27 @@
+#!/bin/bash
+
+set -e
+
+function get_commits() {
+	git log --all --no-color --pretty=format:"%H" --max-count=1000
+}
+
+# get hashes before fetch
+old_hashes=$(get_commits)
+
+# perform the fetch
+git fetch
+
+# get hashes after fetch
+new_hashes=$(get_commits)
+
+# get the difference
+added_hashes=$(comm -1 -3 --nocheck-order <(echo "$old_hashes") <(echo "$new_hashes"))
+
+# print added hashes
+if [ ! -z "$added_hashes" ]; then
+	echo "Incoming commits:"
+	echo "================="
+	echo "$added_hashes" | git log --stdin --no-walk --author-date-order --color --format=format:'%C(blue)[%cd]%C(reset)%x09%<(32,trunc)%C(bold green)%an%C(reset) %C(dim white)%s%C(reset) %C(auto)%d%C(reset)' --date=format:'%A %d %b %Y %H:%M:%S' | tee ~/.config/git/fetch.log
+	echo "-----------------"
+fi

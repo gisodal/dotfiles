@@ -1,0 +1,17 @@
+#!/bin/bash
+
+set -e
+
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+# Check if there are unpushed commits
+if git log origin/$CURRENT_BRANCH..$CURRENT_BRANCH | grep -q .; then
+  echo "There are unpushed commits in the current branch: $CURRENT_BRANCH"
+  exit 1
+fi
+
+# go the other branch
+git checkout $@
+
+# remove the previous branch
+git branch -d $CURRENT_BRANCH

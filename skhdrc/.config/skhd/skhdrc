@@ -1,0 +1,4 @@
+alt - t : open -n -a "Alacritty"
+alt - c : open -n -a "Google Chrome"
+ctrl + cmd - d : open -n -a "Mission Control"
+

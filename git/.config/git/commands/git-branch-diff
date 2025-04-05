@@ -1,0 +1,32 @@
+#!/bin/bash
+
+set -e
+
+DEFAULT_BRANCH=$(basename $(git rev-parse --abbrev-ref origin/HEAD) || git branch --sort=-committerdate -l main master | head -1 | sed 's/^[^a-zA-Z]*//')
+
+if [[ -z $DEFAULT_BRANCH ]]; then 
+    echo "No default branch found." 1>&2
+	exit 1
+fi
+
+BRANCH=$DEFAULT_BRANCH
+
+if [ $# -eq 1 ]; then
+	BRANCH=$1
+fi
+
+if [ ! `git rev-parse --verify $BRANCH 2>/dev/null` ]; then
+	echo "Branch '$BRANCH' does not exist." 1>&2
+	exit 1
+fi
+
+BASE_COMMIT=$(git merge-base $BRANCH HEAD)
+
+if [[ -z $BASE_COMMIT ]]; then 
+	echo "HEAD has no common base with branch '$BRANCH'." 1>&2
+	exit 1
+fi
+ 
+
+git diffview-uno $BASE_COMMIT
+

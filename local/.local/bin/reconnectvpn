@@ -1,0 +1,13 @@
+#!/bin/bash
+
+DELAY=5
+last_vpn_uuid=`nmcli --mode tabular --fields uuid,type,timestamp connection list | grep -E "\s+vpn\s+" | sort -k3 -nr | head -n1 | awk '{ print $1 }'`
+
+while [ 1 ]; do
+    nmcli --mode multiline --fields uuid,vpn connection status | grep -qc "^VPN:.*yes" 1>/dev/null 2>&1
+    if [ $? -ne 0 ]; then
+        nmcli connection up uuid "$last_vpn_uuid"
+    fi
+    sleep $DELAY
+done
+

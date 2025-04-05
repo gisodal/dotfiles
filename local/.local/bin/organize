@@ -1,0 +1,156 @@
+#!/bin/bash
+
+DOIT=1
+
+function confirm(){
+    read -t 0.1 -n 10000 discard
+
+    PRMPT="$(if [ $# -gt 0 ]; then echo "$@"; else echo "Continue? [Y/n]"; fi;)"
+    read -r -p "$PRMPT " response 2>&1
+    response=${response,,}    # tolower
+    if [[ $response =~ ^(no|n)$ ]]; then
+       false
+    else
+       true
+    fi
+}
+
+function id_series(){
+    local file="${@:2}"
+    local dir="$1"
+    local SERIES
+    while read SERIES <&3; do
+        SERIES=${SERIES##*/}
+        SERIESTEST=$(echo "$SERIES" | sed 's:\ :\.:g')
+        if [ "$(echo "$file" | grep -i "$SERIESTEST")" != "" ]; then
+            echo "$SERIES"
+        fi
+    done 3< <(find "$dir" -mindepth 1 -maxdepth 1 -type d)
+}
+
+if [ $# -eq 0 ]; then
+    SRC="$HOME/data/downloads"
+    DEST="$HOME/data"
+    mkdir -p $DEST
+elif [ $# -eq 2 ]; then
+    SRC=$1
+    DEST=$2
+else
+    echo "Usage: organize <source> <destination>" 1>&2
+fi
+
+
+echo "SOURCE     : '$SRC'"
+echo "DESTINATION: '$DEST'"
+echo
+
+while read ENTRY <&4; do
+    if [ ! -f "$ENTRY" ]; then
+        echo "cannot find $ENTRY"
+        continue
+    fi
+
+    FILE=$(basename "$ENTRY")
+    SIZE=$(du "$ENTRY" | awk '{print $1}')
+    SIZE=$(echo "$SIZE/1024" | bc)
+    EXT=$(echo "${FILE##*.}" | tr '[:upper:]' '[:lower:]')
+    TYPE="unknown"
+    EPISODE=
+    SEASON=
+    NAME=
+
+    # determine type
+    case "$EXT" in
+        "avi"|"mkv"|"mp4")
+
+            # id series
+            if [ $SIZE -ge 100 ]; then
+                NAME=$(id_series "$DEST/series" "$FILE")
+                EPISODE=$(echo $FILE | grep -oi "S[0-9][0-9]*E[0-9][0-9]*" | tr '[:lower:]' '[:upper:]')
+                if [ "$EPISODE" != "" ]; then
+                    SEASON=$(echo $EPISODE | grep -Eo '[Ss][0-9]{2}' | sed 's:[SsEe]::' | bc)
+                else
+                    EPISODE=$(echo $FILE | grep -oi "[^0-9][0-9][0-9][0-9][^0-9^p]" | grep -oi "[0-9][0-9][0-9]" | grep -v "264" )
+                    SEASON=$(echo $EPISODE | grep -o "^[0-9]")
+                fi
+                if [ "$EPISODE" != "" ] && [ "$SEASON" != ""  ]; then
+                    if [ "$NAME" != "" ]; then
+                        TYPE="series"
+                    else
+                        TYPE="series; new"
+                    fi
+                fi
+            fi
+
+            # id movie
+            if [ "$TYPE" == "unknown" ]; then
+                if [ $SIZE -ge 650 ]; then
+                    TYPE="movie"
+                fi
+            fi
+            ;;
+        "srt"|"sub")
+            TYPE="subtitle"
+            ;;
+        "mp3")
+            TYPE="music"
+            ;;
+        *)
+            TYPE="unknown"
+            ;;
+    esac
+
+    echo " * $ENTRY"
+    echo "   - File     : $FILE"
+    echo "   - Size     : $(du -sh "$ENTRY" | awk '{print $1}') ($SIZE)"
+    echo "   - Type     : $TYPE"
+
+    # take actions
+    case $TYPE in
+        "movie"|"subtitle")
+            FINALDEST="$DEST/movies-new"
+
+            echo "   - Commands :"
+            echo "     + mkdir -p \"$FINALDEST\""
+            echo "     + mv \"$ENTRY\" \"$FINALDEST\""
+
+            confirm && [ $DOIT ] && (
+                mkdir -p "$FINALDEST"
+                sudo mv "$ENTRY" "$FINALDEST"
+            ) || echo "Skipping..."
+            ;;
+        "series")
+            echo "   - Series   : '$NAME'"
+            echo "   - Episode  : '$EPISODE'"
+            echo "   - Season   : '$SEASON'"
+
+            SERIESDEST="$DEST/series"
+
+            NAMEDEST=$(find "$SERIESDEST" -mindepth 1 -maxdepth 1 2>/dev/null | grep -i "$NAME")
+            [ -z "$NAMEDEST" ] && NAMEDEST="$SERIESDEST/$NAME"
+
+            FINALDEST=$(find "$NAMEDEST" -mindepth 1 -maxdepth 1 2>/dev/null | grep -i "Season $SEASON")
+            [ -z "$FINALDEST" ] && FINALDEST="$NAMEDEST/Season $SEASON"
+
+            echo "   - Base     : $NAMEDEST ($([ -d "$NAMEDEST" ]   && echo "y" || echo "n"))"
+            echo "   - Dest     : $FINALDEST ($([ -d "$FINALDEST" ] && echo "y" || echo "n"))"
+
+            echo "   - Commands :"
+            echo "     + mkdir -p \"$SERIESDEST\""
+            echo "     + mkdir -p \"$NAMEDEST\""
+            echo "     + mkdir -p \"$FINALDEST\""
+            echo "     + mv \"$ENTRY\" \"$FINALDEST\""
+
+            confirm && [ $DOIT ] && (
+                mkdir -p "$SERIESDEST";
+                mkdir -p "$NAMEDEST";
+                mkdir -p "$FINALDEST";
+                sudo mv "$ENTRY" "$FINALDEST";
+            ) || echo "Skipping..."
+            ;;
+        *)
+            ;;
+    esac
+    echo
+done 4< <(find "$SRC" -mindepth 1 -type f)
+

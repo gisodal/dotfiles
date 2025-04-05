@@ -1,0 +1,95 @@
+#!/bin/bash
+
+INTERFACE="eth0"
+if [ $# -eq 1 ]; then
+    INTERFACE=$1
+    echo INTERFACE: $INTERFACE
+fi
+
+DIR=$( cd "$( dirname "$0" )" && pwd )
+SCRIPT=$DIR/${0##*/}
+SPOOFDHCPFILE=$DIR/spoofdhcp.conf
+
+macgen(){
+    hexchars="02468"
+    start=$( for i in {1..2} ; do echo -n ${hexchars:$(( $RANDOM % 5 )):1} ; done)
+    hexchars="0123456789abcdef"
+    end=$( for i in {1..10} ; do echo -n ${hexchars:$(( $RANDOM % 16 )):1} ; done | sed -e 's/\(..\)/:\1/g')
+    echo $start$end
+}
+
+getip(){
+    hostname -I | awk -F" " '{print $1}'
+}
+
+getmac(){
+    ifconfig -a | grep HWaddr | grep eth0 | awk '{print $5}'
+}
+
+function gendhcpconfig(){
+    echo -e "\
+send host-name '$1';
+
+interface \"$INTERFACE\"
+{
+    supersede host-name '$1';
+    prepend domain-name-servers 127.0.0.1;
+    request subnet-mask,
+        broadcast-address,
+        routers,
+        domain-name,
+        domain-name-servers,
+        host-name;
+    require routers,
+        subnet-mask,
+        domain-name-servers;
+}" > $SPOOFDHCPFILE
+}
+
+spoof(){
+    NEWMAC=$(macgen)
+    OLDMAC=$(getmac)
+    OLDIP=$(getip)
+    NEWHOSTNAME=$(echo -n "guest$NEWMAC" | md5sum | awk '{print substr($1,0,10)}')
+
+    gendhcpconfig $NEWHOSTNAME
+
+    echo
+    echo "MAC       : $OLDMAC"
+    echo "IP        : $OLDIP"
+
+    echo
+    echo "------------------------------"
+    echo "dhcp shutting down.."
+    dhclient -r $INTERFACE
+    echo "$INTERFACE shutting down.."
+    ifconfig $INTERFACE down
+    echo "$INTERFACE changing MAC.."
+    ifconfig $INTERFACE hw ether $NEWMAC
+    echo "$INTERFACE booting up.."
+    ifconfig $INTERFACE up
+    echo "dhcp booting up.."
+    dhclient -cf "$SPOOFDHCPFILE" $INTERFACE
+    echo "------------------------------"
+
+    NEWIP=$(getip)
+    NEWMAC=$(getmac)
+    echo
+    echo "MAC (new) : $NEWMAC"
+    echo "IP  (new) : $NEWIP"
+
+    echo
+    echo -n "MAC change  "
+    [ "$OLDMAC" == "$NEWMAC" ] && echo -e "\033[31;1m[FAILED ]\033[0m" || echo -e "\033[32;1m[SUCCESS]\033[0m"
+
+    echo -n "IP  change  "
+    [ "$OLDIP" == "$NEWIP" ] && echo -e "\033[31;1m[FAILED ]\033[0m" || echo -e "\033[32;1m[SUCCESS]\033[0m"
+    echo
+}
+
+if [ "$UID" -ne 0 ]; then
+    sudo $SCRIPT $INTERFACE
+else
+    spoof $INTERFACE
+fi
+

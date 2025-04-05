@@ -1,0 +1,170 @@
+#!/bin/bash -e
+
+LOGLEVEL=info
+DRYRUN=false
+XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
+ME="$(basename "$(test -L "$0" && readlink "$0" || echo "$0")")"
+
+# load scripts
+DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+for script in "$DIR"/src/*.sh; do
+  source "$script"
+done
+
+function usage() {
+  cat <<EOF
+Usage: $ME [-v|-vv|-d] <command> [args]:
+
+  Commands                    Description
+  --------                    -----------
+  stow                        List (and select) stowable packages
+  stow <package>              Stow <package>
+  ls                          List installers
+  install [<package>]         Run an installer
+  env                         Load environment variables
+  test [run command]          Run tests, or test a specific command
+  check <package>             Check if a package is installed
+
+  Flags
+  -----
+  -v                          Debug output
+  -vv                         Verbose output
+  -d                          Dry run
+
+  Examples
+  --------
+  $ME stow
+  $ME stow nvim
+  $ME install
+  $ME install lynx
+  $ME env
+EOF
+  exit 1
+}
+
+# process flags
+while [[ $# -gt 0 && "$1" == -* ]]; do
+  case "$1" in
+  -v)
+    LOGLEVEL=debug
+    ;;
+  -vv)
+    LOGLEVEL=verbose
+    ;;
+  -d)
+    DRYRUN=true
+    ;;
+  *)
+    usage
+    exit 1
+    ;;
+  esac
+  shift
+done
+
+# activate verbosity
+[ $LOGLEVEL == "verbose" ] && set -x
+
+# setup some directories we want anyway
+mkdir -p "$XDG_CONFIG_HOME"
+mkdir -p "$HOME/.local/bin"
+
+if ! have-command stow; then
+  echo 'Error: GNU Stow is not installed.' >&2
+  exit 1
+fi
+
+function run() {
+  case "$1" in
+  'stow')
+    shift
+    if [[ $# -eq 0 ]]; then
+      if have-command fzf; then
+        PKG=$(get-stow-list | fzf --header "Select a package stow")
+        [[ -n $PKG ]] && stow-install $PKG
+      else
+        stow-list
+      fi
+    else
+      stow-install $1
+    fi
+    ;;
+
+  'ls')
+    get-installer-list
+    ;;
+
+  'install')
+    shift
+    if [[ $# -eq 0 ]]; then
+      if have-command fzf; then
+        PKG=$(get-installer-list | fzf --header "Select what you want to install")
+        [[ -n $PKG ]] && install $PKG
+      else
+        usage
+        exit 1
+      fi
+    else
+      install $1
+    fi
+    ;;
+
+  'check')
+    shift
+    is-installed $1
+    ;;
+
+  'env')
+    (load_environment && bash)
+    ;;
+
+  'test')
+    shift
+
+    debug_mode=0
+    attach_mode=0
+    if [[ $# -gt 0 && "$1" == -* ]]; then
+      case "$1" in
+      -d)
+        debug_mode=1
+        ;;
+      -a)
+        attach_mode=1
+        ;;
+      *)
+        usage
+        exit 1
+        ;;
+      esac
+      shift
+    fi
+
+    {
+      if [ "$debug_mode" -eq 1 ]; then
+        log warn "Running in debug mode"
+        export CONTAINER_DEBUG=1
+      fi
+
+      if [ "$attach_mode" -eq 1 ]; then
+        # After tests finish, if container still exists, connect to it
+        container_id=$(sudo docker ps -q --filter "ancestor=dotfiles-test")
+        if [ -n "$container_id" ]; then
+          echo "Connecting to test container for debugging..."
+          sudo docker exec -it $container_id /bin/bash
+        else
+          echo "Failed to get container id" && exit 1
+        fi
+      else
+        DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+        . $DIR/test/tests.sh $@
+      fi
+    }
+    ;;
+
+  *)
+    usage
+    ;;
+  esac
+}
+
+run $@

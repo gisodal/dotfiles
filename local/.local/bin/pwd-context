@@ -1,0 +1,6 @@
+#!/bin/bash
+
+pwd | \
+    sed "s:^$HOME:/~:" | \
+    awk -F'/' '{ OFS = ""; if (NF > 3) { print "../",$(NF-1),"/",$NF } else { print $0 } }' | \
+    sed "s:^/~:~:"

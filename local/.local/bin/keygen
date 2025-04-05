@@ -1,0 +1,113 @@
+#!/bin/bash
+
+function get-password(){
+    unset PASSWORD
+    unset CHARCOUNT
+
+    echo -n "Enter password: " 1>&2
+
+    stty -echo
+
+    CHARCOUNT=0
+    while IFS= read -p "$PROMPT" -r -s -n 1 CHAR
+    do
+        # Enter - accept password
+        if [[ $CHAR == $'\0' ]] ; then
+            break
+        fi
+        # Backspace
+        if [[ $CHAR == $'\177' ]] ; then
+            if [ $CHARCOUNT -gt 0 ] ; then
+                CHARCOUNT=$((CHARCOUNT-1))
+                PROMPT=$'\b \b'
+                PASSWORD="${PASSWORD%?}"
+            else
+                PROMPT=''
+            fi
+        else
+            CHARCOUNT=$((CHARCOUNT+1))
+            PROMPT='*'
+            PASSWORD+="$CHAR"
+        fi
+    done
+    echo  "" 1>&2
+
+    stty echo
+
+    echo "$PASSWORD"
+}
+
+function keygen(){
+    DIR="$HOME/.ssh"
+    KEYS="$DIR/keys"
+    AUTH="$DIR/authorized_keys"
+    KEY="$1"
+    mkdir -p "$DIR"
+    mkdir -p "$KEYS"
+
+    if [ -f "$KEYS/$KEY" ]; then
+        echo "KEY '$KEY' already exists in '$KEYS/'" 1>&2
+    else
+        # set a password
+        PASSWORD=""
+        while [ 1 ]; do
+            read -p "Add password? (y/N)? " -n 1 -r INPUT 2>&1; echo
+            case "$INPUT" in
+                y|Y )
+                    PASSWORD=$(get-password)
+                    break;
+                    ;;
+                n|N|'' ) break;;
+            esac
+        done
+
+        # select key encryption
+        while [ 1 ]; do
+          read -p $'Select encryption:\n    1) ED25519 (default)\n    2) RSA (for PEM)\n[1-2]? ' -n 1 -r INPUT 2>&1; echo
+            case "$INPUT" in
+                2 )
+                    ENCRYPTION="-t rsa -b 4096"
+                    break;
+                    ;;
+                1|'' )
+                    ENCRYPTION="-t ed25519"
+                    break;;
+            esac
+        done
+
+        # add a key comment
+        read -p "Provided a comment (keyname by default): " -r COMMENT 2>&1
+        if [[ -z $COMMENT ]]; then
+            COMMENT="$KEY $(date '+%Y-%m-%d %H:%M:%S')"
+        fi
+
+        # create the actual key
+        ssh-keygen -q $ENCRYPTION -N "$PASSWORD" -f "$KEYS/$KEY" -C "$COMMENT"
+        chmod 600 "$KEYS/$KEY"
+        echo -e "Key '$KEY' created in '$KEYS/'...\n"
+
+        # create PEM file
+        PEM="$KEYS/$KEY.pub.pem"
+        ssh-keygen -f "$KEYS/$KEY.pub" -m pem -e >> "$PEM"
+        [[ $? -ne 0 ]] && echo "Could not generate PEM file" 1>&2 && rm "$PEM" || echo "Generated PEM file: $PEM"
+
+        # add to authorized keys
+        while [ 1 ]; do
+            read -p "Add to authorized keys (Y/n)? " -n 1 -r INPUT 2>&1; echo
+            case "$INPUT" in
+                y|Y|'' )
+                    cat "$KEYS/${KEY}.pub" >> "$AUTH"
+                    break;
+                    ;;
+                n|N ) break;;
+            esac
+        done
+    fi
+}
+
+if [ $# -eq 1 ]; then
+    keygen $1
+else
+    echo "Usage: $(basename $0) <key name>"
+fi
+

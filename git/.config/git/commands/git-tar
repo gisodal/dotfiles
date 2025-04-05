@@ -1,0 +1,15 @@
+#!/bin/bash
+
+BRANCH=$(git branchname)                                               
+REPODIR=$(git root)                                                    
+REPONAME=$(basename $REPODIR)                                      
+ARCHIVE="${REPODIR}/${REPONAME}_${BRANCH}_$(date '+%Y_%m_%d_%H_%M_%S').tar.xz"
+CURRENTDIR=$(pwd)                                                      
+cd $REPODIR                                                            
+XZ_OPT=-9                                                              
+git ls | grep -v ".git.*" | tar -cvJf \"$ARCHIVE\" -T -                                          
+
+echo                                                                   
+echo \"archive $ARCHIVE created...\"                                   
+cd $CURRENTDIR"'
+

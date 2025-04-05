@@ -1,0 +1,31 @@
+#!/bin/bash
+
+cd $(git rev-parse --show-toplevel)
+
+# Function to preview files based on their status
+git_preview_file() {
+  local line="$1"
+  local status="${line:0:2}"
+  local file="${line:3}"
+
+  if [[ "$status" == "??" ]]; then
+    batcat --style=numbers --color=always "$file" 2>/dev/null || cat "$file"
+  elif command -v delta &>/dev/null; then
+    git diff --color=always -- "$file" | delta --width $(tput cols) --side-by-side
+  else
+    git diff --color=always --word-diff=color -- "$file"
+  fi
+}
+export -f git_preview_file
+
+{
+  # Get files with their status
+  git ls-files --others --exclude-standard | sed 's/^/?? /'
+  git diff --name-only | sed 's/^/M  /'
+  git diff --name-only --staged | sed 's/^/A  /'
+} | sort -u | fzf -m --cycle --no-height --header="Select files to add to the staging area" \
+  --preview 'git_preview_file {}' \
+  --preview-window=right:60%:wrap \
+  --bind 'ctrl-d:preview-page-down,ctrl-u:preview-page-up,ctrl-f:preview-page-down,ctrl-b:preview-page-up' |
+  awk '{print substr($0,4)}' |
+  xargs -r -I {} sh -c 'echo "git add {}"; git add "{}"'

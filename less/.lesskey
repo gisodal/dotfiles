@@ -1,0 +1,9 @@
+K back-screen
+J forw-screen
+k back-line
+j forw-line
+l right-scroll
+h left-scroll
+L right-scroll
+H left-scroll
+f quit
