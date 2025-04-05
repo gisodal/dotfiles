@@ -17,7 +17,9 @@ Gnu Stow is used to install the config files.
 
 To install the dotfiles files, use `dot`:
 
-    Usage: run [-v|-vv|-d] <command> [args]:
+    > ./dot
+
+    Usage: dot [-v|-vv|-d] <command> [args]:
 
       Commands                    Description
       --------                    -----------
@@ -37,11 +39,11 @@ To install the dotfiles files, use `dot`:
 
       Examples
       --------
-      run stow
-      run stow nvim
-      run install
-      run install lynx
-      run env
+      dot stow
+      dot stow nvim
+      dot install
+      dot install lynx
+      dot env
 
 Examples:
 
