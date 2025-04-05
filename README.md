@@ -15,15 +15,40 @@ Gnu Stow is used to install the config files.
 
 ## Installation
 
-To install the config files, type:
+To install the dotfiles files, use `dot`:
 
-    > ./install <package>
+    Usage: run [-v|-vv|-d] <command> [args]:
+
+      Commands                    Description
+      --------                    -----------
+      stow                        List (and select) stowable packages
+      stow <package>              Stow <package>
+      ls                          List installers
+      install [<package>]         Run an installer
+      env                         Load environment variables
+      test [run command]          Run tests, or test a specific command
+      check <package>             Check if a package is installed
+
+      Flags
+      -----
+      -v                          Debug output
+      -vv                         Verbose output
+      -d                          Dry run
+
+      Examples
+      --------
+      run stow
+      run stow nvim
+      run install
+      run install lynx
+      run env
 
 Examples:
 
-    > ./install shell
-    > ./install bash
-    > ./install git
+    > ./dot stow shell
+    > ./dot stow bash
+    > ./dot stow git
+    > ./dot stow git
 
 To bootstrap a new user (default: `dotkeeper`) with a basic config setup, type:
 
@@ -31,7 +56,7 @@ To bootstrap a new user (default: `dotkeeper`) with a basic config setup, type:
 curl -fsSL https://raw.githubusercontent.com/gisodal/dotfiles/main/bootstrap.sh | bash -s -- install
 ```
 
-To remove the user type
+To remove the user, type
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/gisodal/dotfiles/main/bootstrap.sh | bash -s -- clean

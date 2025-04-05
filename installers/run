@@ -6,7 +6,7 @@ XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
 ME="$(basename "$(test -L "$0" && readlink "$0" || echo "$0")")"
 
 # load scripts
-DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+DIR=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" >/dev/null 2>&1 && pwd)
 for script in "$DIR"/src/*.sh; do
   source "$script"
 done
@@ -155,7 +155,7 @@ function run() {
           echo "Failed to get container id" && exit 1
         fi
       else
-        DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+        DIR=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" >/dev/null 2>&1 && pwd)
         . $DIR/test/tests.sh $@
       fi
     }

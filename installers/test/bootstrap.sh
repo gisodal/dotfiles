@@ -8,10 +8,8 @@
   source "$ROOT/shell/.config/shell/environment.sh"
   set +o allexport
 
-  DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-  echo "========================== start ========="
+  DIR=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" >/dev/null 2>&1 && pwd)
   . $DIR/$1
-  echo "DONE!"
 )
 
 RESULT=$?
