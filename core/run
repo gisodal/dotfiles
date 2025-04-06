@@ -27,10 +27,10 @@ Usage: $ME [-v|-vv|-d] <command> [args]:
 
   Commands                    Description
   --------                    -----------
-  stow                        List (and select) stowable packages
-  stow <package>              Stow <package>
-  ls                          List installers
-  install [<package>]         Run an installer
+  list-stow                   List stowable packages
+  stow [<package>]            Stow <package>
+  list-install                List installers
+  install [<installer>]       Run <installer>
   env                         Load environment variables
   test [run command]          Run tests, or test a specific command
   check <package>             Check if a package is installed
@@ -86,33 +86,34 @@ fi
 
 function run() {
   case "$1" in
+  'list-stow')
+    get-stow-list
+    ;;
+  'list-install')
+    get-installer-list
+    ;;
   'stow')
     shift
     if [[ $# -eq 0 ]]; then
-      if have-command fzf; then
+      if [ -t 0 ] && have-command fzf; then
         PKG=$(get-stow-list | fzf --header "Select a package stow")
         [[ -n $PKG ]] && stow-install $PKG
       else
-        stow-list
+        get-stow-list
       fi
     else
       stow-install $1
     fi
     ;;
 
-  'ls')
-    get-installer-list
-    ;;
-
   'install')
     shift
     if [[ $# -eq 0 ]]; then
-      if have-command fzf; then
+      if [ -t 0 ] && have-command fzf; then
         PKG=$(get-installer-list | fzf --header "Select what you want to install")
         [[ -n $PKG ]] && install $PKG
       else
-        usage
-        exit 1
+        get-installer-list
       fi
     else
       install $1

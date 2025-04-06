@@ -72,38 +72,33 @@ function run_in_container() {
   fi
 }
 
-# Function to run a test
-function run_test_installer() {
-  local test_name="$1"
-
-  TOTAL=$((TOTAL + 1))
-  echo -e "${YELLOW}Running test: ${test_name}${NC}"
-
-  echo "$DOCKER_DOTFILES_PATH/dot install $1 "
-  if run_docker_test "$DOCKER_DOTFILES_PATH/run install $1"; then
-    echo -e "${GREEN}✓ Test passed: ${test_name}${NC}"
-    PASSED=$((PASSED + 1))
-    return 0
-  else
-    echo -e "${RED}✗ Test failed: ${test_name}${NC}"
-    FAILED=$((FAILED + 1))
-    return 1
-  fi
-}
-
 function run_test_installers() {
-  local INSTALLERS=$($DOTFILES_PATH/dot ls)
+  local INSTALLERS=$($DOTFILES_PATH/dot list-install)
 
   log info "Running tests for installers:"
   for pkg in $INSTALLERS; do
     log info "  - $pkg"
   done
 
+  local ignore="media-post plex"
   for installer in $INSTALLERS; do
     if [ $installer == "media-post" ]; then
       continue
     fi
-    run_test_installer $installer
+    run_in_container install $installer
+  done
+}
+
+function run_test_stow() {
+  local STOWABLE=$($DOTFILES_PATH/dot list-stow)
+
+  log info "Running tests for stow:"
+  for pkg in $STOWABLE; do
+    log info "  - $pkg"
+  done
+
+  for pkg in $STOWABLE; do
+    run_in_container stow $pkg
   done
 }
 
@@ -111,6 +106,8 @@ function run_test_installers() {
 run_tests() {
 
   run_test_installers
+
+  run_test_stow
 
   echo -e "${YELLOW}Test summary:${NC}"
   echo -e "Total: $TOTAL, ${GREEN}Passed: $PASSED${NC}, ${RED}Failed: $FAILED${NC}"

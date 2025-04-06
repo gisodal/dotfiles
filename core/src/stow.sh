@@ -4,7 +4,7 @@ function get-stow-list() {
   for dir in "$STOW_SOURCE"/*/; do
     basename="${dir%/}"
     basename="${basename##*/}"
-    [ "$basename" != "installers" ] && echo "$basename"
+    echo "$basename"
   done
 }
 
@@ -37,6 +37,11 @@ function stow-core() {
     OPT="--no-folding"
     SUDO=sudo
     TARGET="/"
+    ;;
+  "bash")
+    rm "$HOME/.bash_logout"
+    rm "$HOME/.bashrc"
+    rm "$HOME/.profile"
     ;;
   *)
     :
