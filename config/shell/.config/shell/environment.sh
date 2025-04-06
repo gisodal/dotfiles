@@ -65,16 +65,25 @@ fi
 
 # git config
 GIT_USER_FILE="$GIT_CONFIG_PATH/.gituser"
-if [ ! -z "$PS1" -a ! -f "$GIT_USER_FILE" ]; then
-  GITUSER=$USER@$HOSTNAME
-  echo "Configure a git user and email:"
-  read -p "    Using $GITUSER as username. Is that ok? (Y/n) " choice
-  case "$choice" in
-  y | Y | "") ;;
-  *) read -p "    Enter username: " GITUSER ;;
-  esac
-  read -p "    Enter email: " GITMAIL
+if [ -d "$GIT_CONFIG_PATH" -a ! -f "$GIT_USER_FILE" ]; then
+  GITUSER=$USER@$(hostname)
+  GITMAIL="none"
 
-  printf "[user]\n    name = $GITUSER\n    email = $GITMAIL\n" >"$GIT_USER_FILE"
+  if [ -t 0 ]; then
+    echo "Configure a git user and email:"
+    echo -n "    Using $GITUSER as username. Is that ok? (Y/n) "
+    read choice
+    case "$choice" in
+    y | Y | "") ;;
+    *)
+      echo -n "    Enter username: "
+      read GITUSER
+      echo -n "    Enter email: "
+      read GITMAIL
+      ;;
+    esac
+  fi
+
+  echo -e "[user]\n    name = $GITUSER\n    email = $GITMAIL\n" >"$GIT_USER_FILE"
   echo -e "\n    Username '$GITUSER' and email '$GITMAIL' written to $GIT_USER_FILE"
 fi

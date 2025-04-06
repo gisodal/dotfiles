@@ -4,6 +4,19 @@
 # bash functions
 # -----------------------------------------------------------------------------
 
+function prompt_git_info() {
+  if git rev-parse --show-toplevel 2>/dev/null 1>&2; then
+    local REPO=$(basename $(git rev-parse --show-toplevel))
+    local CHANGES=$(git diff-index --quiet HEAD -- && echo "" || echo "*")
+    local BRANCH=$(git symbolic-ref HEAD 2>/dev/null)
+    BRANCH=${BRANCH##refs/heads/}
+    BRANCH=${BRANCH:-detached}
+
+    echo -e "$(tput setaf 4)$REPO $(tput setaf 214)$BRANCH${CHANGES} $(tput setaf 242)$(git config branch."$BRANCH".description)$(tput sgr0)"
+  fi
+}
+
+
 function f {
   CAT=$(exists bat && echo "bat" || exists batcat && echo "batcat" || cat)
 

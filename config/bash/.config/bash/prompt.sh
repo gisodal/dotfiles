@@ -9,21 +9,20 @@ function prompt_exit_code() {
 }
 
 function prompt_location() {
-  echo -n "\[$(tput setaf 2)\]\w\[$(tput sgr0)\]"
-}
+  local path_full=$(dirs)
+  path_full=${path_full%% *} # Take only the first directory from dirs output
 
-function prompt_git_info() {
-  if git rev-parse --show-toplevel 2>/dev/null 1>&2; then
-    local REPO=$(basename $(git rev-parse --show-toplevel))
-    local CHANGES=$(git diff-index --quiet HEAD -- && echo "" || echo "*")
-    local BRANCH=$(git symbolic-ref HEAD 2>/dev/null)
-    BRANCH=${BRANCH##refs/heads/}
-    BRANCH=${BRANCH:-detached}
+  # Count the number of slashes to determine directory depth
+  local depth=$(echo "$path_full" | tr -cd '/' | wc -c)
 
-    echo -e "$(tput setaf 4)$REPO $(tput setaf 214)$BRANCH${CHANGES} $(tput setaf 242)$(git config branch."$BRANCH".description)$(tput sgr0)"
+  if [ "$depth" -gt 3 ]; then
+    # More than 3 directories deep, add ... prefix
+    echo -e "$(tput setaf 2)...$path_full$(tput sgr0)"
+  else
+    # Otherwise show the full path without ...
+    echo -e "$(tput setaf 2)$path_full$(tput sgr0)"
   fi
 }
 
-PROMPT_DIRTRIM=2
-export PS1="\n\$(prompt_exit_code \$?)$(prompt_location) \$(prompt_git_info)\n> "
+export PS1="\n\$(prompt_exit_code \$?)\$(prompt_location) \$(prompt_git_info)\n> "
 export PS2='> '
