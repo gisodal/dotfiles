@@ -1,8 +1,14 @@
 #!/bin/bash
 
 function add-to-path() {
-  if [[ -n $1 ]] && [[ ":$PATH:" != *":$1:"* ]]; then
-    export PATH="$1:$PATH"
+  if [[ -n $1 ]]; then
+    local newpath=":$PATH:"
+    newpath=${newpath//:$1:/:}
+    # Remove leading/trailing colons and export
+    newpath=${newpath#:}
+    newpath=${newpath%:}
+    # Add to beginning of PATH
+    export PATH="$1:$newpath"
   fi
 }
 

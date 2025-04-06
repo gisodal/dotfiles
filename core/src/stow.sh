@@ -8,6 +8,21 @@ function get-stow-list() {
   done
 }
 
+function clean-existing-symlinks() {
+  local pkg=$1
+
+  # Get conflicts from stow dry run
+  stow --simulate --verbose -t "$TARGET" "$pkg" 2>&1 | grep -o "existing target is not owned by stow: .*" | sed 's/existing target is not owned by stow: //' | while read -r target; do
+    local full_path="$TARGET/$target"
+    if [ -L "$full_path" ]; then
+      echo "Removing existing symlink: $full_path"
+      rm "$full_path"
+    elif [ -e "$full_path" ]; then
+      echo "Warning: $full_path exists and is not a symlink. Manual action required."
+    fi
+  done
+}
+
 function stow-core() {
   local TARGET=$HOME
   local PACKAGE=$1
@@ -34,6 +49,8 @@ function stow-core() {
   if [[ -n $SUDO ]]; then
     sudo chown -R root:root "$PACKAGE_DIR"
   fi
+
+  clean-existing-symlinks $PACKAGE
 
   local STOW_DRYRUN
   $DRYRUN && STOW_DRYRUN="--no -v" # stow the pacakge

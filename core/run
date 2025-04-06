@@ -1,5 +1,15 @@
 #!/bin/bash -e
 
+# Check for Bash 4+ for associative arrays
+if ((BASH_VERSINFO[0] < 4)); then
+  if [ "$(uname)" == "Darwin" ]; then
+    exec /opt/homebrew/bin/bash "$0" "$@"
+  else
+    echo "This script requires Bash version 4 or higher. You're running $BASH_VERSION."
+    exit 1
+  fi
+fi
+
 LOGLEVEL=info
 DRYRUN=false
 XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
