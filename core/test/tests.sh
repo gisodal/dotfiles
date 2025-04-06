@@ -6,11 +6,9 @@ set -e
 
 DOCKER_IMAGE="dotfiles-test"
 DOCKER_DOTFILES_PATH="/home/testuser/dotfiles"
-DOCKER_PROJECT_PATH="$DOCKER_DOTFILES_PATH/installers"
-DOCKER_INSTALLER_PATH="$DOCKER_PROJECT_PATH/installers"
+DOCKER_INSTALLER_PATH="$DOCKER_DOTFILES_PATH/installers/installers"
 
 DOTFILES_PATH=$(git rev-parse --show-toplevel)
-PROJECT_PATH="$DOTFILES_PATH/installers"
 TEST_PATH=$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 
 TOTAL=0
@@ -60,10 +58,10 @@ function run_docker_test() {
 # Function to run a test
 function run_in_container() {
   local RUN_ARGS="$@"
-  local CMD="run $RUN_ARGS"
+  local CMD="dot $RUN_ARGS"
 
   log warn "Run: ./$CMD"
-  if run_docker_test "$DOCKER_PROJECT_PATH/$CMD"; then
+  if run_docker_test "$DOCKER_DOTFILES_PATH/$CMD"; then
     echo -e "${GREEN}✓ Test passed: ${CMD}${NC}"
     PASSED=$((PASSED + 1))
     return 0
@@ -81,8 +79,8 @@ function run_test_installer() {
   TOTAL=$((TOTAL + 1))
   echo -e "${YELLOW}Running test: ${test_name}${NC}"
 
-  echo "$DOCKER_PROJECT_PATH/run install $1 "
-  if run_docker_test "$DOCKER_PROJECT_PATH/run install $1"; then
+  echo "$DOCKER_DOTFILES_PATH/dot install $1 "
+  if run_docker_test "$DOCKER_DOTFILES_PATH/run install $1"; then
     echo -e "${GREEN}✓ Test passed: ${test_name}${NC}"
     PASSED=$((PASSED + 1))
     return 0
@@ -94,7 +92,7 @@ function run_test_installer() {
 }
 
 function run_test_installers() {
-  local INSTALLERS=$($PROJECT_PATH/run ls)
+  local INSTALLERS=$($DOTFILES_PATH/dot ls)
 
   log info "Running tests for installers:"
   for pkg in $INSTALLERS; do
