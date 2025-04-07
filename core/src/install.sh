@@ -110,6 +110,8 @@ function install() {
         \unalias -a 2>/dev/null || true
 
         set -e
+
+        export DEBIAN_FRONTEND=noninteractive
         source "$(get-installer $pkg)"
       )
 
