@@ -28,9 +28,9 @@ Usage: $ME [-v|-vv|-d] <command> [args]:
   Commands                    Description
   --------                    -----------
   list-stow                   List stowable packages
-  stow [<package>]            Stow <package>
+  stow [<package>]            Stow <package> config
   list-install                List installers
-  install [<installer>]       Run <installer>
+  install [<packages>]        Run <packages> installer
   env                         Load environment variables
   test [run command]          Run tests, or test a specific command
   check <package>             Check if a package is installed

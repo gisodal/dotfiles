@@ -19,14 +19,15 @@ To install the dotfiles files, use `dot`:
 
     > ./dot
 
+
     Usage: dot [-v|-vv|-d] <command> [args]:
 
       Commands                    Description
       --------                    -----------
-      stow                        List (and select) stowable packages
-      stow <package>              Stow <package>
-      ls                          List installers
-      install [<package>]         Run an installer
+      list-stow                   List stowable packages
+      stow [<package>]            Stow <package> config
+      list-install                List installers
+      install [<packages>]        Run <packages> installer
       env                         Load environment variables
       test [run command]          Run tests, or test a specific command
       check <package>             Check if a package is installed
