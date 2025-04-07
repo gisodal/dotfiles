@@ -4,6 +4,12 @@
 # prompt appearance
 # -----------------------------------------------------------------------------
 
+function prompt_hostname() {
+  if [[ -z "$TMUX" ]]; then
+    echo -ne "$(tput bold)$(tput setaf 5)$(hostname)$(tput sgr0) "
+  fi
+}
+
 function prompt_exit_code() {
   [ $1 -ne 0 ] && printf "$(tput bold)$(tput setab 160) ${1#0} $(tput sgr0) "
 }
@@ -24,5 +30,5 @@ function prompt_location() {
   fi
 }
 
-export PS1="\n\$(prompt_exit_code \$?)\$(prompt_location) \$(prompt_git_info)\n> "
+export PS1="\n\$(prompt_exit_code \$?)\$(prompt_hostname)\$(prompt_location) \$(prompt_git_info)\n> "
 export PS2='> '
