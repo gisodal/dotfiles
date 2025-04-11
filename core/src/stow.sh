@@ -8,7 +8,7 @@ function get-stow-list() {
   done
 }
 
-function clean-existing-symlinks() {
+function stow-remove-conflicts() {
   local pkg=$1
 
   # Get conflicts from stow dry run
@@ -55,7 +55,7 @@ function stow-core() {
     sudo chown -R root:root "$PACKAGE_DIR"
   fi
 
-  clean-existing-symlinks $PACKAGE
+  stow-remove-conflicts $PACKAGE
 
   local STOW_DRYRUN
   $DRYRUN && STOW_DRYRUN="--no -v" # stow the pacakge

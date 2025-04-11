@@ -128,7 +128,6 @@ function filter-installable() {
 
   # Replace results with filtered array
   results=("${filtered[@]}")
-
 }
 
 function get-packages() {
