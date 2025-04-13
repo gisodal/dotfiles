@@ -38,6 +38,33 @@ function has_user() {
   id "$USERNAME" &>/dev/null
 }
 
+function have-command() {
+  if command -v "$1" >/dev/null 2>&1; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+function get-os() {
+  case "$(uname -s)" in
+  Linux)
+    if have-command lsb_release; then
+      local os=$(lsb_release -si 2>/dev/null)
+      echo "${os,,}"
+    else
+      echo "unknown"
+    fi
+    ;;
+  Darwin)
+    echo "macos"
+    ;;
+  *)
+    echo "unknown"
+    ;;
+  esac
+}
+
 function create_user() {
   # create user
   sudo adduser --gecos "" --disabled-password $USERNAME
@@ -48,20 +75,26 @@ function create_user() {
 }
 
 function install_config() {
-  sudo apt install -y git stow tmux
-  sudo snap install nvim --classic
+
+  if [[ "$(get-os)" == "ubuntu" ]]; then
+    sudo apt install -y git stow tmux
+    sudo snap install nvim --classic
+  else
+    echo "You will need to install git, stow, tmux and nvim manually before proceeding. "
+    return 1
+  fi
 
   sudo runuser -l $USERNAME -c "cat << 'EOF' | bash -e
 rm -f .bash* .profile
 mkdir -p .config
 cd .config
 [ ! -d dotfiles ] && git clone --depth=1 https://github.com/gisodal/dotfiles.git
-cd dotfiles/config
-./install git
-./install tmux
-./install shell
-./install bash
-./install nvim
+cd dotfiles
+./dot stow git
+./dot stow tmux
+./dot stow shell
+./dot stow bash
+./dot stow nvim
 EOF"
 }
 
@@ -84,6 +117,11 @@ function login() {
     echo "  sudo -u ${USERNAME} -i"
   fi
 }
+
+if [[ "$(uname -s)" != "Linux" ]]; then
+  echo "This script is only supported on Linux."
+  exit 1
+fi
 
 USERNAME=${2:-$USERNAME}
 case "$1" in
