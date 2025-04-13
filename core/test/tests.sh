@@ -64,9 +64,8 @@ function build_docker_image() {
 }
 
 function run_docker_test() {
-  build_docker_image
-
   local docker_image=$(get-docker-image-name)
+  build_docker_image
 
   local run_cmd=$1
   if [[ -n $CONTAINER_DEBUG ]]; then
@@ -74,6 +73,8 @@ function run_docker_test() {
     run_cmd="if ! $run_cmd; then echo -e '\nExecution failed. Starting bash shell.\n'; bash; false; fi"
   fi
 
+  echo "container: $DOCKER_CONTAINER_NAME"
+  echo "image: $docker_image"
   echo "=== Docker test $1 ==="
   sudo docker run --privileged -v /sys/fs/cgroup:/sys/fs/cgroup:rw -it --rm \
     -v "$DOTFILES_PATH:$DOCKER_DOTFILES_PATH" \
@@ -155,8 +156,32 @@ run_tests() {
   return $FAILED
 }
 
+# select a test system
+SYSTEMS=$(find $CONTAINER_PATH -name 'Dockerfile*' | sed 's:.*Dockerfile.\(.*\):\1:')
+if [[ -n $SYSTEM_SELECT ]]; then
+  set +e
+  ask "Select system to test" $SYSTEMS
+  position=$?
+  set -e
+
+  SYSTEMS=$(echo "$SYSTEMS" | awk -v n="$position" '{print $n}')
+  SYSTEMS_ARRAY=($SYSTEMS)
+  IMAGE_SYSTEM="${SYSTEMS_ARRAY[$position - 1]}"
+fi
+
+# run tests
 if [ $# -eq 0 ]; then
-  run_tests
+  if [[ -n $SYSTEM_SELECT ]]; then
+    echo -e "${YELLOW}Running tests for system: $IMAGE_SYSTEM${NC}"
+    run_tests
+  else
+    for system in "$SYSTEMS"; do
+      IMAGE_SYSTEM=$system
+      echo -e "${YELLOW}Running tests for system: $IMAGE_SYSTEM${NC}"
+      run_tests
+    done
+  fi
 else
+  echo -e "${YELLOW}Running tests for system: $IMAGE_SYSTEM${NC}"
   run_in_container $@
 fi

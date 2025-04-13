@@ -10,6 +10,7 @@ if ((BASH_VERSINFO[0] < 4)); then
   fi
 fi
 
+TEST_SYSTEM=${DOTKEEPER_TEST_SYSTEM:-ubuntu-24.04}
 LOGLEVEL=${DOTKEEPER_LOGLEVEL:-info}
 DRYRUN=${DOTKEEPER_DRYRUN}
 XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
@@ -25,23 +26,24 @@ function usage() {
   cat <<EOF
 Usage: $ME [-v|-vv|-r] <command> [args]:
 
-  Commands                    Description
-  --------                    -----------
-  list-stow                   List stowable packages
-  stow [<package>]            Stow <package> config
-  list-install                List installers
-  install [<packages>]        Run <packages> installer
-  env                         Load environment variables
-  test [-d|-a] [run command]  Run tests, or test a specific command
-  check <package>             Check if a package is installed
+  Commands                   Description
+  --------                   -----------
+  list-stow                  List stowable packages
+  stow [<package>]           Stow <package> config
+  list-install               List installers
+  install [<packages>]       Run <packages> installer
+  env                        Load environment variables
+  test [-d|-a|-s] [command]  Run tests, or test a specific command
+  check <package>            Check if a package is installed
 
   Flags
   -----
-  -v                          Debug output
-  -vv                         Verbose output
-  -r                          Dry run
-  -a                          Attach to the test container
-  -d                          Debug container. Get shell on failure.
+  -v                         Debug output
+  -vv                        Verbose output
+  -r                         Dry run
+  -a                         Attach to the test container
+  -d                         Debug container. Get shell on failure.
+  -s                         Select test system (default: $TEST_SYSTEM)
 
   Examples
   --------
@@ -140,7 +142,11 @@ function run() {
     if [[ $# -gt 0 && "$1" == -* ]]; then
       case "$1" in
       -d)
-        debug_mode=1
+        log warn "Running in debug mode"
+        export CONTAINER_DEBUG=1
+        ;;
+      -s)
+        export SYSTEM_SELECT="yes"
         ;;
       -a)
         attach_mode=1
@@ -154,11 +160,6 @@ function run() {
     fi
 
     {
-      if [ "$debug_mode" -eq 1 ]; then
-        log warn "Running in debug mode"
-        export CONTAINER_DEBUG=1
-      fi
-
       if [ "$attach_mode" -eq 1 ]; then
         attach-docker-container
       else
