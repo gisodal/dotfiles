@@ -164,9 +164,7 @@ if [[ -n $SYSTEM_SELECT ]]; then
   position=$?
   set -e
 
-  SYSTEMS=$(echo "$SYSTEMS" | awk -v n="$position" '{print $n}')
-  SYSTEMS_ARRAY=($SYSTEMS)
-  IMAGE_SYSTEM="${SYSTEMS_ARRAY[$position - 1]}"
+  IMAGE_SYSTEM=$(echo "$SYSTEMS" | sed -n "${position}p")
 fi
 
 # run tests
