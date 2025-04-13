@@ -10,8 +10,8 @@ if ((BASH_VERSINFO[0] < 4)); then
   fi
 fi
 
-LOGLEVEL=info
-DRYRUN=false
+LOGLEVEL=${DOTKEEPER_LOGLEVEL:-info}
+DRYRUN=${DOTKEEPER_DRYRUN}
 XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
 ME="$(basename "$0")"
 
@@ -23,7 +23,7 @@ done
 
 function usage() {
   cat <<EOF
-Usage: $ME [-v|-vv|-d] <command> [args]:
+Usage: $ME [-v|-vv|-r] <command> [args]:
 
   Commands                    Description
   --------                    -----------
@@ -32,14 +32,16 @@ Usage: $ME [-v|-vv|-d] <command> [args]:
   list-install                List installers
   install [<packages>]        Run <packages> installer
   env                         Load environment variables
-  test [run command]          Run tests, or test a specific command
+  test [-d|-a] [run command]  Run tests, or test a specific command
   check <package>             Check if a package is installed
 
   Flags
   -----
   -v                          Debug output
   -vv                         Verbose output
-  -d                          Dry run
+  -r                          Dry run
+  -a                          Attach to the test container
+  -d                          Debug container. Get shell on failure.
 
   Examples
   --------
@@ -47,6 +49,7 @@ Usage: $ME [-v|-vv|-d] <command> [args]:
   $ME stow nvim
   $ME install
   $ME install lynx
+  $ME test install lynx
   $ME env
 EOF
   exit 1
@@ -56,13 +59,13 @@ EOF
 while [[ $# -gt 0 && "$1" == -* ]]; do
   case "$1" in
   -v)
-    LOGLEVEL=debug
+    LOGLEVEL="debug"
     ;;
   -vv)
-    LOGLEVEL=verbose
+    LOGLEVEL="verbose"
     ;;
-  -d)
-    DRYRUN=true
+  -r)
+    DRYRUN="yes"
     ;;
   *)
     usage
@@ -81,7 +84,7 @@ mkdir -p "$HOME/.local/bin"
 
 if ! have-command stow; then
   echo 'Error: GNU Stow is not installed.' >&2
-  exit 1
+  install stow || exit 1
 fi
 
 function run() {
@@ -157,14 +160,7 @@ function run() {
       fi
 
       if [ "$attach_mode" -eq 1 ]; then
-        # After tests finish, if container still exists, connect to it
-        container_id=$(sudo docker ps -q --filter "ancestor=dotfiles-test")
-        if [ -n "$container_id" ]; then
-          echo "Connecting to test container for debugging..."
-          sudo docker exec -it $container_id /bin/bash
-        else
-          echo "Failed to get container id" && exit 1
-        fi
+        attach-docker-container
       else
         DIR=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" >/dev/null 2>&1 && pwd)
         . $DIR/test/tests.sh $@

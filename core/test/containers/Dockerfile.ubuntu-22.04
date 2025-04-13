@@ -1,0 +1,39 @@
+FROM ubuntu:22.04
+
+# Avoid prompts during package installation
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install basic tools needed for testing
+RUN apt-get update && apt-get install -y  --no-install-recommends \
+  lsb-release \
+  stow \
+  sudo \
+  git \
+  curl \
+  wget \
+  pkg-config \
+  build-essential \
+  snapd \
+  && rm -rf /var/lib/apt/lists/*
+
+# Create a non-root user for testing
+RUN useradd -m -s /bin/bash testuser && \
+  echo "testuser ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/testuser
+
+# Set working directory
+WORKDIR /home/testuser/dotfiles
+
+# The repository will be mounted at runtime
+# We're not copying files into the image
+
+# Set correct ownership for the testuser home
+RUN chown -R testuser:testuser /home/testuser
+
+# Switch to testuser
+USER testuser
+
+# add exception for: detected dubious ownership in repository
+RUN git config --global --add safe.directory /home/testuser/dotfiles
+
+# Define entrypoint
+ENTRYPOINT [ "/bin/bash", "-l", "-c" ]

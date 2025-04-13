@@ -8,19 +8,8 @@ function get-dep-child() {
   echo "${1#*:}"
 }
 
-function get-deps-file() {
-  echo "$DEPENDENCY_PATH/$1"
-}
-
-function have-deps() {
-  if [ -f $(get-deps-file $1) ]; then
-    return 0
-  else
-    return 1
-  fi
-}
-
 function parse-deps-file() {
+  log debug "Parse dependency file: $file (with parent '$parent', ref: '$3')"
   local parent=$1
   local file=$2
   local -n results="$3" # Name reference to the array

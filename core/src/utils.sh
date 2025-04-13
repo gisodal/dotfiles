@@ -1,5 +1,30 @@
 #!/bin/bash
 
+function get-os-version() {
+  if have-command lsb_release; then
+    lsb_release -sr 2>/dev/null
+  fi
+}
+
+function get-os() {
+  case "$(uname -s)" in
+  Linux)
+    if have-command lsb_release; then
+      local os=$(lsb_release -si 2>/dev/null)
+      echo "${os,,}"
+    else
+      echo "unknown"
+    fi
+    ;;
+  Darwin)
+    echo "macos"
+    ;;
+  *)
+    echo "unknown"
+    ;;
+  esac
+}
+
 function load_environment() {
   set -o allexport
   source "$STOW_SOURCE/shell/.config/shell/functions.sh"

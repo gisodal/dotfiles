@@ -58,9 +58,9 @@ function stow-core() {
   stow-remove-conflicts $PACKAGE
 
   local STOW_DRYRUN
-  $DRYRUN && STOW_DRYRUN="--no -v" # stow the pacakge
+  [[ -n $DRYRUN ]] && STOW_DRYRUN="--no -v" # stow the pacakge
   CMD="$SUDO stow $OPT -vt $TARGET -d $STOW_SOURCE $PACKAGE"
-  $DRYRUN && log warn "Dry run: $CMD" || echo $CMD
+  [[ -n $DRYRUN ]] && log warn "Dry run: $CMD" || echo $CMD
 
   $CMD $STOW_DRYRUN
 

@@ -43,29 +43,44 @@ function install-fallback() {
   local pkg="$1"
   log warn "Fallback to default installer for '$pkg'"
 
-  # Check if snap is available
-  if have-command snap; then
-    log info "Trying to install '$pkg' with snap..."
-    if $DRYRUN; then
-      log warn "Dry run: sudo snap install $pkg"
-    else
-      sudo snap install "$pkg" && return 0
+  case $(get-os) in
+  ubuntu)
+    # Check if snap is available
+    if have-command snap; then
+      log info "Trying to install '$pkg' with snap..."
+      if [[ -n $DRYRUN ]]; then
+        log warn "Dry run: sudo snap install $pkg"
+      else
+        sudo snap install "$pkg" && return 0
+      fi
     fi
-  fi
 
-  # If snap fails or isn't available, try apt
-  if have-command apt; then
-    log info "Trying to install '$pkg' with apt..."
-    if $DRYRUN; then
+    # If snap fails or isn't available, try apt
+    if have-command apt; then
+      log info "Trying to install '$pkg' with apt..."
+      if [[ -n $DRYRUN ]]; then
+        log warn "Dry run: sudo apt-get install -y $pkg"
+      else
+        sudo apt-get update && sudo apt-get install -y "$pkg" && return 0
+      fi
+    fi
+
+    [[ -n $DRYRUN ]] && return 0
+    ;;
+  macos)
+    if [[ -n $DRYRUN ]]; then
       log warn "Dry run: sudo apt-get install -y $pkg"
     else
-      sudo apt-get update && sudo apt-get install -y "$pkg" && return 0
+
+      brew install "$pkg" && return 0
     fi
-  fi
+    ;;
+  *)
+    log error "No fallback package configured for OS: $(get-os)"
+    ;;
+  esac
 
-  $DRYRUN && return 0
-
-  log error "Failed to install '$pkg'. No suitable package manager found."
+  log error "Failed to install '$pkg'"
   return 1
 }
 
@@ -102,7 +117,7 @@ function install() {
     fi
 
     # run the installer
-    if $DRYRUN; then
+    if [[ -n $DRYRUN ]]; then
       log warn "Dry run: $(get-installer $pkg)"
     else
       (
@@ -112,6 +127,9 @@ function install() {
         set -e
 
         export DEBIAN_FRONTEND=noninteractive
+
+        echo "get-installer $pkg: $(get-installer $pkg)"
+
         source "$(get-installer $pkg)"
       )
 
@@ -124,5 +142,11 @@ function install() {
       fi
     fi
   done
+
+  log info "Installed package(s):"
+  for pkg in "${packages[@]}"; do
+    log info "  - $pkg"
+  done
+
   return 0
 }

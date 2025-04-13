@@ -5,6 +5,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Install basic tools needed for testing
 RUN apt-get update && apt-get install -y  --no-install-recommends \
+  lsb-release \
   stow \
   sudo \
   git \
@@ -35,5 +36,4 @@ USER testuser
 RUN git config --global --add safe.directory /home/testuser/dotfiles
 
 # Define entrypoint
-ENTRYPOINT ["/bin/bash"]
-
+ENTRYPOINT [ "/bin/bash", "-l", "-c" ]
