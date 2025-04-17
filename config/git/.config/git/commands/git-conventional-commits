@@ -1,4 +1,4 @@
-#!/bin/bash -ex
+#!/bin/bash -e
 
 if ! git rev-parse --is-inside-work-tree 2>/dev/null 1>&2; then
   echo "This script should not be run inside a git repository."
@@ -7,11 +7,12 @@ fi
 
 ROOT_PATH="$(git rev-parse --show-toplevel)"
 GIT_PATH="$ROOT_PATH/.git"
-
 GIT_HOOK="$GIT_PATH/hooks/commit-msg"
+
 mkdir -p "$(dirname '$GIT_HOOK')"
 
-tee "$GIT_HOOK" <<EOF
+echo "Writing commit hook to '$GIT_HOOK'"
+cat >"$GIT_HOOK" <<EOF
 #!/bin/bash
 
 # Read the commit message
@@ -33,3 +34,5 @@ fi
 EOF
 
 chmod +x "$GIT_HOOK"
+
+echo -e "\nYou are all set!"
