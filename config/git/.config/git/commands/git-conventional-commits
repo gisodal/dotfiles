@@ -1,0 +1,35 @@
+#!/bin/bash -ex
+
+if ! git rev-parse --is-inside-work-tree 2>/dev/null 1>&2; then
+  echo "This script should not be run inside a git repository."
+  exit 1
+fi
+
+ROOT_PATH="$(git rev-parse --show-toplevel)"
+GIT_PATH="$ROOT_PATH/.git"
+
+GIT_HOOK="$GIT_PATH/hooks/commit-msg"
+mkdir -p "$(dirname '$GIT_HOOK')"
+
+tee "$GIT_HOOK" <<EOF
+#!/bin/bash
+
+# Read the commit message
+commit_msg=\$(cat "\$1")
+
+# Define the regex pattern for conventional commits
+# format: type(scope): description
+pattern='^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\([a-z ]+\))?: .+'
+
+# Check if the commit message matches the pattern
+if ! [[ "\$commit_msg" =~ \$pattern ]]; then
+  echo "Error: Commit message doesn't follow the conventional commit format."
+  echo "Please use format: type(scope): description"
+  echo "Example: feat(user): add login functionality"
+  echo ""
+  echo "Allowed types: build, chore, ci, docs, feat, fix, perf, refactor, revert, style, test"
+  exit 1
+fi
+EOF
+
+chmod +x "$GIT_HOOK"
