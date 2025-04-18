@@ -12,26 +12,40 @@ GIT_HOOK="$GIT_PATH/hooks/commit-msg"
 mkdir -p "$(dirname '$GIT_HOOK')"
 
 echo "Writing commit hook to '$GIT_HOOK'"
-cat >"$GIT_HOOK" <<EOF
-#!/bin/bash
+cat >"$GIT_HOOK" <<CAT_EOF
+#!/bin/bash -e
 
 # Read the commit message
 commit_msg=\$(cat "\$1")
 
 # Define the regex pattern for conventional commits
 # format: type(scope): description
-pattern='^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\([a-z ]+\))?: .+'
+pattern='^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\([a-z ]+\))?[!]?: [^\.]+$'
+
+function error_exit {
+  cat <<EOF
+Error: Commit message doesn't follow the conventional commit format.
+
+Please use format:
+  <type>[(scope)][!]: <description>
+
+  [optional body]
+
+  [optional footer(s)]
+
+Allowed types: build, chore, ci, docs, feat, fix, perf, refactor, revert, style, test.
+
+Example:
+  git commit -m 'feat(user)!: add feature' -m 'body message' -m 'BREAKING CHANGE: description'
+EOF
+}
 
 # Check if the commit message matches the pattern
-if ! [[ "\$commit_msg" =~ \$pattern ]]; then
-  echo "Error: Commit message doesn't follow the conventional commit format."
-  echo "Please use format: type(scope): description"
-  echo "Example: feat(user): add login functionality"
-  echo ""
-  echo "Allowed types: build, chore, ci, docs, feat, fix, perf, refactor, revert, style, test"
+if ! [[ "\$(echo "\$commit_msg" | head -n1)"  =~ \$pattern ]]; then
+  error_exit
   exit 1
 fi
-EOF
+CAT_EOF
 
 chmod +x "$GIT_HOOK"
 
