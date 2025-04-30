@@ -1,0 +1,30 @@
+#!/bin/bash -e
+
+# Read the commit message
+COMMIT_MSG=$(cat "$1")
+
+# Define the regex pattern for conventional commits
+# format: type(scope): description
+PATTERN='^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\([a-z ]+\))?[!]?: .+[^.][\ ]*$'
+
+ERROR_MESSAGE=$(cat <<EOF
+Error: Commit message doesn't follow the conventional commit format.
+
+Please use format:
+  <type>[(scope)][!]: <description>
+
+  [optional body]
+
+  [optional footer(s)]
+
+Allowed types: build, chore, ci, docs, feat, fix, perf, refactor, revert, style, test.
+
+Example:
+  git commit -m 'feat(user)!: add feature' -m 'body message' -m 'BREAKING CHANGE: description'
+EOF)
+
+# Check if the commit message matches the pattern
+if ! [[ "$(echo "$COMMIT_MSG" | head -n1)" =~ $PATTERN ]]; then
+  echo "$ERROR_MESSAGE"
+  exit 1
+fi

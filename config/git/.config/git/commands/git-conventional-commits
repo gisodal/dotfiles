@@ -8,44 +8,14 @@ fi
 ROOT_PATH="$(git rev-parse --show-toplevel)"
 GIT_PATH="$ROOT_PATH/.git"
 GIT_HOOK="$GIT_PATH/hooks/commit-msg"
+CUSTOM_HOOKS="$(command cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)/../hooks"
+CUSTOM_HOOKS=$(command cd "$CUSTOM_HOOKS" && pwd)
 
 mkdir -p "$(dirname '$GIT_HOOK')"
 
-echo "Writing commit hook to '$GIT_HOOK'"
-cat >"$GIT_HOOK" <<CAT_EOF
-#!/bin/bash -e
-
-# Read the commit message
-commit_msg=\$(cat "\$1")
-
-# Define the regex pattern for conventional commits
-# format: type(scope): description
-pattern='^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\([a-z ]+\))?[!]?: [^\.]+$'
-
-function error_exit {
-  cat <<EOF
-Error: Commit message doesn't follow the conventional commit format.
-
-Please use format:
-  <type>[(scope)][!]: <description>
-
-  [optional body]
-
-  [optional footer(s)]
-
-Allowed types: build, chore, ci, docs, feat, fix, perf, refactor, revert, style, test.
-
-Example:
-  git commit -m 'feat(user)!: add feature' -m 'body message' -m 'BREAKING CHANGE: description'
-EOF
-}
-
-# Check if the commit message matches the pattern
-if ! [[ "\$(echo "\$commit_msg" | head -n1)"  =~ \$pattern ]]; then
-  error_exit
-  exit 1
-fi
-CAT_EOF
+echo "Creating symlink hook from '$GIT_HOOK' to '$CUSTOM_HOOKS/commit-msg'"
+rm -f "$GIT_HOOK"
+ln -sf "$CUSTOM_HOOKS/commit-msg" "$GIT_HOOK"
 
 chmod +x "$GIT_HOOK"
 
