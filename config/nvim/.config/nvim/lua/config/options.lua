@@ -22,7 +22,7 @@ vim.lsp.set_log_level("off")
 -- absolute numbering
 vim.opt.relativenumber = false
 
-vim.opt.completeopt = { "menu", "menuone", "popup" }
+vim.opt.completeopt = { "menu", "menuone", "noinsert", "popup" }
 -- the command:
 -- :LazyRoot
 -- will show you the available roots that LazyVim detects and you can change the LSP server accordingly.
