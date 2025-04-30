@@ -34,8 +34,8 @@
 [alias]
     branch-main = ! basename $(git rev-parse --abbrev-ref origin/HEAD) || git branch --sort=-committerdate -l main master | head -1 | sed 's/^[^a-zA-Z]*//'
     base-commit = !git merge-base $(git branch-main) HEAD
-    name = !sh -c obasename $(git root)'
-    zip = !sh -c 'git archive --format zip --output \"$(git name).zip\" HEAD' -
+    name = !sh -c 'basename $(git rev-parse --show-toplevel)'
+    zip = !sh -c 'git archive --format zip --prefix=\"$(git name)/\" --output \"$(git name).zip\" HEAD && echo \"Created $(git name).zip\" || echo \"Failed to create archive\"' -
 
     ta = log --all --author-date-order --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %C(auto)%d%C(reset) %<(16,trunc)%C(dim magenta)%an%C(reset) %C(dim white)%s%C(reset) %C(blue)[%ar]%C(reset)' --date=format:'%A %d %B %Y %H:%M:%S'
     t = log --all --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %C(auto)%d%C(reset) %<(16,trunc)%C(dim magenta)%an%C(reset) %C(dim white)%s%C(reset) %C(blue)[%ar]%C(reset)' --date=format:'%A %d %B %Y %H:%M:%S'
