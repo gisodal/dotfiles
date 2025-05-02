@@ -21,7 +21,8 @@ Allowed types: build, chore, ci, docs, feat, fix, perf, refactor, revert, style,
 
 Example:
   git commit -m 'feat(user)!: add feature' -m 'body message' -m 'BREAKING CHANGE: description'
-EOF)
+EOF
+)
 
 # Check if the commit message matches the pattern
 if ! [[ "$(echo "$COMMIT_MSG" | head -n1)" =~ $PATTERN ]]; then
