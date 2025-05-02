@@ -3,30 +3,31 @@
 USERNAME=dotkeeper
 XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
 DOTFILES_HOME="${XDG_CONFIG_HOME}/dotfiles"
+REPO_UPDATE=true
 
 function usage() {
   local ME="$(basename "$(test -L "$0" && readlink "$0" || echo "$0")")"
   cat <<EOF
 Usage: $ME <command> [args]:
 
-  Commands              Description
-  --------              -----------
-  install [username]    Install the dotfiles under user (default: $USERNAME)
-  login [username]      Switch to the user (default: $USERNAME)
-  clean [username]      Cleanup the user (default: $USERNAME)
+  Commands      Description
+  --------      -----------
+  install       Install dotfiles under new user '$USERNAME'
+  login         Switch to the dotfiles user
+  remove        Remove the dotfiles user
 
   Examples
   --------
   $ME install
   $ME install user1
   $ME login
-  $ME clean
+  $ME remove
 EOF
   exit 1
 }
 
-# Function to clean up (delete the user)
-function cleanup() {
+# Function to remove up (delete the user)
+function remove() {
   echo "Deleting user $USERNAME"
   sudo pkill -u $USERNAME   # Kill any processes running as the user
   sudo userdel -r $USERNAME # Remove user and their home directory
@@ -34,7 +35,7 @@ function cleanup() {
   echo "User $USERNAME has been deleted"
 }
 
-function has_user() {
+function has-user() {
   id "$USERNAME" &>/dev/null
 }
 
@@ -49,12 +50,14 @@ function have-command() {
 function get-os() {
   case "$(uname -s)" in
   Linux)
-    if have-command lsb_release; then
-      local os=$(lsb_release -si 2>/dev/null)
-      echo "${os,,}"
-    else
+    if ! have-command lsb_release; then
+      echo "Cannot determine OS without lsb_release" >&$(tty)
       echo "unknown"
+      return 1
     fi
+
+    local os=$(lsb_release -si 2>/dev/null)
+    echo "${os,,}"
     ;;
   Darwin)
     echo "macos"
@@ -65,23 +68,72 @@ function get-os() {
   esac
 }
 
-function create_user() {
+function create-user() {
   # create user
   sudo adduser --gecos "" --disabled-password $USERNAME
 
   # Grant sudo privileges by adding to sudo group
   echo "$USERNAME ALL=(ALL) NOPASSWD: ALL" | sudo tee /etc/sudoers.d/$USERNAME
-  sudo chmod /etc/sudoers.d/$USERNAME
+  sudo chmod 440 /etc/sudoers.d/$USERNAME
 }
 
-function install_config() {
+function not-installed() {
+  local not_installed=""
+  local pkg
+  for pkg in $@; do
+    if ! have-command "$pkg"; then
+      not_installed+=" $pkg"
+    fi
+  done
 
-  if [[ "$(get-os)" == "ubuntu" ]]; then
-    sudo apt install -y git stow tmux
-    sudo snap install nvim --classic
+  echo "$not_installed"
+}
+
+function install-pkg() {
+  local pkg=$1
+  local os=$(get-os)
+
+  if [[ "$os" == "ubuntu" ]]; then
+    if $REPO_UPDATE; then
+      echo "Updating apt repositories..."
+      sudo apt update
+      REPO_UPDATE=false
+    fi
+
+    case $pkg in
+    nvim)
+      sudo snap install --classic nvim
+      ;;
+    *)
+      sudo apt install -y $pkg
+      ;;
+    esac
+
+  elif [[ "$os" == "macos" ]]; then
+    brew install $pkg
   else
-    echo "You will need to install git, stow, tmux and nvim manually before proceeding. "
+    echo "No installer available for $pkg on OS: $(get-os)"
     return 1
+  fi
+}
+
+function install-pkgs() {
+  local pkgs=$@
+  local pkg
+  for pkg in $pkgs; do
+    install-pkg $pkg
+    if [ $? -ne 0 ]; then
+      echo "Failed to install $pkg"
+      return 1
+    fi
+  done
+}
+
+function install-config() {
+  local pkgs="$(not-installed git stow tmux make g++ nvim)"
+  if [[ -n "$pkgs" ]]; then
+    echo "Installing missing packages: $pkgs"
+    install-pkgs $pkgs || return 1
   fi
 
   sudo runuser -l $USERNAME -c "cat << 'EOF' | bash -e
@@ -100,11 +152,11 @@ EOF"
 
 function bootstrap() {
   # check if user exists
-  if ! has_user; then
-    create_user
+  if ! has-user; then
+    create-user
   fi
 
-  install_config
+  install-config
 }
 
 function login() {
@@ -123,16 +175,15 @@ if [[ "$(uname -s)" != "Linux" ]]; then
   exit 1
 fi
 
-USERNAME=${2:-$USERNAME}
 case "$1" in
-'clean')
-  cleanup
+'remove')
+  remove
   ;;
 'login')
   login
   ;;
 'install')
-  bootstrap
+  bootstrap || exit 1
   login
   ;;
 *)

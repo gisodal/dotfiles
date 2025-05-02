@@ -53,7 +53,7 @@ Examples:
     > ./dot stow git
     > ./dot stow git
 
-To bootstrap a new user (default: `dotkeeper`) with a basic config setup, type:
+To bootstrap a new user `dotkeeper` with a basic config setup, type:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/gisodal/dotfiles/main/bootstrap.sh | bash -s -- install
@@ -62,7 +62,7 @@ curl -fsSL https://raw.githubusercontent.com/gisodal/dotfiles/main/bootstrap.sh 
 To remove the user, type
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/gisodal/dotfiles/main/bootstrap.sh | bash -s -- clean
+curl -fsSL https://raw.githubusercontent.com/gisodal/dotfiles/main/bootstrap.sh | bash -s -- remove
 ```
 
 To have the script locally and run it, type:
