@@ -1,0 +1,11 @@
+#!/bin/bash
+
+COMMIT_MSG_FILE=$1
+COMMIT_SOURCE=$2
+SHA1=$3
+
+# Only modify merge commits
+if [ "$COMMIT_SOURCE" = "merge" ]; then
+  # Prepend 'chore: ' to the first line of the commit message
+  sed -i.bak '1{s/^/chore: /}' "$COMMIT_MSG_FILE"
+fi

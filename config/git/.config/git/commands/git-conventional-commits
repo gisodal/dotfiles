@@ -7,16 +7,23 @@ fi
 
 ROOT_PATH="$(git rev-parse --show-toplevel)"
 GIT_PATH="$ROOT_PATH/.git"
-GIT_HOOK="$GIT_PATH/hooks/commit-msg"
+GIT_HOOK_PATH="$GIT_PATH/hooks"
 CUSTOM_HOOKS="$(command cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)/../hooks"
 CUSTOM_HOOKS=$(command cd "$CUSTOM_HOOKS" && pwd)
 
-mkdir -p "$(dirname '$GIT_HOOK')"
+mkdir -p "$GIT_HOOK_PATH"
 
-echo "Creating symlink hook from '$GIT_HOOK' to '$CUSTOM_HOOKS/commit-msg'"
-rm -f "$GIT_HOOK"
-ln -sf "$CUSTOM_HOOKS/commit-msg" "$GIT_HOOK"
+function install-hook() {
+  local hook_name="$1"
+  local git_hook="$GIT_HOOK_PATH/$hook_name"
 
-chmod +x "$GIT_HOOK"
+  echo "Creating symlink from '$git_hook' to '$CUSTOM_HOOKS/$hook_name'"
+  rm -f "$git_hook"
+  ln -sf "$CUSTOM_HOOKS/$hook_name" "$git_hook"
+  chmod +x "$git_hook"
+}
+
+install-hook "commit-msg"
+install-hook "prepare-commit-msg"
 
 echo -e "\nYou are all set!"
