@@ -4,8 +4,22 @@ COMMIT_MSG_FILE=$1
 COMMIT_SOURCE=$2
 SHA1=$3
 
-# Only modify merge commits
+# List of valid conventional commit types
+PATTERN='^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\([a-z ]+\))?[!]?: .+[^.][\ ]*$'
+
+# Don't modify if the message already has a valid type prefix
+if [[ "$(cat "$COMMIT_MSG_FILE" | head -n1)" =~ $PATTERN ]]; then
+  exit 0
+fi
+
+# Handle specific commit sources
 if [ "$COMMIT_SOURCE" = "merge" ]; then
-  # Prepend 'chore: ' to the first line of the commit message
+  # Prepend 'chore: ' to merge commits
   sed -i.bak '1{s/^/chore: /}' "$COMMIT_MSG_FILE"
+elif grep -q "^Revert \"" "$COMMIT_MSG_FILE"; then
+  # Modify revert commits to use conventional format
+  sed -i.bak '1{s/^Revert \"/revert: /}' "$COMMIT_MSG_FILE"
+elif [ "$COMMIT_SOURCE" = "template" ] || [ -z "$COMMIT_SOURCE" ]; then
+  # Don't modify template or manual commits - let the user add the type
+  exit 0
 fi
