@@ -49,9 +49,6 @@ export NVM_DIR=${NVM_DIR:-$HOME/.nvm}
 
 [ -f "${XDG_CONFIG_HOME:-$HOME/.config}"/fzf/fzf.bash ] && source "${XDG_CONFIG_HOME:-$HOME/.config}"/fzf/fzf.bash
 
-if [ -z "$SSH_TTY" ] &&
-  [ -z "$SSH_CONNECTION" ] &&
-  [ -z "$SSH_CLIENT" ] &&
-  [ -z "$TMUX" ]; then
-  tmux
+if [ -z "$TMUX" ] && command -v tmux &>/dev/null; then
+  tmux attach 2>/dev/null || tmux
 fi
