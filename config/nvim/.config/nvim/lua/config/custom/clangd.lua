@@ -9,8 +9,6 @@ if vim.fn.hostname() == "rts" or vim.fn.hostname() == "gdal" then
     "configure.ac", -- AutoTools
   }
 
-  local util = require("lspconfig.util")
-
   require("lspconfig").clangd.setup({
     cmd = {
       "clangd-18",
