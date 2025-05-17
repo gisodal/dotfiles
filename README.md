@@ -56,19 +56,19 @@ Examples:
 To bootstrap a new user `dotkeeper` with a basic config setup, type:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/gisodal/dotfiles/main/dotkeeper.sh | bash -s -- install
+curl -fsSL https://raw.githubusercontent.com/gisodal/dotfiles/main/dotkeeper | bash -s -- install
 ```
 
 To remove the user, type
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/gisodal/dotfiles/main/dotkeeper.sh | bash -s -- remove
+curl -fsSL https://raw.githubusercontent.com/gisodal/dotfiles/main/dotkeeper | bash -s -- remove
 ```
 
 To have the script locally and run it, type:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/gisodal/dotfiles/main/dotkeeper.sh -o /tmp/dotkeeper.sh && bash /tmp/dotkeeper.sh install
+sudo curl -fsSL https://raw.githubusercontent.com/gisodal/dotfiles/main/dotkeeper -o /usr/local/bin/dotkeeper && sudo chmod +x /usr/local/bin/dotkeeper && dotkeeper install
 ```
 
 ## Install applications
