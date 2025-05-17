@@ -10,6 +10,12 @@ function prompt_hostname() {
   fi
 }
 
+function prompt_username() {
+  if [[ "$USER" == "dotkeeper" ]]; then
+    echo -ne "$(tput bold)$(tput setaf 7)${USER}$(tput sgr0) "
+  fi
+}
+
 function prompt_exit_code() {
   [ $1 -ne 0 ] && printf "$(tput bold)$(tput setab 160) ${1#0} $(tput sgr0) "
 }
@@ -29,6 +35,6 @@ function prompt_location() {
     echo -e "$(tput setaf 2)$path_full$(tput sgr0)"
   fi
 }
+export PS1="\n\$(prompt_exit_code \$?)\$(prompt_username)\$(prompt_hostname)\$(prompt_location) \$(prompt_git_info)\n> "
 
-export PS1="\n\$(prompt_exit_code \$?)\$(prompt_hostname)\$(prompt_location) \$(prompt_git_info)\n> "
 export PS2='> '

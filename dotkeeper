@@ -142,6 +142,8 @@ mkdir -p .config
 cd .config
 [ ! -d dotfiles ] && git clone --depth=1 https://github.com/gisodal/dotfiles.git
 cd dotfiles
+./dot install fzf
+./dot install ripgrep
 ./dot stow git
 ./dot stow tmux
 ./dot stow shell
@@ -170,6 +172,10 @@ function login() {
   fi
 }
 
+function update() {
+  cd "$DOTFILES_HOME" && git pull
+}
+
 if [[ "$(uname -s)" != "Linux" ]]; then
   echo "This script is only supported on Linux."
   exit 1
@@ -185,6 +191,9 @@ case "$1" in
 'install')
   bootstrap || exit 1
   login
+  ;;
+'update')
+  update
   ;;
 *)
   usage
