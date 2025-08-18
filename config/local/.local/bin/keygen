@@ -86,10 +86,12 @@ function keygen(){
         chmod 600 "$KEYS/$KEY"
         echo -e "Key '$KEY' created in '$KEYS/'...\n"
 
-        # create PEM file
-        PEM="$KEYS/$KEY.pub.pem"
-        ssh-keygen -f "$KEYS/$KEY.pub" -m pem -e >> "$PEM"
-        [[ $? -ne 0 ]] && echo "Could not generate PEM file" 1>&2 && rm "$PEM" || echo "Generated PEM file: $PEM"
+        if [ "$INPUT" -eq 2 ]; then 
+          # create PEM file for rsa keys
+          PEM="$KEYS/$KEY.pub.pem"
+          ssh-keygen -f "$KEYS/$KEY.pub" -m pem -e >> "$PEM"
+          [[ $? -ne 0 ]] && echo "Could not generate PEM file" 1>&2 && rm "$PEM" || echo "Generated PEM file: $PEM"
+        fi
 
         # add to authorized keys
         while [ 1 ]; do
@@ -97,8 +99,7 @@ function keygen(){
             case "$INPUT" in
                 y|Y|'' )
                     cat "$KEYS/${KEY}.pub" >> "$AUTH"
-                    break;
-                    ;;
+                    break ;;
                 n|N ) break;;
             esac
         done
