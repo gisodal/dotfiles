@@ -55,6 +55,7 @@ bind 0 select-window -t 10  \; refresh-client -S
 # window creation/splitting
 bind C-[ split-window -h -l 50% -p 50 -c "#{pane_current_path}"
 bind C-] split-window -v -l 50% -p 50 -c "#{pane_current_path}"
+bind Escape split-window -h -l 50% -p 50 -c "#{pane_current_path}"
 bind [ split-window -h -l 20% -p 20 -c "#{pane_current_path}"
 bind ] split-window -v -l 20% -p 20 -c "#{pane_current_path}"
 
@@ -72,7 +73,9 @@ bind -r K resize-pane -U 2
 bind -r J resize-pane -D 2
 bind -r L resize-pane -R 2
 bind -r H resize-pane -L 2
-bind    m resize-pane -Z # toggle maximize pane
+bind    m     resize-pane -Z # toggle maximize pane
+bind    Enter resize-pane -Z # toggle maximize pane
+bind    C-m   resize-pane -Z # toggle maximize pane
 
 ## window manipulations
 bind R command-prompt -p "Rename window:" "rename-window %%"
