@@ -6,7 +6,7 @@ return {
     -- optional for icon support
     dependencies = { "nvim-tree/nvim-web-devicons" },
     -- or if using mini.icons/mini.nvim
-    -- dependencies = { "echasnovski/mini.icons" },
+    -- dependencies = { "nvim-mini/mini.icons" },
     opts = function(_, opts)
       opts.files = opts.files or {}
       opts.files.rg_opts = (opts.files.rg_opts or "")
