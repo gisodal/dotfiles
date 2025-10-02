@@ -97,6 +97,7 @@
 	  skip = update-index --skip-worktree --
 	  unskip = update-index --no-skip-worktree --
 	adog = log --all --decorate --oneline --graph
+	rebase-preserve = rebase --committer-date-is-author-date
 
 [color "decorate"]
     head = reverse bold ul italic yellow
@@ -119,5 +120,3 @@
 	  enabled = true
 [init]
 	defaultBranch = main
-[credential]
-	helper = osxkeychain
