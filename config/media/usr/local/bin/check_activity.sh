@@ -33,6 +33,13 @@ for APP in $ACTIVITY_APPS; do
   fi
 done
 
+# Check for active RustDesk connections
+RUSTDESK_ACTIVE=$(ss -tn | grep -E ':(21115|21116|21117|21118|21119)' | grep ESTAB)
+if [[ -n "$RUSTDESK_ACTIVE" ]]; then
+  echo "rustdesk is active"
+  ACTIVE="$ACTIVE rustdesk"
+fi
+
 logger "Server activity with:$ACTIVE"
 if [[ -z $ACTIVE ]]; then
   # No active streams, schedule shutdown
