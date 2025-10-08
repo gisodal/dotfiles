@@ -2,8 +2,8 @@ return {
   {
     "CopilotC-Nvim/CopilotChat.nvim",
     opts = {
-      answer_header = " Copilot (claude 4.0 sonnet) ",
-      model = "claude-sonnet-4",
+      answer_header = " Copilot (claude 4.5 sonnet) ",
+      model = "claude-sonnet-4.5",
     },
   },
   {

@@ -64,3 +64,11 @@ wk.add({
   silent = true,
   icon = "💾",
 })
+
+-- Overrides the default spacebar behavior (cursor move) to be a "No-Op" in Normal mode.
+--    This is essential to stop the cursor from moving when the menu is expected.
+vim.keymap.set("n", "<Space>", "<Nop>", {
+  desc = "Leader Key Trigger",
+  silent = true,
+  noremap = true,
+})
