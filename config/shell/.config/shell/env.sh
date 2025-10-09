@@ -65,10 +65,6 @@ if exists dircolors; then
   test -r $XDG_CONFIG_HOME/shell/.lsrc && eval "$(dircolors --sh "$XDG_CONFIG_HOME/shell/.lsrc")"
 fi
 
-if exists direnv; then
-  eval "$(direnv hook bash)"
-fi
-
 # git config
 GIT_USER_FILE="$GIT_CONFIG_PATH/.gituser"
 if [ -d "$GIT_CONFIG_PATH" -a ! -f "$GIT_USER_FILE" ]; then

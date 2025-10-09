@@ -19,9 +19,11 @@ fi
 set -o allexport
 source $SHELL_CONFIG_PATH/functions.sh
 
-source $SHELL_CONFIG_PATH/environment.sh
+source $SHELL_CONFIG_PATH/env.sh
 
-source $BASH_CONFIG_PATH/environment.sh
+source $BASH_CONFIG_PATH/env.sh
+
+[ -f $HOME/.env ] && source $HOME/.env
 set +o allexport
 
 source $SHELL_CONFIG_PATH/alias.sh

@@ -15,11 +15,13 @@ typeset -U path PATH # make path hold unique values
 set -o allexport
 source $SHELL_CONFIG_PATH/functions.sh
 
-source $SHELL_CONFIG_PATH/environment.sh
+source $SHELL_CONFIG_PATH/env.sh
 
-source $ZSH_CONFIG_PATH/environment.sh
+source $ZSH_CONFIG_PATH/env.sh
 
 source $ZSH_CONFIG_PATH/functions.zsh
+
+[ -f $HOME/.env ] && source $HOME/.env
 set +o allexport
 
 source $SHELL_CONFIG_PATH/alias.sh
