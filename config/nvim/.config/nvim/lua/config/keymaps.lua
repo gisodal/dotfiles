@@ -44,6 +44,18 @@ wk.add({
   end,
 })
 
+-- Reload which-key when it stops working
+wk.add({
+  "<leader>xw",
+  function()
+    require("lazy.core.loader").reload("which-key.nvim")
+    vim.notify("Which-key reloaded!", vim.log.levels.INFO)
+  end,
+  desc = "Reload which-key",
+  mode = "n",
+  icon = "󰑐",
+})
+
 -- function to store the current buffer if it is modified
 local function store_buffer_if_modified()
   if vim.bo.readonly then

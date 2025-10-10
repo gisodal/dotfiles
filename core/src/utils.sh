@@ -28,7 +28,7 @@ function get-os() {
 function load_environment() {
   set -o allexport
   source "$STOW_SOURCE/shell/.config/shell/functions.sh"
-  source "$STOW_SOURCE/shell/.config/shell/environment.sh"
+  source "$STOW_SOURCE/shell/.config/shell/env.sh"
   set +o allexport
 }
 
