@@ -18,7 +18,6 @@ if command -v fzf 2>/dev/null 1>&2; then
 	}
 fi
 
-#setup direnv if it is available
-if exists direnv; then
-  eval "$(direnv hook zsh)"
+if exists mise; then 
+  eval "$(mise activate zsh)"
 fi

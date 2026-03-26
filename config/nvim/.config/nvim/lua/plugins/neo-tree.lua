@@ -14,6 +14,7 @@ return {
       },
     },
     window = {
+      width = 50, -- Set your desired width here (default is usually 40)
       mappings = {
         ["g"] = {
           function(state)

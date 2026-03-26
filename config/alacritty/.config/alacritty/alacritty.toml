@@ -338,5 +338,5 @@ bindings = [
 
   { key = "F11", action = "Togglefullscreen" },
   { key = "h", mods = "Alt", chars = "\u001bh" },
-
+  { key = "Return", mods = "Shift", chars = "\u001B\r" },
 ]

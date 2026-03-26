@@ -14,13 +14,18 @@ return {
       -- Read the beastmode file
       return {
         question_header = "## Me ",
-        answer_header = "## Copilot (claude 4.5 sonnet) ",
+        answer_header = "## Copilot (claude 4.6 sonnet) ",
         error_header = "## Error ",
-        model = "claude-sonnet-4.5",
+        model = "claude-sonnet-4.6",
         prompts = {
           Beastmode = {
             prompt = "> ",
             system_prompt = beastmode_prompt,
+          },
+        },
+        mappings = {
+          submit_prompt = {
+            insert = "",
           },
         },
       }

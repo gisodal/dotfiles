@@ -5,6 +5,10 @@ if exists direnv; then
   eval "$(direnv hook bash)"
 fi
 
+if exists mise; then
+  eval "$(mise activate zsh)"
+fi
+
 # setup fzf
 if exists fzf; then
   eval "$(fzf --bash)"

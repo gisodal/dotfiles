@@ -7,6 +7,26 @@ return {
     keys = {
       { "<Leader>gd", "<cmd>DiffviewFileHistory %<CR>", desc = "Diff File" },
       { "<Leader>gv", "<cmd>DiffviewOpen<CR>", desc = "Diff View" },
+      -- NEW: Branch Selector using Snacks.picker
+      {
+        "<leader>gp",
+        function()
+          Snacks.picker.git_branches({
+            confirm = function(picker, item)
+              picker:close()
+              if item then
+                -- Strip '*' and whitespace if it exists
+                local branch = item.branch or item.text:gsub("^%*%s*", "")
+                vim.cmd("DiffviewOpen " .. branch .. " -- %")
+              end
+            end,
+          })
+        end,
+        desc = "Diff File vs Branch (Pick)",
+      },
+
+      -- Quick shortcut for main
+      { "<leader>gm", "<cmd>DiffviewOpen main -- %<CR>", desc = "Diff File vs Main" },
     },
     opts = function()
       local actions = require("diffview.actions")

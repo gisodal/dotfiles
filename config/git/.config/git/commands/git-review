@@ -58,31 +58,48 @@ fi
 command cd $(git rev-parse --show-toplevel)
 
 # Create diff with base commit branch and save it
-echo "Creating diff"
-PATCH=/tmp/pr-diff.patch
-git diff $BASE_COMMIT >$PATCH
+# echo "Creating diff"
+# PATCH=/tmp/pr-diff.patch
+# git diff $BASE_COMMIT >$PATCH
 
 # Get list of changed files compared to the base commit
-CHANGED_FILES=$(git diff --name-only $BASE_COMMIT)
+CHANGED_FILES=$(
+  git diff --name-only $BASE_COMMIT | fzf -m --cycle --no-height \
+    --bind 'ctrl-a:select-all,ctrl-d:deselect-all,ctrl-t:toggle-all' \
+    --header="Select files (Tab=toggle, Ctrl+A=all, Ctrl+D=none, Enter=confirm)"
+)
 
 # If no files changed, exit
 if [ -z "$CHANGED_FILES" ]; then
-  echo "No files have changed"
+  echo "No files selected"
   exit 1
 fi
 
 # Store prompt in temporary file
 PROMPT_FILE=$(mktemp)
 cat >$PROMPT_FILE <<EOF
-> /COPILOT_REVIEW
-> #buffers
+/COPILOT_REVIEW
+$(echo "$CHANGED_FILES" | while read -r file; do echo "#file:$(pwd)/$file"; done)
 
-Please review the latest changes ($PATCH). $PATCH has already been applied. Try to use actual code file locations rather than diff line numbers.
+I have listed all important files that changed between $MERGE_BRANCH and $FEATURE_BRANCH.
 
-focus on the following:
+here is a diff to help focus your review
+\`\`\`diff
+$(git diff $BASE_COMMIT -- $CHANGED_FILES)
+\`\`\`
 
+Please review each file's changes and provide feedback in the following format:
+
+## path/to/file.ext
+
+line=X: Issue description
+line=Y-Z: Another issue description
+
+do not reference this diff, only the actual files (added to the context).
+
+focus on:
 1. Potential bugs or edge cases
-2. Code style and best practices
+2. Consisten code style and best practices
 3. Performance considerations
 4. Security implications
 5. Coverage by Unit or integration tests
@@ -94,4 +111,3 @@ EOF
 nvim -R $PATCH $CHANGED_FILES -c "CopilotChat" -c "CopilotChatOpen" -c "r $PROMPT_FILE" -c "stopinsert"
 
 rm $PROMPT_FILE
-rm $PATCH

@@ -12,4 +12,7 @@ cd $(git rev-parse --show-toplevel)
   --preview-window=right:60%:wrap \
   --bind 'ctrl-d:preview-page-down,ctrl-u:preview-page-up,ctrl-f:preview-page-down,ctrl-b:preview-page-up' |
   awk '{print substr($0,4)}' |
-  xargs -r -I {} sh -c 'echo "git add {}"; git add "{}"'
+  while IFS= read -r file; do
+    echo "git add \"$file\""
+    git add "$file"
+  done
