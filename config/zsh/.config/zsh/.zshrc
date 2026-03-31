@@ -37,8 +37,16 @@ source $SHELL_CONFIG_PATH/keymaps.sh
 
 source $ZSH_CONFIG_PATH/prompt.sh
 
-# load git completions
-autoload -Uz compinit && compinit
+# load completions (skip security audit unless dump is >24h old)
+autoload -Uz compinit
+() {
+  setopt local_options extended_glob
+  if [[ -n $ZSH_CONFIG_PATH/.zcompdump(#qN.mh+24) ]]; then
+    compinit -d "$ZSH_CONFIG_PATH/.zcompdump"
+  else
+    compinit -C -d "$ZSH_CONFIG_PATH/.zcompdump"
+  fi
+}
 
 
 function install_plugins() {

@@ -13,12 +13,9 @@ alias xcopy='xclip -selectionclipboard'      # copy to clipboard
 alias xpaste='xclip -selection clipboard -o' # paste from clipboard
 alias sshnokey='ssh -Y -o PreferredAuthentications=password -o PubkeyAuthentication=no'
 alias ..='popd &>/dev/null'
-alias vim='vim -O'
 alias vimdiff='vim -d -c "norm ]c[c"'   # jump to first difference on startup
 alias nvimdiff='nvim -d -c "norm ]c[c"' # jump to first difference on startup
-alias unspoof='spoof x'
 alias vgdb='valgrind --vgdb=yes --vgdb-error=0 --leak-check=full --show-reachable=yes --track-origins=yes --num-callers=20 --track-fds=yes -s'
-alias evince='env -i DISPLAY=$DISPLAY evince'
 alias lock='lxlock' # sudo apt-get install lxsession
 alias callgrind='valgrind --tool=callgrind'
 alias profgrind='valgrind --tool=kcachegrind'

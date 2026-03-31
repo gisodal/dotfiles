@@ -17,11 +17,9 @@ XDG_DATA_HOME="$HOME/.local/share"
 XDG_STATE_HOME="$HOME/.local/state"
 XDG_CACHE_HOME="$HOME/.cache"
 
-LOCALBINS=$(find ~/.local/bin -maxdepth 1 -type d 2>/dev/null | xargs printf "%s:")
 GIT_CONFIG_PATH="$XDG_CONFIG_HOME/git"
 
 add-to-path "$GIT_CONFIG_PATH/commands"
-add-to-path "$LOCALBINS"
 add-to-path "$HOME/.local/bin"
 add-to-path "/opt/homebrew/bin"
 
@@ -47,9 +45,6 @@ PATH="$PNPM_HOME:$PATH"
 
 [ -s "$HOME/.cargo/env" ] && source "$HOME/.cargo/env"
 
-NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"                   # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion" # This loads nvm bash_completion
 
 if exists fdfind; then
   FZF_DEFAULT_COMMAND="fdfind --type file --hidden --no-ignore"
