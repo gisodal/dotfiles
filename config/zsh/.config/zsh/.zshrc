@@ -70,9 +70,15 @@ if [ ! -d "$PLUGINDIR/zsh-vi-mode" ]; then
   install_plugins
 fi
 
-source $PLUGINDIR/zsh-vi-mode/zsh-vi-mode.plugin.zsh
-source $PLUGINDIR/zsh-autosuggestions/zsh-autosuggestions.zsh
-source $PLUGINDIR/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+# compile plugins to wordcode on first load (faster cold startup)
+for _plugin in \
+  $PLUGINDIR/zsh-vi-mode/zsh-vi-mode.plugin.zsh \
+  $PLUGINDIR/zsh-autosuggestions/zsh-autosuggestions.zsh \
+  $PLUGINDIR/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh; do
+  [[ -f "$_plugin" && ( ! -f "$_plugin.zwc" || "$_plugin" -nt "$_plugin.zwc" ) ]] && zcompile "$_plugin"
+  source "$_plugin"
+done
+unset _plugin
 
 zstyle ':completion:*' menu select
 
