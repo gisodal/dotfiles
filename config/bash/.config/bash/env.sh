@@ -6,7 +6,7 @@ if exists direnv; then
 fi
 
 if exists mise; then
-  eval "$(mise activate zsh)"
+  eval "$(mise activate bash)"
 fi
 
 # setup fzf

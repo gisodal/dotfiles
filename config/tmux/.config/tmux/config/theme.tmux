@@ -14,10 +14,10 @@ set -g @catppuccin_window_status "none"
 set -g @catppuccin_window_current_background "#{@thm_peach}"
 
 set -g @catppuccin_window_default_fill "number" # or 'number' the number is highlighted
-set -g @catppuccin_window_default_text "#W#{?window_zoomed_flag, 󰁌 ,}"
+set -g @catppuccin_window_default_text '#(cd "#{pane_current_path}" && git symbolic-ref --short HEAD 2>/dev/null || echo "#W")#{?window_zoomed_flag, 󰁌 ,}'
 
 set -g @catppuccin_window_current_fill "all" # the number and text field are highlighted
-set -g @catppuccin_window_current_text "#W#{?window_zoomed_flag, 󰁌 ,}"
+set -g @catppuccin_window_current_text '#(cd "#{pane_current_path}" && git symbolic-ref --short HEAD 2>/dev/null || echo "#W")#{?window_zoomed_flag, 󰁌 ,}'
 
 ## status bar stuff
 set -g @catppuccin_status_right_separator " "
@@ -34,8 +34,12 @@ set -g status-left " "
 
 set -g @catppuccin_date_time_text "%d-%m-%Y %H:%M"
 
-set -g status-right-length 68
+# Load git branch module
+source -F "#{d:current_file}/../plugins/catppuccin/status/git_branch.conf"
+
+set -g status-right-length 100
 set -g status-right "#{?client_prefix,#[fg=#{@thm_yellow}]#[bg=#000000]#[reverse]prefix#[noreverse]  ,}"
+set -ag status-right "#{?#{E:@catppuccin_git_branch_text},#{E:@catppuccin_status_git_branch},}"
 set -ag status-right "#{E:@catppuccin_status_session}"
 set -ag status-right "#{E:@catppuccin_status_host}"
 set -ag status-right "#{E:@catppuccin_status_date_time}"

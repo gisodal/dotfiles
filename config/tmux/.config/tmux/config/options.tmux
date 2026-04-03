@@ -49,6 +49,9 @@ set -g visual-activity off
 #set -sg repeat-time 600                   # increase repeat timeout
 set -g  mouse on
 
+# Enter copy mode and scroll in one motion
+bind -n WheelUpPane if-shell -F -t = "#{mouse_any_flag}" "send-keys -M" "if -Ft= '#{pane_in_mode}' 'send-keys -M' 'select-pane -t=; copy-mode -e; send-keys -M'"
+
 ## tmux session name
 set -g allow-rename on # Allow programs in the pane to change the window name using \ek...\e\\
 set -g set-titles on

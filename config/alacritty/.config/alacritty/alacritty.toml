@@ -101,7 +101,7 @@ option_as_alt = "Both" # Default: "None"
 history = 10000 # Default: 10000
 
 # Number of lines scrolled for every input scroll increment
-multiplier = 1 # Default: 3
+multiplier = 10 # Default: 3
 
 ########
 # FONT #
