@@ -84,3 +84,15 @@ bind M command-prompt -p "Move window to:" "move-window -t %%"
 
 bind x confirm-before -p 'Kill pane (y/N)?' kill-pane
 
+## mark pane, then swap or join from elsewhere
+bind w select-pane -m
+bind S swap-pane
+bind W join-pane -h
+
+## browse options and keybindings
+bind ? customize-mode -Z
+
+## popups
+bind C-o display-popup -E -w 80% -h 80% -d "#{pane_current_path}" \
+    'fzf --preview "head -40 {}" | xargs -r nvim'
+

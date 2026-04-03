@@ -27,6 +27,12 @@ set-option -a terminal-features "xterm*:RGB,alacritty*:RGB,tmux*:RGB"
 # Focus events enabled for terminals that support them
 set -g focus-events on
 
+# Enable CSI u key sequences for Ctrl-Shift, Ctrl-Enter, etc.
+set -g extended-keys on
+
+# Let programs talk directly to the outer terminal (OSC 52 clipboard, images, etc.)
+set -g allow-passthrough on
+
 # Super useful when using "grouped sessions" and multi-monitor setup
 setw -g aggressive-resize on
 ## act like gnu screen
