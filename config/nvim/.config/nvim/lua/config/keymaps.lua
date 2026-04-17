@@ -84,3 +84,15 @@ vim.keymap.set("n", "<Space>", "<Nop>", {
   silent = true,
   noremap = true,
 })
+
+wk.add({
+  "<leader>wf",
+  function()
+    require("config.custom.file_explorer").toggle_fit()
+  end,
+  desc = "Fit file explorer width to content",
+  mode = "n",
+  noremap = true,
+  silent = true,
+  icon = "󰩨",
+})
