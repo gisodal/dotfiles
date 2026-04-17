@@ -57,6 +57,12 @@ return {
             disable_diagnostics = true,
           },
         },
+        file_panel = {
+          win_config = {
+            position = "left",
+            width = 60,
+          },
+        },
         keymaps = {
           view = {
             { "n", "q", actions.close },

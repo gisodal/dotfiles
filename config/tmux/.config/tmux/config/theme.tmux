@@ -14,10 +14,10 @@ set -g @catppuccin_window_status "none"
 set -g @catppuccin_window_current_background "#{@thm_peach}"
 
 set -g @catppuccin_window_default_fill "number" # or 'number' the number is highlighted
-set -g @catppuccin_window_default_text '#(cd "#{pane_current_path}" && git symbolic-ref --short HEAD 2>/dev/null || echo "#W")#{?window_zoomed_flag, 󰁌 ,}'
+set -g @catppuccin_window_default_text '#(cd "#{pane_current_path}" && b=$(git symbolic-ref --short HEAD 2>/dev/null) && echo "$(basename $(git rev-parse --show-toplevel)):$b" || echo "#W")#{?window_zoomed_flag, 󰁌 ,}'
 
 set -g @catppuccin_window_current_fill "all" # the number and text field are highlighted
-set -g @catppuccin_window_current_text '#(cd "#{pane_current_path}" && git symbolic-ref --short HEAD 2>/dev/null || echo "#W")#{?window_zoomed_flag, 󰁌 ,}'
+set -g @catppuccin_window_current_text '#(cd "#{pane_current_path}" && b=$(git symbolic-ref --short HEAD 2>/dev/null) && echo "$(basename $(git rev-parse --show-toplevel)):$b" || echo "#W")#{?window_zoomed_flag, 󰁌 ,}'
 
 ## status bar stuff
 set -g @catppuccin_status_right_separator " "

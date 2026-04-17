@@ -84,6 +84,8 @@ zstyle ':completion:*' menu select
 
 zmodload -i zsh/complist
 bindkey -M menuselect '^i' accept-line
+bindkey -M menuselect '^n' down-line-or-history
+bindkey -M menuselect '^p' up-line-or-history
 zstyle ':completion:*' menu select=1
 zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}'
 
