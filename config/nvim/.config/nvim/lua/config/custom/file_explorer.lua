@@ -1,7 +1,7 @@
 local M = {}
 
-M.DEFAULT_WIDTH = 60
-M.MAX_WIDTH = 80
+M.DEFAULT_WIDTH = 50
+M.MAX_WIDTH = 100
 
 -- Width contributions used by the neo-tree backend's synthetic width calculation.
 local INDENT_SIZE = 2
@@ -97,14 +97,6 @@ function M.toggle_fit()
     return
   end
 
-  -- Second press: restore.
-  if saved_widths[winid] then
-    vim.api.nvim_win_set_width(winid, saved_widths[winid])
-    saved_widths[winid] = nil
-    return
-  end
-
-  -- First press: fit.
   local computed = backends[backend_name](winid)
   if not computed then
     vim.notify("no width computed for " .. backend_name, vim.log.levels.WARN)
@@ -114,12 +106,22 @@ function M.toggle_fit()
   local current = vim.api.nvim_win_get_width(winid)
   local target = clamp(computed, current, M.MAX_WIDTH)
 
+  -- Panel already matches content: toggle off by restoring the saved width.
   if target == current then
-    vim.notify("panel already fits", vim.log.levels.INFO)
+    if saved_widths[winid] then
+      vim.api.nvim_win_set_width(winid, saved_widths[winid])
+      saved_widths[winid] = nil
+    else
+      vim.notify("panel already fits", vim.log.levels.INFO)
+    end
     return
   end
 
-  saved_widths[winid] = current
+  -- Panel needs to grow (first fit, or content widened after a prior fit).
+  -- Preserve the original saved width so a later restore returns to the user's default.
+  if not saved_widths[winid] then
+    saved_widths[winid] = current
+  end
   vim.api.nvim_win_set_width(winid, target)
 end
 
