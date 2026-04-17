@@ -36,7 +36,19 @@ function backends.neo_tree(winid)
 end
 
 function backends.diffview(winid)
-  return nil -- implemented in a later task
+  local bufnr = vim.api.nvim_win_get_buf(winid)
+  local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+  local max = 0
+  for _, line in ipairs(lines) do
+    local w = vim.fn.strdisplaywidth(line)
+    if w > max then
+      max = w
+    end
+  end
+  if max == 0 then
+    return nil
+  end
+  return max + 2 -- small margin so the last character isn't flush against the border
 end
 
 local function clamp(n, lo, hi)
