@@ -6,6 +6,7 @@ M.MAX_WIDTH = 80
 -- Width contributions used by the neo-tree backend's synthetic width calculation.
 local INDENT_SIZE = 2
 local ICON_BUDGET = 4 -- devicon (2) + trailing space + slack
+local PANEL_MARGIN = 2 -- trailing slack so the last glyph isn't flush with the window border
 
 -- [winid] -> prior width (set when panel is fitted, cleared when restored).
 local saved_widths = {}
@@ -32,7 +33,39 @@ end
 local backends = {}
 
 function backends.neo_tree(winid)
-  return nil -- implemented in a later task
+  local ok, manager = pcall(require, "neo-tree.sources.manager")
+  if not ok then
+    return nil
+  end
+  local state = manager.get_state("filesystem")
+  if not state or not state.tree then
+    return nil
+  end
+
+  local tree = state.tree
+  local max = 0
+
+  local function visit(node_id)
+    local children = tree:get_nodes(node_id)
+    for _, node in ipairs(children) do
+      local depth = node:get_depth() -- NuiTree: root children are depth 1
+      local name = node.name or vim.fs.basename(node:get_id()) or ""
+      local width = (depth - 1) * INDENT_SIZE + ICON_BUDGET + vim.fn.strdisplaywidth(name)
+      if width > max then
+        max = width
+      end
+      if node:has_children() then
+        visit(node:get_id())
+      end
+    end
+  end
+
+  visit(nil) -- nil asks NuiTree for the root-level children
+
+  if max == 0 then
+    return nil
+  end
+  return max + PANEL_MARGIN
 end
 
 function backends.diffview(winid)
@@ -48,7 +81,7 @@ function backends.diffview(winid)
   if max == 0 then
     return nil
   end
-  return max + 2 -- small margin so the last character isn't flush against the border
+  return max + PANEL_MARGIN
 end
 
 local function clamp(n, lo, hi)
