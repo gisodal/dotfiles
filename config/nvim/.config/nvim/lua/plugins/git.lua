@@ -30,6 +30,7 @@ return {
     },
     opts = function()
       local actions = require("diffview.actions")
+      local explorer = require("config.custom.file_explorer")
       vim.api.nvim_create_autocmd({ "WinEnter", "BufEnter" }, {
         group = vim.api.nvim_create_augroup("rafi_diffview", {}),
         pattern = "diffview:///panels/*",
@@ -60,7 +61,7 @@ return {
         file_panel = {
           win_config = {
             position = "left",
-            width = 60,
+            width = explorer.DEFAULT_WIDTH,
           },
         },
         keymaps = {
