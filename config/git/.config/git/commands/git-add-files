@@ -3,11 +3,12 @@
 cd $(git rev-parse --show-toplevel)
 
 {
-  # Get files with their status
-  git ls-files --others --exclude-standard | sed 's/^/?? /'
-  git diff --name-only | sed 's/^/M  /'
-  git diff --name-only --staged | sed 's/^/A  /'
-} | sort -u | fzf -m --cycle --no-height --header="Select files to add to the staging area" \
+  # Order in input = bottom-up in fzf default layout.
+  # M closest to prompt, then ??, then A farthest.
+  git diff --name-only | sed 's/^/M  /' | sort
+  git ls-files --others --exclude-standard | sed 's/^/?? /' | sort
+  git diff --name-only --staged | sed 's/^/A  /' | sort
+} | awk '!seen[$0]++' | fzf -m --cycle --no-height --header="Select files to add to the staging area" \
   --preview 'git preview-file {}' \
   --preview-window=right:60%:wrap \
   --bind 'ctrl-d:preview-page-down,ctrl-u:preview-page-up,ctrl-f:preview-page-down,ctrl-b:preview-page-up' |
