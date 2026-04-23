@@ -1,0 +1,831 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Enable with WT_XTRACE=1 to see every step with line numbers.
+# Usage: WT_XTRACE=1 wt rm 2>/tmp/wt.trace
+if [[ -n "${WT_XTRACE:-}" ]]; then
+  PS4='+ ${BASH_SOURCE##*/}:${LINENO}: '
+  set -x
+fi
+
+CONFIG_REPO=""
+SOURCE_REPO=""
+WORKSPACE_ROOT=""
+
+# --- Output helpers ------------------------------------------------------
+
+info()    { echo "$*" >&2; }
+success() { echo "ok:    $*" >&2; }
+warn()    { echo "warn:  $*" >&2; }
+die()     { echo "error: $*" >&2; exit 1; }
+
+prompt_yn() {
+  local msg="$1" default="${2:-N}" reply
+  if [[ ! -t 0 ]]; then
+    [[ "$default" == "Y" ]] && return 0 || return 1
+  fi
+  read -rp "$msg " reply
+  reply="${reply:-$default}"
+  [[ "$reply" =~ ^[Yy]$ ]]
+}
+
+# --- Path & context resolution ------------------------------------------
+
+resolve_link() {
+  local target="$1" i=0
+  cd "$(dirname "$target")" >/dev/null 2>&1 || return 1
+  target="$(basename "$target")"
+  while [[ -L "$target" ]]; do
+    (( i++ < 40 )) || return 1
+    target="$(readlink "$target")"
+    cd "$(dirname "$target")" >/dev/null 2>&1 || return 1
+    target="$(basename "$target")"
+  done
+  echo "$(pwd -P)/$target"
+}
+
+git_root_of() {
+  local path="$1"
+  [[ -d "$path" ]] || path="$(dirname "$path")"
+  git -C "$path" rev-parse --show-toplevel 2>/dev/null
+}
+
+detect_config_repo() {
+  local self
+  self="$(resolve_link "${BASH_SOURCE[0]}")"
+  git_root_of "$self" || die "cannot determine config repo from $self"
+}
+
+discover_siblings() {
+  local cfg="$1" parent candidate
+  parent="$(dirname "$cfg")"
+  for candidate in "$parent"/*/; do
+    candidate="${candidate%/}"
+    [[ "$candidate" == "$cfg" ]] && continue
+    [[ -d "$candidate/.git" ]] && echo "$candidate"
+  done
+}
+
+upsert_mise_env() {
+  mise set --file "$1" "$2=$3"
+}
+
+resolve_source_candidate() {
+  local name="$1" cfg="$2" path
+  if [[ "$name" == /* ]]; then
+    path="$name"
+  else
+    path="$(dirname "$cfg")/$name"
+  fi
+  [[ -d "$path/.git" ]] || die "source '$name' resolved to '$path' but no git repo there"
+  ( cd "$path" && pwd -P )
+}
+
+# primary repo root containing PWD (handles worktrees); empty if PWD not in a git repo
+pwd_primary_repo() {
+  local top common
+  top="$(git -C "$PWD" rev-parse --show-toplevel 2>/dev/null)" || return 0
+  common="$(git -C "$PWD" rev-parse --git-common-dir 2>/dev/null || true)"
+  if [[ "$common" == /* ]]; then
+    ( cd "$common/.." && pwd -P )
+  else
+    echo "$top"
+  fi
+}
+
+detect_source_repo() {
+  local cfg="${1:-$CONFIG_REPO}"
+  [[ -n "$cfg" ]] || cfg="$(detect_config_repo)"
+
+  # 1. Explicit env override — trust the user
+  if [[ -n "${WT_SOURCE:-}" ]]; then
+    resolve_source_candidate "$WT_SOURCE" "$cfg"
+    return
+  fi
+
+  # 2. Recorded binding from `wt setup` (read via mise, symmetric with how it's written)
+  local recorded=""
+  if command -v mise >/dev/null && [[ -f "$cfg/mise.local.toml" ]]; then
+    recorded="$(mise config get --file "$cfg/mise.local.toml" env.WT_SOURCE 2>/dev/null || true)"
+  fi
+  if [[ -n "$recorded" ]]; then
+    local candidate pwd_primary
+    candidate="$(resolve_source_candidate "$recorded" "$cfg")"
+    pwd_primary="$(pwd_primary_repo)"
+    if [[ -n "$pwd_primary" && "$pwd_primary" != "$candidate" ]]; then
+      die "wt is bound to '$(basename "$candidate")' (config at $cfg), but PWD is in a different repo '$pwd_primary'. Run 'wt setup' from inside $pwd_primary to create its own config."
+    fi
+    echo "$candidate"
+    return
+  fi
+
+  # 3. No recording — last-ditch sibling fallback (pre-setup state)
+  local -a siblings=()
+  while IFS= read -r s; do siblings+=("$s"); done < <(discover_siblings "$cfg")
+  case ${#siblings[@]} in
+    0) die "no source repo recorded and none discoverable. Run 'wt setup' inside your source repo" ;;
+    1) echo "${siblings[0]}"; return ;;
+    *)
+       command -v fzf >/dev/null || die "multiple candidates, install fzf to pick"
+       local picked
+       picked="$(printf '%s\n' "${siblings[@]}" | FZF_DEFAULT_COMMAND= fzf --prompt='Select source repo: ' --height=~40% --layout=reverse)"
+       [[ -z "$picked" ]] && die "no selection"
+       upsert_mise_env "$cfg/mise.local.toml" WT_SOURCE "$(basename "$picked")"
+       echo "$picked"
+       ;;
+  esac
+}
+
+load_context() {
+  CONFIG_REPO="$(detect_config_repo)"
+  SOURCE_REPO="$(detect_source_repo "$CONFIG_REPO")"
+  WORKSPACE_ROOT="$(dirname "$SOURCE_REPO")"
+}
+
+# --- Stow integration ---------------------------------------------------
+
+# always skip these regardless of .stow-local-ignore (a user-supplied one
+# replaces stow's defaults entirely, so we can't rely on them)
+STOW_IGNORES=(
+  --ignore='\.git$'
+  --ignore='\.gitignore$'
+  --ignore='\.gitmodules$'
+  --ignore='\.gitattributes$'
+  --ignore='\.DS_Store$'
+  --ignore='^docs$'
+)
+
+check_stow_conflicts() {
+  local src="$1" dst="$2" out
+  if ! out="$(stow --dir="$src" --target="$dst" --simulate --verbose=0 "${STOW_IGNORES[@]}" . 2>&1)"; then
+    warn "stow would conflict:"
+    echo "$out" | grep -E '^\s*\*' >&2
+    return 1
+  fi
+  return 0
+}
+
+is_stow_ignored() {
+  local src="$1" rel="$2" ignore="$src/.stow-local-ignore" pat
+  [[ -f "$ignore" ]] || return 1
+  while IFS= read -r pat; do
+    [[ -z "$pat" || "$pat" == \#* ]] && continue
+    if [[ "$pat" == ^/* ]]; then
+      local anchored="${pat#^/}"
+      [[ "/$rel" =~ ^/${anchored} ]] && return 0
+    else
+      [[ "$rel" =~ $pat ]] && return 0
+    fi
+  done < "$ignore"
+  return 1
+}
+
+stow_into() {
+  local src="$1" dst="$2"
+  command -v stow >/dev/null || die "stow not installed"
+  # pre-create dirs that hold non-ignored files so stow symlinks per-file instead of folding
+  while IFS= read -r -d '' f; do
+    local rel="${f#$src/}"
+    [[ "$rel" == .git || "$rel" == .git/* ]] && continue
+    is_stow_ignored "$src" "$rel" && continue
+    local parent
+    parent="$(dirname "$rel")"
+    [[ "$parent" == "." ]] && continue
+    mkdir -p "$dst/$parent"
+  done < <(find "$src" -mindepth 1 -type f -not -path "$src/.git/*" -print0)
+  stow --dir="$src" --target="$dst" --verbose=0 "${STOW_IGNORES[@]}" .
+
+  # stow just injected mise config symlinks into $dst — trust both real and symlink paths
+  if command -v mise >/dev/null; then
+    local f
+    for f in mise.toml mise.local.toml; do
+      [[ -f "$src/$f" ]] && mise trust "$src/$f" >/dev/null 2>&1 || true
+      [[ -f "$dst/$f" ]] && mise trust "$dst/$f" >/dev/null 2>&1 || true
+    done
+  fi
+}
+
+unstow_from() {
+  local src="$1" dst="$2"
+  command -v stow >/dev/null || die "stow not installed"
+  stow --dir="$src" --target="$dst" --delete --verbose=0 "${STOW_IGNORES[@]}" . 2>/dev/null || true
+}
+
+# --- Worktree helpers ---------------------------------------------------
+
+get_worktrees() {
+  local source_repo="$1"
+  local wt_path="" wt_branch=""
+  while IFS= read -r line; do
+    if [[ "$line" == worktree\ * ]]; then
+      wt_path="${line#worktree }"
+    elif [[ "$line" == branch\ * || "$line" == detached ]]; then
+      [[ -d "$wt_path/.git" ]] && continue
+      if [[ "$line" == branch\ * ]]; then
+        wt_branch="${line#branch refs/heads/}"
+      else
+        wt_branch="(detached HEAD)"
+      fi
+      printf '%s\t%s\n' "$wt_path" "$wt_branch"
+    fi
+  done < <(git -C "$source_repo" worktree list --porcelain 2>/dev/null)
+}
+
+get_worktree_status() {
+  local wt_path="$1" dirty="" count=0 f
+  if ! git -C "$wt_path" diff --quiet 2>/dev/null \
+     || ! git -C "$wt_path" diff --cached --quiet 2>/dev/null; then
+    dirty="dirty"
+  fi
+  while IFS= read -r f; do
+    [[ -L "$wt_path/$f" ]] && continue
+    (( count++ )) || true
+  done < <(git -C "$wt_path" ls-files --others --exclude-standard 2>/dev/null)
+  (( count > 0 )) && dirty="${dirty:+$dirty, }$count untracked"
+  echo "${dirty:-clean}"
+}
+
+# --- Clipboard & ephemeral state ----------------------------------------
+
+copy_to_clipboard() {
+  local text="$1"
+  if command -v pbcopy   >/dev/null; then echo "$text" | pbcopy;    return; fi
+  if command -v xclip    >/dev/null; then echo "$text" | xclip -selection clipboard; return; fi
+  if command -v xsel     >/dev/null; then echo "$text" | xsel --clipboard --input;   return; fi
+  if command -v wl-copy  >/dev/null; then echo "$text" | wl-copy;   return; fi
+  return 1
+}
+
+# shell wrapper reads this and pushes it into the next prompt's edit buffer
+# (zsh: print -z, bash: history -s)
+write_next_cmd() {
+  echo "$1" > /tmp/wt_next_cmd
+}
+
+# unified UX for sending the user to a worktree: pre-fill next prompt + clipboard fallback
+offer_cd() {
+  local path="$1" cmd="cd \"$1\""
+  write_next_cmd "$cmd"
+  copy_to_clipboard "$cmd" || true
+  info "(hit Enter on the next prompt to jump there; also copied to clipboard)"
+}
+
+# --- Help & dispatch ----------------------------------------------------
+
+cmd_help() {
+  cat <<'EOF'
+Usage: wt <command> [arguments]
+
+Commands:
+  setup [path]     Bootstrap a config repo for a source repo (arg or cwd)
+  add <branch>     Create a worktree, stow config, trust mise, run bootstrap
+  rm [branch]      Remove a worktree (fzf if no name)
+  ls               Pick a worktree with fzf; pre-fills 'cd <path>' on next prompt
+  status           List worktrees with path and dirty status
+  pr               Call 'pr' from PATH for a branch, then wt add
+  stow <target>    Stow config repo into target (name or path)
+  unstow <target>  Unstow config repo from target
+  test             Run embedded smoke tests against this wt
+  help             Show this message
+EOF
+}
+
+main() {
+  local cmd="${1:-help}"
+  shift || true
+  case "$cmd" in
+    help|-h|--help) cmd_help ;;
+    setup)    cmd_setup   "$@" ;;
+    add)      cmd_add     "$@" ;;
+    rm)      cmd_rm      "$@" ;;
+    ls)       cmd_ls      "$@" ;;
+    status|st) cmd_status "$@" ;;
+    pr)       cmd_pr      "$@" ;;
+    stow)     cmd_stow    "$@" ;;
+    unstow)   cmd_unstow  "$@" ;;
+    test)     cmd_test    "$@" ;;
+    *) warn "Unknown command: $cmd"; cmd_help; exit 1 ;;
+  esac
+}
+
+# --- Dependency management (setup-only) ---------------------------------
+
+check_deps() {
+  local -a missing=()
+  local dep
+  for dep in git mise stow fzf; do
+    command -v "$dep" >/dev/null || missing+=("$dep")
+  done
+  if [[ ${#missing[@]} -gt 0 ]]; then
+    warn "missing dependencies: ${missing[*]}"
+    if prompt_yn "Install ${missing[*]} via package manager? [y/N]" N; then
+      if command -v brew >/dev/null; then
+        brew install "${missing[@]}"
+      elif command -v apt-get >/dev/null; then
+        sudo apt-get install -y "${missing[@]}"
+      elif command -v dnf >/dev/null; then
+        sudo dnf install -y "${missing[@]}"
+      elif command -v pacman >/dev/null; then
+        sudo pacman -S --noconfirm "${missing[@]}"
+      else
+        die "no supported package manager found. Install manually: ${missing[*]}"
+      fi
+    else
+      die "cannot proceed without: ${missing[*]}"
+    fi
+  fi
+}
+
+ensure_mise_shell_activation() {
+  command -v mise >/dev/null || return 0
+
+  local shell_name rc_file activate_line
+  local -a candidates=()
+  shell_name="$(basename "${SHELL:-}")"
+  case "$shell_name" in
+    zsh)
+      candidates=("$HOME/.zshrc" "$HOME/.zshenv" "$HOME/.zprofile")
+      rc_file="$HOME/.zshrc"
+      activate_line='eval "$(mise activate zsh)"'
+      ;;
+    bash)
+      candidates=("$HOME/.bashrc" "$HOME/.bash_profile" "$HOME/.profile")
+      rc_file="$HOME/.bashrc"
+      [[ "$(uname -s)" == "Darwin" && ! -f "$rc_file" && -f "$HOME/.bash_profile" ]] \
+        && rc_file="$HOME/.bash_profile"
+      activate_line='eval "$(mise activate bash)"'
+      ;;
+    fish)
+      candidates=("$HOME/.config/fish/config.fish")
+      rc_file="$HOME/.config/fish/config.fish"
+      activate_line='mise activate fish | source'
+      ;;
+    *)
+      warn "unknown shell '$shell_name'; add mise activation manually"
+      return 0
+      ;;
+  esac
+
+  local f
+  for f in "${candidates[@]}"; do
+    [[ -f "$f" ]] && grep -q 'mise activate' "$f" && return 0
+  done
+
+  if prompt_yn "mise activation missing from $shell_name rc. Append to $rc_file? [Y/n]" Y; then
+    mkdir -p "$(dirname "$rc_file")"
+    printf '\n%s\n' "$activate_line" >> "$rc_file"
+    success "added mise activation to $rc_file (source it or restart your shell)"
+  else
+    warn "mise env loading won't work until you add: $activate_line"
+  fi
+}
+
+# --- Command handlers ---------------------------------------------------
+
+cmd_setup() {
+  local source_arg="${1:-}"
+  local source_repo
+  if [[ -n "$source_arg" ]]; then
+    source_repo="$(cd "$source_arg" 2>/dev/null && pwd)" || die "not a directory: $source_arg"
+  else
+    source_repo="$(git rev-parse --show-toplevel 2>/dev/null)" \
+      || die "no path given and not inside a git repo"
+  fi
+  [[ -e "$source_repo/.git" ]] || die "not a git repo: $source_repo"
+
+  local common_dir
+  common_dir="$(git -C "$source_repo" rev-parse --git-common-dir 2>/dev/null)"
+  [[ "$common_dir" == ".git" ]] \
+    || die "source repo is a worktree; use its primary repo instead"
+
+  local self_cfg=""
+  self_cfg="$(git_root_of "$(resolve_link "${BASH_SOURCE[0]}")" 2>/dev/null || true)"
+  if [[ -n "$self_cfg" && "$source_repo" == "$self_cfg" ]]; then
+    die "you're inside the config repo for another project; run setup from inside your source repo"
+  fi
+
+  check_deps
+  ensure_mise_shell_activation
+
+  local source_name config_repo
+  source_name="$(basename "$source_repo")"
+  config_repo="$(dirname "$source_repo")/${source_name}-local"
+
+  if [[ -d "$config_repo" ]]; then
+    info "re-syncing config repo at $config_repo"
+  else
+    info "creating config repo at $config_repo"
+  fi
+  mkdir -p "$config_repo/local/bin"
+  [[ -d "$config_repo/.git" ]] || git -C "$config_repo" init -q
+
+  # absorb a pre-existing source mise.local.toml only when config has none yet
+  if [[ ! -f "$config_repo/mise.local.toml" ]]; then
+    local src_mise="$source_repo/mise.local.toml"
+    if [[ -f "$src_mise" && ! -L "$src_mise" ]]; then
+      if prompt_yn "Source repo has mise.local.toml. Absorb into config repo? [Y/n]" Y; then
+        mv "$src_mise" "$config_repo/mise.local.toml"
+        info "absorbed $src_mise"
+      else
+        die "aborted: existing $src_mise would conflict with stow"
+      fi
+    else
+      touch "$config_repo/mise.local.toml"
+    fi
+  fi
+
+  mise trust "$config_repo/mise.local.toml" >/dev/null
+  mise set --file "$config_repo/mise.local.toml" "WT_SOURCE=$source_name"
+
+  if ! grep -q '^_\.path' "$config_repo/mise.local.toml"; then
+    local tmp_f; tmp_f="$(mktemp)"
+    if grep -q '^\[env\]' "$config_repo/mise.local.toml"; then
+      awk '/^\[env\]/ && !done { print; print "_.path = [\"local/bin\"]"; done=1; next } { print }' \
+        "$config_repo/mise.local.toml" > "$tmp_f"
+      mv "$tmp_f" "$config_repo/mise.local.toml"
+    else
+      printf '\n[env]\n_.path = ["local/bin"]\n' >> "$config_repo/mise.local.toml"
+    fi
+  fi
+
+  # sync the running wt script into the config repo — enables edit-and-re-run workflow
+  local self
+  self="$(resolve_link "${BASH_SOURCE[0]}")"
+  if [[ "$self" != "$config_repo/local/bin/wt" ]]; then
+    cp "$self" "$config_repo/local/bin/wt"
+    chmod +x "$config_repo/local/bin/wt"
+    info "synced wt script from $self"
+  fi
+
+  [[ -f "$config_repo/.gitignore" ]] || printf '.DS_Store\n' > "$config_repo/.gitignore"
+
+  info "checking for stow conflicts..."
+  check_stow_conflicts "$config_repo" "$source_repo" || die "resolve conflicts and re-run"
+
+  info "stowing config into source repo..."
+  stow_into "$config_repo" "$source_repo"
+
+  local orig
+  orig="$(resolve_link "${BASH_SOURCE[0]}")"
+  success "setup complete at $config_repo"
+  info "bootstrap copy at $orig is no longer needed; you can delete it"
+  info "add this to your shell rc so 'wt add'/'wt ls' pre-fill 'cd <worktree>' on your next prompt:"
+  cat <<'SNIP'
+  wt() {
+    command wt "$@"
+    if [ -f /tmp/wt_next_cmd ]; then
+      local __wt_cmd="$(cat /tmp/wt_next_cmd)"; rm -f /tmp/wt_next_cmd
+      if [ -n "$ZSH_VERSION" ]; then print -z "$__wt_cmd"
+      elif [ -n "$BASH_VERSION" ]; then history -s "$__wt_cmd"
+      fi
+    fi
+  }
+SNIP
+  info "optional hooks — drop into $config_repo/local/bin/ (already on PATH via mise):"
+  cat <<SNIP
+  # $config_repo/local/bin/bootstrap — runs after 'wt add' with the new worktree path as \$1
+  #!/usr/bin/env bash
+  set -e
+  cd "\$1"
+  pnpm install                  # or whatever this project needs
+
+  # $config_repo/local/bin/pr — emits a branch name on stdout for 'wt pr' to use as the worktree
+  #!/usr/bin/env bash
+  gh pr list --json headRefName -q '.[].headRefName' | fzf
+SNIP
+}
+cmd_add() {
+  local branch="${1:-}"
+  [[ -n "$branch" ]] || die "usage: wt add <branch>"
+
+  load_context
+  local wt_path="$WORKSPACE_ROOT/$branch"
+
+  info "creating worktree at $wt_path"
+  if git -C "$SOURCE_REPO" show-ref --verify --quiet "refs/heads/$branch"; then
+    git -C "$SOURCE_REPO" worktree add "$wt_path" "$branch"
+  elif git -C "$SOURCE_REPO" show-ref --verify --quiet "refs/remotes/origin/$branch"; then
+    git -C "$SOURCE_REPO" worktree add --track -b "$branch" "$wt_path" "origin/$branch"
+  else
+    git -C "$SOURCE_REPO" worktree add -b "$branch" "$wt_path"
+  fi
+
+  info "checking stow conflicts..."
+  check_stow_conflicts "$CONFIG_REPO" "$wt_path" || die "resolve conflicts and try again"
+
+  info "stowing..."
+  stow_into "$CONFIG_REPO" "$wt_path"
+
+  local bootstrap_rc=0
+  if command -v bootstrap >/dev/null; then
+    info "running bootstrap..."
+    bootstrap "$wt_path" || bootstrap_rc=$?
+    (( bootstrap_rc == 0 )) || warn "bootstrap exited with $bootstrap_rc"
+  fi
+
+  offer_cd "$wt_path"
+  success "worktree ready at $wt_path"
+  return "$bootstrap_rc"
+}
+
+cmd_rm() {
+  local branch="${1:-}"
+  load_context
+  local wt_path
+
+  if [[ -z "$branch" ]]; then
+    local picked
+    picked="$(pick_worktree_with_fzf 'Remove worktree: ' no)" \
+      || { info "no worktree selected"; exit 0; }
+    wt_path="$(echo "$picked" | cut -f1)"
+    branch="$(echo "$picked" | cut -f2)"
+  else
+    wt_path="$WORKSPACE_ROOT/$branch"
+  fi
+
+  [[ "$wt_path" != "$SOURCE_REPO" ]] || die "cannot remove the source repo"
+  [[ -d "$wt_path" ]]                || die "worktree not found at $wt_path"
+  [[ "$PWD" != "$wt_path" && "$PWD" != "$wt_path"/* ]] || die "cd out of $wt_path first"
+
+  local status
+  status="$(get_worktree_status "$wt_path")"
+  if [[ "$status" != "clean" ]]; then
+    warn "worktree has uncommitted changes ($status):"
+    git -C "$wt_path" status --short >&2
+    prompt_yn "Proceed with removal? [y/N]" N || { info "aborted"; exit 0; }
+  fi
+
+  info "unstowing..."
+  unstow_from "$CONFIG_REPO" "$wt_path"
+  info "removing worktree..."
+  git -C "$SOURCE_REPO" worktree remove "$wt_path" --force
+  success "worktree removed"
+
+  if [[ "$branch" != "(detached HEAD)" && -n "$branch" ]]; then
+    if prompt_yn "Delete branch '$branch'? [y/N]" N; then
+      if git -C "$SOURCE_REPO" branch -d "$branch" 2>/dev/null; then
+        success "branch '$branch' deleted"
+      else
+        warn "branch '$branch' is not fully merged"
+        if prompt_yn "Force delete? [y/N]" N; then
+          git -C "$SOURCE_REPO" branch -D "$branch"
+          success "branch '$branch' force-deleted"
+        fi
+      fi
+    fi
+  fi
+}
+cmd_status() {
+  load_context
+
+  info "worktrees in $WORKSPACE_ROOT:"
+  printf '  %-30s %-20s %s\n' "BRANCH" "PATH" "STATUS"
+  printf '  %-30s %-20s %s\n' "------" "----" "------"
+
+  local base_branch base_rel base_status
+  base_rel="$(basename "$SOURCE_REPO")"
+  base_branch="$(git -C "$SOURCE_REPO" symbolic-ref --short HEAD 2>/dev/null || echo '(detached)')"
+  base_status="$(get_worktree_status "$SOURCE_REPO")"
+  printf '  %-30s %-20s %s\n' "$base_branch (MAIN)" "./$base_rel" "$base_status"
+
+  local p b rel status
+  while IFS=$'\t' read -r p b; do
+    rel="$(basename "$p")"
+    status="$(get_worktree_status "$p")"
+    printf '  %-30s %-20s %s\n' "$b" "./$rel" "$status"
+  done < <(get_worktrees "$SOURCE_REPO")
+}
+
+cmd_ls() {
+  load_context
+  local picked wt_path
+  picked="$(pick_worktree_with_fzf 'Worktree: ' yes)" || exit 0
+  wt_path="$(echo "$picked" | cut -f1)"
+  offer_cd "$wt_path"
+}
+
+pick_worktree_with_fzf() {
+  local prompt="$1" include_main="${2:-no}"
+  command -v fzf >/dev/null || die "fzf not found"
+  local -a lines=()
+  local p b rel status display
+
+  if [[ "$include_main" == "yes" ]]; then
+    rel="$(basename "$SOURCE_REPO")"
+    b="$(git -C "$SOURCE_REPO" symbolic-ref --short HEAD 2>/dev/null || echo '(detached)')"
+    status="$(get_worktree_status "$SOURCE_REPO")"
+    display="$(printf '%-30s %-20s %s' "$b (MAIN)" "./$rel" "$status")"
+    lines+=("${display}"$'\t'"${SOURCE_REPO}"$'\t'"${b}")
+  fi
+
+  while IFS=$'\t' read -r p b; do
+    rel="$(basename "$p")"
+    status="$(get_worktree_status "$p")"
+    display="$(printf '%-30s %-20s %s' "$b" "./$rel" "$status")"
+    lines+=("${display}"$'\t'"${p}"$'\t'"${b}")
+  done < <(get_worktrees "$SOURCE_REPO")
+
+  [[ ${#lines[@]} -eq 0 ]] && return 1
+
+  set +e
+  local selected
+  selected="$(printf '%s\n' "${lines[@]}" | FZF_DEFAULT_COMMAND= fzf --with-nth=1 --delimiter=$'\t' \
+    --layout=reverse --prompt="$prompt" --height=~40%)"
+  set -e
+  [[ -z "$selected" ]] && return 1
+  echo "$selected" | awk -F$'\t' '{print $2 "\t" $3}'
+}
+
+resolve_target_path() {
+  local arg="$1" ws="$2"
+  if [[ "$arg" == /* ]]; then
+    echo "$arg"
+  elif [[ -d "$arg" ]]; then
+    (cd "$arg" && pwd)
+  elif [[ -d "$ws/$arg" ]]; then
+    echo "$ws/$arg"
+  else
+    die "target not found: $arg"
+  fi
+}
+
+cmd_stow() {
+  local arg="${1:-}"
+  [[ -n "$arg" ]] || die "usage: wt stow <target>"
+  load_context
+  local tgt
+  tgt="$(resolve_target_path "$arg" "$WORKSPACE_ROOT")"
+  check_stow_conflicts "$CONFIG_REPO" "$tgt" || die "resolve conflicts and try again"
+  stow_into "$CONFIG_REPO" "$tgt"
+  success "stowed into $tgt"
+}
+
+cmd_unstow() {
+  local arg="${1:-}"
+  [[ -n "$arg" ]] || die "usage: wt unstow <target>"
+  load_context
+  local tgt
+  tgt="$(resolve_target_path "$arg" "$WORKSPACE_ROOT")"
+  unstow_from "$CONFIG_REPO" "$tgt"
+  success "unstowed from $tgt"
+}
+
+cmd_test() {
+  export PATH="/usr/bin:/bin:/usr/local/bin:/opt/homebrew/bin:$HOME/.local/bin"
+  for dep in git stow mise; do
+    command -v "$dep" >/dev/null || die "$dep not on test PATH"
+  done
+
+  local self
+  self="$(resolve_link "${BASH_SOURCE[0]}")"
+
+  local tmp
+  tmp=$(mktemp -d)
+  tmp=$(cd "$tmp" && pwd -P)
+  # shellcheck disable=SC2064
+  trap "rm -rf '$tmp'" RETURN
+
+  info "running wt smoke tests in $tmp"
+
+  # fake source repo
+  mkdir -p "$tmp/ws/foo"
+  git -C "$tmp/ws/foo" init -q -b main
+  git -C "$tmp/ws/foo" -c user.email=a@b -c user.name=a commit --allow-empty -q -m init
+
+  # fresh download copy
+  cp "$self" "$tmp/dl-wt"
+  chmod +x "$tmp/dl-wt"
+
+  # test 1: setup structure
+  "$tmp/dl-wt" setup "$tmp/ws/foo" >/dev/null 2>&1 \
+    || { echo "❌ test 1 failed: setup command errored" >&2; return 1; }
+  [[ -d "$tmp/ws/foo-local/.git" ]] \
+    || { echo "❌ test 1 failed: config repo .git missing" >&2; return 1; }
+  grep -q 'WT_SOURCE = "foo"' "$tmp/ws/foo-local/mise.local.toml" \
+    || { echo "❌ test 1 failed: WT_SOURCE missing" >&2; return 1; }
+  [[ -x "$tmp/ws/foo-local/local/bin/wt" ]] \
+    || { echo "❌ test 1 failed: wt not copied into config repo" >&2; return 1; }
+  echo "✅ test 1: setup structure"
+
+  # test 2: setup stow
+  [[ -L "$tmp/ws/foo/mise.local.toml" ]] \
+    || { echo "❌ test 2 failed: mise.local.toml not symlinked in source" >&2; return 1; }
+  [[ -L "$tmp/ws/foo/local/bin/wt" ]] \
+    || { echo "❌ test 2 failed: wt not symlinked in source" >&2; return 1; }
+  echo "✅ test 2: setup stow"
+
+  local WT2="$tmp/ws/foo-local/local/bin/wt"
+
+  # test 3: add + stow (from inside the bound source repo)
+  ( cd "$tmp/ws/foo" && "$WT2" add feat-smoke >/dev/null 2>&1 ) \
+    || { echo "❌ test 3 failed: add errored" >&2; return 1; }
+  [[ -e "$tmp/ws/feat-smoke/.git" ]] \
+    || { echo "❌ test 3 failed: worktree .git missing" >&2; return 1; }
+  [[ -L "$tmp/ws/feat-smoke/mise.local.toml" ]] \
+    || { echo "❌ test 3 failed: worktree mise.local.toml not symlinked" >&2; return 1; }
+  [[ -L "$tmp/ws/feat-smoke/local/bin/wt" ]] \
+    || { echo "❌ test 3 failed: worktree wt not symlinked" >&2; return 1; }
+  echo "✅ test 3: add + stow"
+
+  # test 4: status (from non-git dir — also allowed)
+  local status_out
+  status_out="$( cd "$tmp" && "$WT2" status 2>&1 )" \
+    || { echo "❌ test 4 failed: status errored" >&2; return 1; }
+  echo "$status_out" | grep -q "feat-smoke" \
+    || { echo "❌ test 4 failed: status missing feat-smoke" >&2; return 1; }
+  echo "$status_out" | grep -q "BRANCH" \
+    || { echo "❌ test 4 failed: status missing header" >&2; return 1; }
+  echo "✅ test 4: status"
+
+  # test 5: pr hook
+  mkdir -p "$tmp/hooks"
+  cat > "$tmp/hooks/pr" <<'PR'
+#!/usr/bin/env bash
+echo "from-pr"
+PR
+  chmod +x "$tmp/hooks/pr"
+  ( cd "$tmp/ws/foo" && PATH="$tmp/hooks:$PATH" "$WT2" pr >/dev/null 2>&1 ) \
+    || { echo "❌ test 5 failed: pr errored" >&2; return 1; }
+  [[ -d "$tmp/ws/from-pr" ]] \
+    || { echo "❌ test 5 failed: pr did not create worktree" >&2; return 1; }
+  echo "✅ test 5: pr hook"
+
+  # test 6: rm keeps branch
+  ( cd "$tmp" && echo n | "$WT2" rm feat-smoke >/dev/null 2>&1 ) \
+    || { echo "❌ test 6 failed: rm errored" >&2; return 1; }
+  [[ ! -d "$tmp/ws/feat-smoke" ]] \
+    || { echo "❌ test 6 failed: worktree still present" >&2; return 1; }
+  git -C "$tmp/ws/foo" branch --list feat-smoke | grep -q feat-smoke \
+    || { echo "❌ test 6 failed: branch deleted unexpectedly" >&2; return 1; }
+  echo "✅ test 6: rm keeps branch"
+
+  # test 7: setup absorbs pre-existing mise.local.toml in source repo
+  mkdir -p "$tmp/ws/bar"
+  git -C "$tmp/ws/bar" init -q -b main
+  cat > "$tmp/ws/bar/mise.local.toml" <<'MISE'
+[env]
+AWS_PROFILE = "test-profile"
+MISE
+  git -C "$tmp/ws/bar" add mise.local.toml
+  git -C "$tmp/ws/bar" -c user.email=a@b -c user.name=a commit -q -m init
+
+  "$tmp/dl-wt" setup "$tmp/ws/bar" </dev/null >/dev/null 2>&1 \
+    || { echo "❌ test 7 failed: setup with absorb errored" >&2; return 1; }
+  grep -q 'AWS_PROFILE = "test-profile"' "$tmp/ws/bar-local/mise.local.toml" \
+    || { echo "❌ test 7 failed: AWS_PROFILE not preserved" >&2; return 1; }
+  grep -q 'WT_SOURCE = "bar"' "$tmp/ws/bar-local/mise.local.toml" \
+    || { echo "❌ test 7 failed: WT_SOURCE missing" >&2; return 1; }
+  grep -q '^_\.path' "$tmp/ws/bar-local/mise.local.toml" \
+    || { echo "❌ test 7 failed: _.path missing" >&2; return 1; }
+  [[ -L "$tmp/ws/bar/mise.local.toml" ]] \
+    || { echo "❌ test 7 failed: source mise.local.toml not symlinked" >&2; return 1; }
+  echo "✅ test 7: absorb existing mise.local.toml"
+
+  # test 8: recorded WT_SOURCE binds config to source even from unrelated PWD
+  mkdir -p "$tmp/ws/unrelated"
+  git -C "$tmp/ws/unrelated" init -q -b main
+  git -C "$tmp/ws/unrelated" -c user.email=a@b -c user.name=a commit --allow-empty -q -m init
+  local bar_wt="$tmp/ws/bar-local/local/bin/wt"
+  local status_out_unrelated
+  status_out_unrelated="$( cd "$tmp/ws/unrelated" && "$bar_wt" status 2>&1 )" && {
+    echo "❌ test 8 failed: expected error when run from unrelated repo, got success" >&2
+    echo "output: $status_out_unrelated" >&2
+    return 1
+  }
+  echo "$status_out_unrelated" | grep -q "wt setup" \
+    || { echo "❌ test 8 failed: error should mention 'wt setup'; got: $status_out_unrelated" >&2; return 1; }
+  echo "✅ test 8: rejects invocation from unrelated repo"
+
+  # test 9: recorded WT_SOURCE works from outside any git repo
+  ( cd "$tmp" && "$bar_wt" status 2>&1 ) | grep -q "bar" \
+    || { echo "❌ test 9 failed: status from non-git dir should succeed and show bar" >&2; return 1; }
+  echo "✅ test 9: works from non-git PWD"
+
+  # test 10: setup is idempotent and propagates script updates from the bootstrap copy
+  printf '\n# testtag-idempotent\n' >> "$tmp/dl-wt"
+  "$tmp/dl-wt" setup "$tmp/ws/foo" </dev/null >/dev/null 2>&1 \
+    || { echo "❌ test 10 failed: second setup errored" >&2; return 1; }
+  grep -q 'testtag-idempotent' "$tmp/ws/foo-local/local/bin/wt" \
+    || { echo "❌ test 10 failed: wt script not re-synced on second setup" >&2; return 1; }
+  echo "✅ test 10: setup is idempotent and propagates wt updates"
+
+  success "all 10 tests passed"
+  return 0
+}
+
+cmd_pr() {
+  command -v pr >/dev/null || die "'pr' not on PATH (drop your own pr script there)"
+  load_context
+  local branch
+  branch="$(pr)" || exit 0
+  [[ -z "$branch" ]] && exit 0
+  info "creating worktree for PR branch: $branch"
+  git -C "$SOURCE_REPO" fetch origin "$branch" 2>/dev/null || true
+  cmd_add "$branch"
+}
+
+# --- Entrypoint ---------------------------------------------------------
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+  main "$@"
+fi

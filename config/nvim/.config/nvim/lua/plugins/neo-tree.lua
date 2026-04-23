@@ -1,8 +1,8 @@
 return {
   "nvim-neo-tree/neo-tree.nvim",
-  opts = function()
+  opts = function(_, opts)
     local explorer = require("config.custom.file_explorer")
-    return {
+    return vim.tbl_deep_extend("force", opts, {
       filesystem = {
         filtered_items = {
           hide_dotfiles = false,
@@ -32,6 +32,6 @@ return {
           },
         },
       },
-    }
+    })
   end,
 }
