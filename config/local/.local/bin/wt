@@ -165,34 +165,9 @@ check_stow_conflicts() {
   return 0
 }
 
-is_stow_ignored() {
-  local src="$1" rel="$2" ignore="$src/.stow-local-ignore" pat
-  [[ -f "$ignore" ]] || return 1
-  while IFS= read -r pat; do
-    [[ -z "$pat" || "$pat" == \#* ]] && continue
-    if [[ "$pat" == ^/* ]]; then
-      local anchored="${pat#^/}"
-      [[ "/$rel" =~ ^/${anchored} ]] && return 0
-    else
-      [[ "$rel" =~ $pat ]] && return 0
-    fi
-  done < "$ignore"
-  return 1
-}
-
 stow_into() {
   local src="$1" dst="$2"
   command -v stow >/dev/null || die "stow not installed"
-  # pre-create dirs that hold non-ignored files so stow symlinks per-file instead of folding
-  while IFS= read -r -d '' f; do
-    local rel="${f#$src/}"
-    [[ "$rel" == .git || "$rel" == .git/* ]] && continue
-    is_stow_ignored "$src" "$rel" && continue
-    local parent
-    parent="$(dirname "$rel")"
-    [[ "$parent" == "." ]] && continue
-    mkdir -p "$dst/$parent"
-  done < <(find "$src" -mindepth 1 -type f -not -path "$src/.git/*" -print0)
   stow --dir="$src" --target="$dst" --verbose=0 "${STOW_IGNORES[@]}" .
 
   # stow just injected mise config symlinks into $dst — trust both real and symlink paths
@@ -494,11 +469,43 @@ SNIP
   gh pr list --json headRefName -q '.[].headRefName' | fzf
 SNIP
 }
+derive_next_branch() {
+  [[ -n "$SOURCE_REPO" ]] || die "derive_next_branch called before load_context"
+  local current=""
+  if git -C "$PWD" rev-parse --git-dir >/dev/null 2>&1; then
+    current="$(git -C "$PWD" symbolic-ref --short HEAD 2>/dev/null)" \
+      || die "HEAD is detached; pass a branch name explicitly"
+  else
+    local picked
+    picked="$(pick_worktree_with_fzf 'Base branch: ' yes)" || exit 1
+    current="$(echo "$picked" | cut -f2)"
+  fi
+
+  local root="$current"
+  [[ "$current" =~ ^(.*)-v([0-9]+)$ ]] && root="${BASH_REMATCH[1]}"
+
+  local max_n=1 b suffix
+  while IFS= read -r b; do
+    b="${b:2}"
+    suffix="${b#"${root}-v"}"
+    if [[ "$b" == "${root}-v"* && "$suffix" =~ ^[0-9]+$ ]]; then
+      (( suffix > max_n )) && max_n=$suffix
+    fi
+  done < <(git -C "$SOURCE_REPO" branch --list "${root}-v*" 2>/dev/null)
+
+  echo "${root}-v$((max_n + 1))"
+}
+
 cmd_add() {
   local branch="${1:-}"
-  [[ -n "$branch" ]] || die "usage: wt add <branch>"
 
   load_context
+
+  if [[ -z "$branch" ]]; then
+    branch="$(derive_next_branch)" || { info "no worktree selected"; exit 0; }
+    info "no branch given; creating $branch"
+  fi
+
   local wt_path="$WORKSPACE_ROOT/$branch"
 
   info "creating worktree at $wt_path"
@@ -672,6 +679,7 @@ cmd_unstow() {
 
 cmd_test() {
   export PATH="/usr/bin:/bin:/usr/local/bin:/opt/homebrew/bin:$HOME/.local/bin"
+  unset WT_SOURCE CONFIG_REPO
   for dep in git stow mise; do
     command -v "$dep" >/dev/null || die "$dep not on test PATH"
   done
@@ -710,8 +718,8 @@ cmd_test() {
   # test 2: setup stow
   [[ -L "$tmp/ws/foo/mise.local.toml" ]] \
     || { echo "❌ test 2 failed: mise.local.toml not symlinked in source" >&2; return 1; }
-  [[ -L "$tmp/ws/foo/local/bin/wt" ]] \
-    || { echo "❌ test 2 failed: wt not symlinked in source" >&2; return 1; }
+  [[ -L "$tmp/ws/foo/local" ]] \
+    || { echo "❌ test 2 failed: local/ not folded into single symlink in source" >&2; return 1; }
   echo "✅ test 2: setup stow"
 
   local WT2="$tmp/ws/foo-local/local/bin/wt"
@@ -723,8 +731,8 @@ cmd_test() {
     || { echo "❌ test 3 failed: worktree .git missing" >&2; return 1; }
   [[ -L "$tmp/ws/feat-smoke/mise.local.toml" ]] \
     || { echo "❌ test 3 failed: worktree mise.local.toml not symlinked" >&2; return 1; }
-  [[ -L "$tmp/ws/feat-smoke/local/bin/wt" ]] \
-    || { echo "❌ test 3 failed: worktree wt not symlinked" >&2; return 1; }
+  [[ -L "$tmp/ws/feat-smoke/local" ]] \
+    || { echo "❌ test 3 failed: worktree local/ not folded into single symlink" >&2; return 1; }
   echo "✅ test 3: add + stow"
 
   # test 4: status (from non-git dir — also allowed)
@@ -809,7 +817,23 @@ MISE
     || { echo "❌ test 10 failed: wt script not re-synced on second setup" >&2; return 1; }
   echo "✅ test 10: setup is idempotent and propagates wt updates"
 
-  success "all 10 tests passed"
+  # test 11: wt add with no arg derives -v2 from current branch
+  ( cd "$tmp/ws/foo" && "$WT2" add >/dev/null 2>&1 ) \
+    || { echo "❌ test 11 failed: add with no arg errored" >&2; return 1; }
+  [[ -d "$tmp/ws/main-v2" ]] \
+    || { echo "❌ test 11 failed: expected worktree at $tmp/ws/main-v2" >&2; return 1; }
+  echo "✅ test 11: wt add with no arg creates <branch>-v2"
+
+  # test 12: wt add from inside a -vN worktree creates root-v<N+1>, not root-vN-v2
+  ( cd "$tmp/ws/main-v2" && "$WT2" add >/dev/null 2>&1 ) \
+    || { echo "❌ test 12 failed: add from -v2 worktree errored" >&2; return 1; }
+  [[ -d "$tmp/ws/main-v3" ]] \
+    || { echo "❌ test 12 failed: expected main-v3, not found" >&2; return 1; }
+  [[ ! -d "$tmp/ws/main-v2-v2" ]] \
+    || { echo "❌ test 12 failed: main-v2-v2 should not exist" >&2; return 1; }
+  echo "✅ test 12: wt add from -vN worktree creates root-v<N+1>"
+
+  success "all 12 tests passed"
   return 0
 }
 

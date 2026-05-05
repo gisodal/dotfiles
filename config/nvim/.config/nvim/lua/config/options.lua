@@ -8,6 +8,9 @@ local opt = vim.opt
 opt.scrolloff = 10
 opt.sidescrolloff = 10
 
+-- 1 line per mouse wheel tick
+opt.mousescroll = "ver:1,hor:1"
+
 -- disable all folding
 opt.foldenable = false
 opt.diffopt = opt.diffopt + "context:99999"

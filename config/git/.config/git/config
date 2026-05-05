@@ -43,6 +43,7 @@
 
     basetree = log --author-date-order --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %x09%C(auto)%d%C(reset) %<(16,trunc)%C(dim magenta)%an%C(reset) %C(dim white)%s%C(reset)\n%x09%x09%C(blue) [%ar on %cd]%C(reset)' --date=format:'%A %d %B %Y %H:%M:%S'
     tree = !bash -c '"git basetree --all"'
+    t = "!f(){ n=$(git log --oneline | grep -n -m1 ^$(git rev-parse --short HEAD) | cut -d: -f1); tig +${n:-1}; }; f"
 
     mtree = log --author-date-order --author="gdal*" --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %x09%C(auto)%d%C(reset) %<(16,trunc)%C(dim magenta)%an%C(reset) %C(dim white)%s%C(reset)\n%x09%x09%C(blue) [%ar on %cd]%C(reset)' --date=format:'%A %d %B %Y %H:%M:%S'
     atree = log --all --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %x09%C(auto)%d%C(reset) %<(16,trunc)%C(dim magenta)%an%C(reset) %C(dim white)%s%C(reset)\n%x09%x09%C(blue) [%ar on %cd]%C(reset)' --date=format:'%A %d %B %Y %H:%M:%S'
