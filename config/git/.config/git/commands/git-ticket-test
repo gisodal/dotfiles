@@ -37,7 +37,7 @@ run_in() {
 
 #--- test 1: picker happy path ------------------------------------------------
 reset_hooks
-write_hook ticket-pick <<'PICK'
+write_hook ticket <<'PICK'
 #!/usr/bin/env bash
 echo "T-1"
 PICK
@@ -57,9 +57,9 @@ echo "✅ test 1: picker happy path"
 
 #--- test 2: direct id skips picker ------------------------------------------
 reset_hooks
-write_hook ticket-pick <<'PICK'
+write_hook ticket <<'PICK'
 #!/usr/bin/env bash
-echo "ticket-pick was called when it shouldn't have been" >&2
+echo "ticket was called when it shouldn't have been" >&2
 exit 99
 PICK
 write_hook ticket-title <<'TITLE'
@@ -97,7 +97,7 @@ echo "✅ test 3: existing branch refresh"
 
 #--- test 4: picker cancelled (empty stdout) ---------------------------------
 reset_hooks
-write_hook ticket-pick <<'PICK'
+write_hook ticket <<'PICK'
 #!/usr/bin/env bash
 exit 0
 PICK
@@ -115,20 +115,20 @@ after_branches="$(git -C "$R" branch | wc -l)"
   || { echo "❌ test 4 failed: cancelled picker created a branch" >&2; exit 1; }
 echo "✅ test 4: cancelled picker exits silent"
 
-#--- test 5: missing ticket-pick + no id ------------------------------------
+#--- test 5: missing ticket + no id ------------------------------------
 reset_hooks
-# no ticket-pick written
+# no ticket written
 
 R="$TMP/repo5"; make_repo "$R"
 out="$( cd "$R" && PATH="$TEST_PATH" git ticket 2>&1 )" && {
   echo "❌ test 5 failed: expected non-zero exit, got success" >&2; exit 1; }
-echo "$out" | grep -qi "ticket-pick" \
-  || { echo "❌ test 5 failed: error message should mention ticket-pick; got: $out" >&2; exit 1; }
-echo "✅ test 5: missing ticket-pick dies with hint"
+echo "$out" | grep -qi "on PATH" \
+  || { echo "❌ test 5 failed: error message should mention missing hook on PATH; got: $out" >&2; exit 1; }
+echo "✅ test 5: missing ticket hook dies with hint"
 
 #--- test 6: missing ticket-title ------------------------------------------
 reset_hooks
-write_hook ticket-pick <<'PICK'
+write_hook ticket <<'PICK'
 #!/usr/bin/env bash
 echo "T-6"
 PICK
@@ -148,7 +148,7 @@ echo "✅ test 6: missing ticket-title warns, branch created, no description"
 
 #--- test 7: ticket-title exits non-zero -----------------------------------
 reset_hooks
-write_hook ticket-pick <<'PICK'
+write_hook ticket <<'PICK'
 #!/usr/bin/env bash
 echo "T-7"
 PICK
@@ -169,7 +169,7 @@ echo "✅ test 7: ticket-title non-zero aborts with clear error"
 
 #--- test 8: ticket-title empty stdout ------------------------------------
 reset_hooks
-write_hook ticket-pick <<'PICK'
+write_hook ticket <<'PICK'
 #!/usr/bin/env bash
 echo "T-8"
 PICK
