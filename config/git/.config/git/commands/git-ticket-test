@@ -167,4 +167,25 @@ git -C "$R" rev-parse --verify --quiet refs/heads/T-7 >/dev/null && {
   echo "❌ test 7 failed: branch T-7 should not be created when ticket-title fails" >&2; exit 1; }
 echo "✅ test 7: ticket-title non-zero aborts with clear error"
 
+#--- test 8: ticket-title empty stdout ------------------------------------
+reset_hooks
+write_hook ticket-pick <<'PICK'
+#!/usr/bin/env bash
+echo "T-8"
+PICK
+write_hook ticket-title <<'TITLE'
+#!/usr/bin/env bash
+exit 0
+TITLE
+
+R="$TMP/repo8"; make_repo "$R"
+out="$( cd "$R" && PATH="$TEST_PATH" git ticket 2>&1 )" \
+  || { echo "❌ test 8 failed: empty title should not abort: $out" >&2; exit 1; }
+git -C "$R" rev-parse --verify --quiet refs/heads/T-8 >/dev/null \
+  || { echo "❌ test 8 failed: branch T-8 not created" >&2; exit 1; }
+got="$(git -C "$R" config branch.T-8.description 2>/dev/null || true)"
+[[ -z "$got" ]] \
+  || { echo "❌ test 8 failed: description should be empty; got '$got'" >&2; exit 1; }
+echo "✅ test 8: empty ticket-title output, branch created, no description"
+
 echo "all tests passed"
