@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ID="$(ticket-pick)"
-[[ -n "$ID" ]] || exit 0
+if [[ $# -ge 1 ]]; then
+  ID="$1"
+else
+  ID="$(ticket-pick)"
+  [[ -n "$ID" ]] || exit 0
+fi
 
 TITLE="$(ticket-title "$ID")"
 

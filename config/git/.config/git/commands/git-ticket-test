@@ -55,4 +55,25 @@ got="$(git -C "$R" config branch.T-1.description || true)"
   || { echo "❌ test 1 failed: description='$got' (expected 'Hello world')" >&2; exit 1; }
 echo "✅ test 1: picker happy path"
 
+#--- test 2: direct id skips picker ------------------------------------------
+reset_hooks
+write_hook ticket-pick <<'PICK'
+#!/usr/bin/env bash
+echo "ticket-pick was called when it shouldn't have been" >&2
+exit 99
+PICK
+write_hook ticket-title <<'TITLE'
+#!/usr/bin/env bash
+echo "Direct title for $1"
+TITLE
+
+R="$TMP/repo2"; make_repo "$R"
+run_in "$R" T-2 >/dev/null 2>&1 || { echo "❌ test 2 failed: git ticket T-2 errored" >&2; exit 1; }
+git -C "$R" rev-parse --verify --quiet refs/heads/T-2 >/dev/null \
+  || { echo "❌ test 2 failed: branch T-2 not created" >&2; exit 1; }
+got="$(git -C "$R" config branch.T-2.description || true)"
+[[ "$got" == "Direct title for T-2" ]] \
+  || { echo "❌ test 2 failed: description='$got'" >&2; exit 1; }
+echo "✅ test 2: direct id skips picker"
+
 echo "all tests passed"
