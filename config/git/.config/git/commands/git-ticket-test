@@ -126,4 +126,24 @@ echo "$out" | grep -qi "ticket-pick" \
   || { echo "❌ test 5 failed: error message should mention ticket-pick; got: $out" >&2; exit 1; }
 echo "✅ test 5: missing ticket-pick dies with hint"
 
+#--- test 6: missing ticket-title ------------------------------------------
+reset_hooks
+write_hook ticket-pick <<'PICK'
+#!/usr/bin/env bash
+echo "T-6"
+PICK
+# no ticket-title
+
+R="$TMP/repo6"; make_repo "$R"
+out="$( cd "$R" && PATH="$TEST_PATH" git ticket 2>&1 )" \
+  || { echo "❌ test 6 failed: should still succeed without ticket-title; got: $out" >&2; exit 1; }
+git -C "$R" rev-parse --verify --quiet refs/heads/T-6 >/dev/null \
+  || { echo "❌ test 6 failed: branch T-6 not created" >&2; exit 1; }
+got="$(git -C "$R" config branch.T-6.description 2>/dev/null || true)"
+[[ -z "$got" ]] \
+  || { echo "❌ test 6 failed: description should be empty; got '$got'" >&2; exit 1; }
+echo "$out" | grep -qi "ticket-title" \
+  || { echo "❌ test 6 failed: warning should mention ticket-title; got: $out" >&2; exit 1; }
+echo "✅ test 6: missing ticket-title warns, branch created, no description"
+
 echo "all tests passed"

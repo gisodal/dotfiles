@@ -12,7 +12,12 @@ else
   [[ -n "$ID" ]] || exit 0
 fi
 
-TITLE="$(ticket-title "$ID")"
+if command -v ticket-title >/dev/null; then
+  TITLE="$(ticket-title "$ID")"
+else
+  echo "warn: no ticket-title on PATH; skipping branch description" >&2
+  TITLE=""
+fi
 
 if git show-ref --verify --quiet "refs/heads/$ID"; then
   git checkout "$ID"
@@ -22,4 +27,7 @@ else
   git checkout -b "$ID"
 fi
 
-git config branch."$ID".description "$TITLE"
+if [[ -n "$TITLE" ]]; then
+  TITLE="$(printf '%s' "$TITLE" | head -1)"
+  git config branch."$ID".description "$TITLE"
+fi
