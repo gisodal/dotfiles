@@ -13,7 +13,10 @@ else
 fi
 
 if command -v ticket-title >/dev/null; then
-  TITLE="$(ticket-title "$ID")"
+  if ! TITLE="$(ticket-title "$ID")"; then
+    echo "error: ticket-title failed for $ID (exit $?)" >&2
+    exit 1
+  fi
 else
   echo "warn: no ticket-title on PATH; skipping branch description" >&2
   TITLE=""

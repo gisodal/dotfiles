@@ -146,4 +146,25 @@ echo "$out" | grep -qi "ticket-title" \
   || { echo "❌ test 6 failed: warning should mention ticket-title; got: $out" >&2; exit 1; }
 echo "✅ test 6: missing ticket-title warns, branch created, no description"
 
+#--- test 7: ticket-title exits non-zero -----------------------------------
+reset_hooks
+write_hook ticket-pick <<'PICK'
+#!/usr/bin/env bash
+echo "T-7"
+PICK
+write_hook ticket-title <<'TITLE'
+#!/usr/bin/env bash
+echo "boom" >&2
+exit 17
+TITLE
+
+R="$TMP/repo7"; make_repo "$R"
+out="$( cd "$R" && PATH="$TEST_PATH" git ticket 2>&1 )" && {
+  echo "❌ test 7 failed: expected non-zero exit on ticket-title failure" >&2; exit 1; }
+echo "$out" | grep -qi "ticket-title" \
+  || { echo "❌ test 7 failed: error message should mention ticket-title; got: $out" >&2; exit 1; }
+git -C "$R" rev-parse --verify --quiet refs/heads/T-7 >/dev/null && {
+  echo "❌ test 7 failed: branch T-7 should not be created when ticket-title fails" >&2; exit 1; }
+echo "✅ test 7: ticket-title non-zero aborts with clear error"
+
 echo "all tests passed"
