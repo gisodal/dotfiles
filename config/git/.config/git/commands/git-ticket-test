@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SELF_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+GIT_TICKET="$SELF_DIR/git-ticket"
+
+[[ -x "$GIT_TICKET" ]] || { echo "git-ticket not found or not executable at $GIT_TICKET" >&2; exit 1; }
+
+TMP="$(mktemp -d)"; TMP="$(cd "$TMP" && pwd -P)"
+trap "rm -rf '$TMP'" EXIT
+
+echo "running git-ticket smoke tests in $TMP"
+
+HOOKS="$TMP/hooks"
+TEST_PATH="$HOOKS:$SELF_DIR:/usr/bin:/bin:/usr/local/bin:/opt/homebrew/bin"
+
+reset_hooks() { rm -rf "$HOOKS"; mkdir -p "$HOOKS"; }
+
+write_hook() {
+  local name="$1"; shift
+  cat > "$HOOKS/$name"
+  chmod +x "$HOOKS/$name"
+}
+
+make_repo() {
+  local d="$1"
+  rm -rf "$d"; mkdir -p "$d"
+  git -C "$d" init -q -b main
+  git -C "$d" -c user.email=a@b -c user.name=a commit --allow-empty -q -m init
+  git -C "$d" branch -M main
+}
+
+run_in() {
+  local repo="$1"; shift
+  ( cd "$repo" && PATH="$TEST_PATH" git ticket "$@" )
+}
+
+#--- test 1: picker happy path ------------------------------------------------
+reset_hooks
+write_hook ticket-pick <<'PICK'
+#!/usr/bin/env bash
+echo "T-1"
+PICK
+write_hook ticket-title <<'TITLE'
+#!/usr/bin/env bash
+echo "Hello world"
+TITLE
+
+R="$TMP/repo1"; make_repo "$R"
+run_in "$R" >/dev/null 2>&1 || { echo "❌ test 1 failed: git ticket errored" >&2; exit 1; }
+git -C "$R" rev-parse --verify --quiet refs/heads/T-1 >/dev/null \
+  || { echo "❌ test 1 failed: branch T-1 not created" >&2; exit 1; }
+got="$(git -C "$R" config branch.T-1.description || true)"
+[[ "$got" == "Hello world" ]] \
+  || { echo "❌ test 1 failed: description='$got' (expected 'Hello world')" >&2; exit 1; }
+echo "✅ test 1: picker happy path"
+
+echo "all tests passed"

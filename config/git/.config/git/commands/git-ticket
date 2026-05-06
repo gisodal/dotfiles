@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ID="$(ticket-pick)"
+[[ -n "$ID" ]] || exit 0
+
+TITLE="$(ticket-title "$ID")"
+
+git checkout -b "$ID"
+git config branch."$ID".description "$TITLE"
