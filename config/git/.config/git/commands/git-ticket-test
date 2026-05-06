@@ -95,4 +95,24 @@ got="$(git -C "$R" config branch.T-3.description || true)"
   || { echo "❌ test 3 failed: description='$got' (expected 'Refreshed title')" >&2; exit 1; }
 echo "✅ test 3: existing branch refresh"
 
+#--- test 4: picker cancelled (empty stdout) ---------------------------------
+reset_hooks
+write_hook ticket-pick <<'PICK'
+#!/usr/bin/env bash
+exit 0
+PICK
+write_hook ticket-title <<'TITLE'
+#!/usr/bin/env bash
+echo "should-not-run-because-picker-was-empty" >&2
+exit 99
+TITLE
+
+R="$TMP/repo4"; make_repo "$R"
+before_branches="$(git -C "$R" branch | wc -l)"
+run_in "$R" >/dev/null 2>&1 || { echo "❌ test 4 failed: cancelled picker should exit 0" >&2; exit 1; }
+after_branches="$(git -C "$R" branch | wc -l)"
+[[ "$before_branches" == "$after_branches" ]] \
+  || { echo "❌ test 4 failed: cancelled picker created a branch" >&2; exit 1; }
+echo "✅ test 4: cancelled picker exits silent"
+
 echo "all tests passed"
