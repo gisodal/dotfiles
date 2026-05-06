@@ -76,4 +76,23 @@ got="$(git -C "$R" config branch.T-2.description || true)"
   || { echo "❌ test 2 failed: description='$got'" >&2; exit 1; }
 echo "✅ test 2: direct id skips picker"
 
+#--- test 3: existing branch — refresh description ---------------------------
+reset_hooks
+write_hook ticket-title <<'TITLE'
+#!/usr/bin/env bash
+echo "Refreshed title"
+TITLE
+
+R="$TMP/repo3"; make_repo "$R"
+git -C "$R" branch T-3
+git -C "$R" config branch.T-3.description "Old title"
+
+run_in "$R" T-3 >/dev/null 2>&1 || { echo "❌ test 3 failed: git ticket T-3 errored" >&2; exit 1; }
+[[ "$(git -C "$R" symbolic-ref --short HEAD)" == "T-3" ]] \
+  || { echo "❌ test 3 failed: HEAD is not on T-3" >&2; exit 1; }
+got="$(git -C "$R" config branch.T-3.description || true)"
+[[ "$got" == "Refreshed title" ]] \
+  || { echo "❌ test 3 failed: description='$got' (expected 'Refreshed title')" >&2; exit 1; }
+echo "✅ test 3: existing branch refresh"
+
 echo "all tests passed"

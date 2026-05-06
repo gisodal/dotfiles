@@ -10,5 +10,12 @@ fi
 
 TITLE="$(ticket-title "$ID")"
 
-git checkout -b "$ID"
+if git show-ref --verify --quiet "refs/heads/$ID"; then
+  git checkout "$ID"
+elif git show-ref --verify --quiet "refs/remotes/origin/$ID"; then
+  git checkout -b "$ID" --track "origin/$ID"
+else
+  git checkout -b "$ID"
+fi
+
 git config branch."$ID".description "$TITLE"
