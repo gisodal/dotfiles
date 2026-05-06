@@ -115,4 +115,15 @@ after_branches="$(git -C "$R" branch | wc -l)"
   || { echo "❌ test 4 failed: cancelled picker created a branch" >&2; exit 1; }
 echo "✅ test 4: cancelled picker exits silent"
 
+#--- test 5: missing ticket-pick + no id ------------------------------------
+reset_hooks
+# no ticket-pick written
+
+R="$TMP/repo5"; make_repo "$R"
+out="$( cd "$R" && PATH="$TEST_PATH" git ticket 2>&1 )" && {
+  echo "❌ test 5 failed: expected non-zero exit, got success" >&2; exit 1; }
+echo "$out" | grep -qi "ticket-pick" \
+  || { echo "❌ test 5 failed: error message should mention ticket-pick; got: $out" >&2; exit 1; }
+echo "✅ test 5: missing ticket-pick dies with hint"
+
 echo "all tests passed"

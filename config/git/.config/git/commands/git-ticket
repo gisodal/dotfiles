@@ -4,6 +4,10 @@ set -euo pipefail
 if [[ $# -ge 1 ]]; then
   ID="$1"
 else
+  command -v ticket-pick >/dev/null || {
+    echo "error: no ticket-pick on PATH; drop a hook script in your project's local/bin/ (see hook contract)" >&2
+    exit 1
+  }
   ID="$(ticket-pick)"
   [[ -n "$ID" ]] || exit 0
 fi
