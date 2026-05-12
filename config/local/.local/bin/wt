@@ -258,6 +258,7 @@ Commands:
   ls               Pick a worktree with fzf; pre-fills 'cd <path>' on next prompt
   status           List worktrees with path and dirty status
   pr               Call 'pr' from PATH for a branch, then wt add
+  ticket [<id>]    Pick a ticket via 'ticket' hook, create worktree, set description from 'ticket-title'
   stow <target>    Stow config repo into target (name or path)
   unstow <target>  Unstow config repo from target
   test             Run embedded smoke tests against this wt
@@ -276,6 +277,7 @@ main() {
     ls)       cmd_ls      "$@" ;;
     status|st) cmd_status "$@" ;;
     pr)       cmd_pr      "$@" ;;
+    ticket)   cmd_ticket  "$@" ;;
     stow)     cmd_stow    "$@" ;;
     unstow)   cmd_unstow  "$@" ;;
     test)     cmd_test    "$@" ;;
@@ -833,7 +835,64 @@ MISE
     || { echo "❌ test 12 failed: main-v2-v2 should not exist" >&2; return 1; }
   echo "✅ test 12: wt add from -vN worktree creates root-v<N+1>"
 
-  success "all 12 tests passed"
+  # test 13: wt ticket happy path with picker
+  mkdir -p "$tmp/hooks"
+  cat > "$tmp/hooks/ticket" <<'PICK'
+#!/usr/bin/env bash
+echo "T-13"
+PICK
+  cat > "$tmp/hooks/ticket-title" <<'TITLE'
+#!/usr/bin/env bash
+echo "Test ticket 13 title"
+TITLE
+  chmod +x "$tmp/hooks/ticket" "$tmp/hooks/ticket-title"
+
+  ( cd "$tmp/ws/foo" && PATH="$tmp/hooks:$PATH" "$WT2" ticket >/dev/null 2>&1 ) \
+    || { echo "❌ test 13 failed: ticket errored" >&2; return 1; }
+  [[ -d "$tmp/ws/T-13" ]] \
+    || { echo "❌ test 13 failed: worktree T-13 not created" >&2; return 1; }
+  desc="$(git -C "$tmp/ws/foo" config branch.T-13.description 2>/dev/null || true)"
+  [[ "$desc" == "Test ticket 13 title" ]] \
+    || { echo "❌ test 13 failed: description='$desc'" >&2; return 1; }
+  echo "✅ test 13: wt ticket happy path"
+
+  # test 14: wt ticket <id> skips picker
+  cat > "$tmp/hooks/ticket" <<'PICK'
+#!/usr/bin/env bash
+echo "ticket should not have run" >&2
+exit 99
+PICK
+  cat > "$tmp/hooks/ticket-title" <<'TITLE'
+#!/usr/bin/env bash
+echo "Direct $1"
+TITLE
+  chmod +x "$tmp/hooks/ticket" "$tmp/hooks/ticket-title"
+
+  ( cd "$tmp/ws/foo" && PATH="$tmp/hooks:$PATH" "$WT2" ticket T-14 >/dev/null 2>&1 ) \
+    || { echo "❌ test 14 failed: ticket T-14 errored" >&2; return 1; }
+  [[ -d "$tmp/ws/T-14" ]] \
+    || { echo "❌ test 14 failed: worktree T-14 not created" >&2; return 1; }
+  desc="$(git -C "$tmp/ws/foo" config branch.T-14.description 2>/dev/null || true)"
+  [[ "$desc" == "Direct T-14" ]] \
+    || { echo "❌ test 14 failed: description='$desc'" >&2; return 1; }
+  echo "✅ test 14: wt ticket <id> skips picker"
+
+  # test 15: cancelled picker (empty stdout) does not create a worktree
+  cat > "$tmp/hooks/ticket" <<'PICK'
+#!/usr/bin/env bash
+exit 0
+PICK
+  chmod +x "$tmp/hooks/ticket"
+
+  before="$(git -C "$tmp/ws/foo" worktree list | wc -l)"
+  ( cd "$tmp/ws/foo" && PATH="$tmp/hooks:$PATH" "$WT2" ticket >/dev/null 2>&1 ) \
+    || { echo "❌ test 15 failed: cancelled picker should exit 0" >&2; return 1; }
+  after="$(git -C "$tmp/ws/foo" worktree list | wc -l)"
+  [[ "$before" == "$after" ]] \
+    || { echo "❌ test 15 failed: cancelled picker created a worktree" >&2; return 1; }
+  echo "✅ test 15: cancelled picker — no worktree"
+
+  success "all 15 tests passed"
   return 0
 }
 
@@ -846,6 +905,38 @@ cmd_pr() {
   info "creating worktree for PR branch: $branch"
   git -C "$SOURCE_REPO" fetch origin "$branch" 2>/dev/null || true
   cmd_add "$branch"
+}
+
+cmd_ticket() {
+  local id="${1:-}"
+  load_context
+
+  if [[ -z "$id" ]]; then
+    command -v ticket >/dev/null \
+      || die "no ticket on PATH; drop a hook script in $CONFIG_REPO/local/bin/"
+    id="$(ticket)"
+    [[ -n "$id" ]] || { info "no ticket selected"; exit 0; }
+  fi
+
+  local title=""
+  if command -v ticket-title >/dev/null; then
+    if ! title="$(ticket-title "$id")"; then
+      die "ticket-title failed for $id"
+    fi
+  else
+    warn "no ticket-title on PATH; skipping branch description"
+  fi
+
+  cmd_add "$id"
+
+  if [[ -z "$title" ]]; then
+    warn "no description set for $id"
+  else
+    title="$(printf '%s' "$title" | head -1)"
+    local wt_path="$WORKSPACE_ROOT/$id"
+    git -C "$wt_path" config branch."$id".description "$title"
+    success "description: $title"
+  fi
 }
 
 # --- Entrypoint ---------------------------------------------------------
