@@ -96,3 +96,28 @@ wk.add({
   silent = true,
   icon = "󰩨",
 })
+
+-- Hunk navigation that works in both gitsigns buffers and diff windows.
+-- Diffview's virtual buffers don't get gitsigns' on_attach, so LazyVim's
+-- buffer-local ]h/[h never get set there.
+vim.keymap.set("n", "]h", function()
+  if vim.wo.diff then
+    vim.cmd.normal({ "]c", bang = true })
+  else
+    local ok, gs = pcall(require, "gitsigns")
+    if ok then
+      gs.nav_hunk("next")
+    end
+  end
+end, { desc = "Next Hunk" })
+
+vim.keymap.set("n", "[h", function()
+  if vim.wo.diff then
+    vim.cmd.normal({ "[c", bang = true })
+  else
+    local ok, gs = pcall(require, "gitsigns")
+    if ok then
+      gs.nav_hunk("prev")
+    end
+  end
+end, { desc = "Prev Hunk" })
