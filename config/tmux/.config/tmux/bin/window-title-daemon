@@ -1,0 +1,29 @@
+#!/bin/bash
+# window-title-daemon — periodically refresh @window_title for the active pane of every window.
+# Started once by tmux config; exits when the tmux server goes away.
+
+set -u
+
+interval=${TMUX_WINDOW_TITLE_INTERVAL:-2}
+pidfile=${TMPDIR:-/tmp}/tmux-window-title-daemon-$UID.pid
+updater="$(dirname "$(readlink -f "$0" 2>/dev/null || echo "$0")")/window-title"
+
+# Single-instance guard. Bail if a live daemon already owns the pidfile.
+if [ -f "$pidfile" ] && kill -0 "$(cat "$pidfile" 2>/dev/null)" 2>/dev/null; then
+  exit 0
+fi
+echo $$ >"$pidfile"
+trap 'rm -f "$pidfile"' EXIT INT TERM
+
+while :; do
+  # `-f #{pane_active}` keeps one row per window — the focused pane drives the title,
+  # matching what the old `#{pane_current_path}` substitution did.
+  panes=$(tmux list-panes -a -f '#{pane_active}' -F '#{window_id}|#{pane_current_path}' 2>/dev/null) || exit 0
+
+  while IFS='|' read -r window_id path; do
+    [ -n "$window_id" ] || continue
+    "$updater" "$window_id" "$path"
+  done <<<"$panes"
+
+  sleep "$interval"
+done

@@ -13,11 +13,16 @@ set -g @catppuccin_window_number_position "left"
 set -g @catppuccin_window_status "none"
 set -g @catppuccin_window_current_background "#{@thm_peach}"
 
+# @window_title is populated asynchronously by ../bin/window-title (hooks + daemon).
+# Default value uses `#W` so the format keeps working before the first update lands.
+# `#{E:...}` re-expands that `#W` into the actual window name.
+set -gw @window_title "#W"
+
 set -g @catppuccin_window_default_fill "number" # or 'number' the number is highlighted
-set -g @catppuccin_window_default_text '#(cd "#{pane_current_path}" && b=$(git symbolic-ref --short HEAD 2>/dev/null) && echo "$(basename $(git rev-parse --show-toplevel)):$b" || echo "#W")#{?window_zoomed_flag, 󰁌 ,}'
+set -g @catppuccin_window_default_text '#{E:@window_title}#{?window_zoomed_flag, 󰁌 ,}'
 
 set -g @catppuccin_window_current_fill "all" # the number and text field are highlighted
-set -g @catppuccin_window_current_text '#(cd "#{pane_current_path}" && b=$(git symbolic-ref --short HEAD 2>/dev/null) && echo "$(basename $(git rev-parse --show-toplevel)):$b" || echo "#W")#{?window_zoomed_flag, 󰁌 ,}'
+set -g @catppuccin_window_current_text '#{E:@window_title}#{?window_zoomed_flag, 󰁌 ,}'
 
 ## status bar stuff
 set -g @catppuccin_status_right_separator " "

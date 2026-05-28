@@ -4,7 +4,7 @@
 [include] # add file containing user info
     path = ~/.config/git/.gituser
 [push]
-    default = matching
+	default = current
 [merge]
     defaultToUpstream = true
     tool = diffview
@@ -71,6 +71,7 @@
     cmm = commit -m
     fd = fetch-diff
     af = add-files
+    rf = remove-files
     sf = stash-files
     cb = checkout-branch
 
@@ -84,6 +85,7 @@
   
     bde = branch-description-edit
     bds = branch-description-show
+    sd = set-description
 
     sr = skip-restore
 

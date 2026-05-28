@@ -73,7 +73,8 @@ function o() {
 
 function ls() {
   if exists eza; then
-    eza --icons --git --ignore-glob='**/.git' --time-style=long-iso --group-directories-first -a $@
+    local _cols=$(stty size 2>/dev/null | awk '{print $2}')
+    eza --icons --git --ignore-glob='**/.git' --time-style=long-iso --group-directories-first -a ${_cols:+--width=$_cols} $@
   elif [ $(uname) == "Darwin" ]; then
     command ls --color=auto -v -h -a -I .. -I . -I .git $@
   else

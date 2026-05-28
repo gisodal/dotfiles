@@ -37,4 +37,13 @@ bind D confirm-before -p 'Kill tmux (y/N)?' '                                   
         tmux confirm-before -p \"Confirm kill tmux (y/N)?\" kill-server;                        \
     "'
 
+# Async window-title pipeline. Hooks cover event-driven updates; the daemon
+# polls for cwd changes inside a pane that tmux has no hook for.
+set-hook -g after-new-window    'run-shell -b "~/.config/tmux/bin/window-title #{window_id} \"#{pane_current_path}\""'
+set-hook -g after-select-window 'run-shell -b "~/.config/tmux/bin/window-title #{window_id} \"#{pane_current_path}\""'
+set-hook -g pane-focus-in       'run-shell -b "~/.config/tmux/bin/window-title #{window_id} \"#{pane_current_path}\""'
+set-hook -g window-pane-changed 'run-shell -b "~/.config/tmux/bin/window-title #{window_id} \"#{pane_current_path}\""'
+
+run-shell -b "~/.config/tmux/bin/window-title-daemon"
+
 

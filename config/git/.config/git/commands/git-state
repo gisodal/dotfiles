@@ -1,0 +1,50 @@
+#!/bin/bash
+# git state — print "branch[~off][:op][*]" describing current git state.
+# Exits 1 with empty stdout when not in a git repo.
+
+git_dir=$(git rev-parse --git-dir 2>/dev/null) || exit 1
+
+rebase_head=
+if [ -f "$git_dir/rebase-merge/head-name" ]; then
+  rebase_head=$git_dir/rebase-merge/head-name
+elif [ -f "$git_dir/rebase-apply/head-name" ]; then
+  rebase_head=$git_dir/rebase-apply/head-name
+fi
+
+if branch=$(git symbolic-ref --short HEAD 2>/dev/null); then
+  detached=
+elif [ -n "$rebase_head" ]; then
+  branch=$(sed 's@^refs/heads/@@' "$rebase_head")
+  detached=1
+elif branch=$(git name-rev --name-only --no-undefined HEAD 2>/dev/null); then
+  detached=1
+elif branch=$(git rev-parse --short HEAD 2>/dev/null); then
+  detached=1
+else
+  exit 1
+fi
+
+# precedence: rebase > bisect > cherry-pick > revert > merge > detached
+if [ -d "$git_dir/rebase-merge" ] || [ -d "$git_dir/rebase-apply" ]; then
+  op=rebasing
+elif [ -f "$git_dir/BISECT_LOG" ]; then
+  op=bisecting
+elif [ -f "$git_dir/CHERRY_PICK_HEAD" ]; then
+  op=cherry-picking
+elif [ -f "$git_dir/REVERT_HEAD" ]; then
+  op=reverting
+elif [ -f "$git_dir/MERGE_HEAD" ]; then
+  op=merging
+elif [ -n "$detached" ]; then
+  op=detached
+else
+  op=
+fi
+
+dirty=
+git diff-index --quiet HEAD -- 2>/dev/null || dirty='*'
+
+out=$branch
+[ -n "$op" ] && out=$out:$op
+out=$out$dirty
+printf '%s\n' "$out"

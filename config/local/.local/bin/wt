@@ -253,7 +253,11 @@ Usage: wt <command> [arguments]
 
 Commands:
   setup [path]     Bootstrap a config repo for a source repo (arg or cwd)
-  add <branch>     Create a worktree, stow config, trust mise, run bootstrap
+  add <branch> [<position>]
+                   Create a worktree, stow config, trust mise, run bootstrap.
+                   <position> is any commit-ish (branch, tag, hash) to start from;
+                   defaults to current HEAD. Branch must not already exist when
+                   <position> is given.
   rm [branch]      Remove a worktree (fzf if no name)
   ls               Pick a worktree with fzf; pre-fills 'cd <path>' on next prompt
   status           List worktrees with path and dirty status
@@ -500,6 +504,7 @@ derive_next_branch() {
 
 cmd_add() {
   local branch="${1:-}"
+  local position="${2:-}"
 
   load_context
 
@@ -509,14 +514,33 @@ cmd_add() {
   fi
 
   local wt_path="$WORKSPACE_ROOT/$branch"
+  local branch_exists_local=0 branch_exists_remote=0
+  git -C "$SOURCE_REPO" show-ref --verify --quiet "refs/heads/$branch" && branch_exists_local=1
+  git -C "$SOURCE_REPO" show-ref --verify --quiet "refs/remotes/origin/$branch" && branch_exists_remote=1
 
-  info "creating worktree at $wt_path"
-  if git -C "$SOURCE_REPO" show-ref --verify --quiet "refs/heads/$branch"; then
-    git -C "$SOURCE_REPO" worktree add "$wt_path" "$branch"
-  elif git -C "$SOURCE_REPO" show-ref --verify --quiet "refs/remotes/origin/$branch"; then
-    git -C "$SOURCE_REPO" worktree add --track -b "$branch" "$wt_path" "origin/$branch"
+  if [[ -n "$position" ]]; then
+    (( branch_exists_local || branch_exists_remote )) \
+      && die "branch '$branch' already exists; drop the position arg or pick a new name"
+    local resolved="$position"
+    if ! git -C "$SOURCE_REPO" rev-parse --verify --quiet "${position}^{commit}" >/dev/null; then
+      if git -C "$SOURCE_REPO" rev-parse --verify --quiet "origin/${position}^{commit}" >/dev/null; then
+        resolved="origin/$position"
+        info "position '$position' not found locally; using '$resolved'"
+      else
+        die "position '$position' does not resolve to a commit"
+      fi
+    fi
+    info "creating worktree at $wt_path from $resolved"
+    git -C "$SOURCE_REPO" worktree add --no-track -b "$branch" "$wt_path" "$resolved"
   else
-    git -C "$SOURCE_REPO" worktree add -b "$branch" "$wt_path"
+    info "creating worktree at $wt_path"
+    if (( branch_exists_local )); then
+      git -C "$SOURCE_REPO" worktree add "$wt_path" "$branch"
+    elif (( branch_exists_remote )); then
+      git -C "$SOURCE_REPO" worktree add --track -b "$branch" "$wt_path" "origin/$branch"
+    else
+      git -C "$SOURCE_REPO" worktree add -b "$branch" "$wt_path"
+    fi
   fi
 
   info "checking stow conflicts..."
@@ -892,7 +916,56 @@ PICK
     || { echo "❌ test 15 failed: cancelled picker created a worktree" >&2; return 1; }
   echo "✅ test 15: cancelled picker — no worktree"
 
-  success "all 15 tests passed"
+  # test 16: wt add <branch> <position> with local-branch position
+  git -C "$tmp/ws/foo" branch base-16 main >/dev/null 2>&1
+  git -C "$tmp/ws/foo" -c user.email=a@b -c user.name=a commit --allow-empty -q -m c1
+  ( cd "$tmp/ws/foo" && "$WT2" add feat-16 base-16 >/dev/null 2>&1 ) \
+    || { echo "❌ test 16 failed: add with position errored" >&2; return 1; }
+  [[ -e "$tmp/ws/feat-16/.git" ]] \
+    || { echo "❌ test 16 failed: worktree not created" >&2; return 1; }
+  local base_sha feat_sha
+  base_sha="$(git -C "$tmp/ws/foo" rev-parse base-16)"
+  feat_sha="$(git -C "$tmp/ws/feat-16" rev-parse HEAD)"
+  [[ "$base_sha" == "$feat_sha" ]] \
+    || { echo "❌ test 16 failed: feat-16 HEAD ($feat_sha) != base-16 ($base_sha)" >&2; return 1; }
+  echo "✅ test 16: add with local-branch position"
+
+  # test 17: wt add <branch> <commit-hash>
+  local hash17
+  hash17="$(git -C "$tmp/ws/foo" rev-parse base-16)"
+  ( cd "$tmp/ws/foo" && "$WT2" add feat-17 "$hash17" >/dev/null 2>&1 ) \
+    || { echo "❌ test 17 failed: add with hash errored" >&2; return 1; }
+  [[ "$(git -C "$tmp/ws/feat-17" rev-parse HEAD)" == "$hash17" ]] \
+    || { echo "❌ test 17 failed: feat-17 HEAD != $hash17" >&2; return 1; }
+  echo "✅ test 17: add with commit-hash position"
+
+  # test 18: unresolvable position errors out
+  ( cd "$tmp/ws/foo" && "$WT2" add feat-18 nonexistent-ref-xyz >/dev/null 2>&1 ) && {
+    echo "❌ test 18 failed: expected error for unresolvable position" >&2
+    return 1
+  }
+  [[ ! -d "$tmp/ws/feat-18" ]] \
+    || { echo "❌ test 18 failed: worktree created despite bad position" >&2; return 1; }
+  echo "✅ test 18: unresolvable position errors"
+
+  # test 19: existing branch + position errors out
+  ( cd "$tmp/ws/foo" && "$WT2" add base-16 main >/dev/null 2>&1 ) && {
+    echo "❌ test 19 failed: expected error for existing branch with position" >&2
+    return 1
+  }
+  echo "✅ test 19: existing branch + position errors"
+
+  # test 20: origin/X position does not set up tracking
+  git -C "$tmp/ws/foo" update-ref refs/remotes/origin/main HEAD
+  ( cd "$tmp/ws/foo" && "$WT2" add feat-20 origin/main >/dev/null 2>&1 ) \
+    || { echo "❌ test 20 failed: add from origin/main errored" >&2; return 1; }
+  local merge_cfg
+  merge_cfg="$(git -C "$tmp/ws/foo" config --get branch.feat-20.merge 2>/dev/null || true)"
+  [[ -z "$merge_cfg" ]] \
+    || { echo "❌ test 20 failed: feat-20 has tracking ($merge_cfg); expected --no-track" >&2; return 1; }
+  echo "✅ test 20: origin/X position uses --no-track"
+
+  success "all 20 tests passed"
   return 0
 }
 

@@ -1,0 +1,80 @@
+#!/bin/bash
+
+cd "$(git rev-parse --show-toplevel)" || exit 1
+
+include_ignored=0
+for arg in "$@"; do
+  case "$arg" in
+    -x|--ignored) include_ignored=1 ;;
+    -h|--help)
+      cat <<EOF
+Usage: git rf [-x]
+  Interactively remove untracked files/dirs or revert local modifications.
+    ??  untracked -> rm -rf
+    M   modified  -> git restore
+  -x, --ignored   also include .gitignored files
+EOF
+      exit 0
+      ;;
+    *) echo "unknown argument: $arg" >&2; exit 2 ;;
+  esac
+done
+
+if [[ $include_ignored -eq 1 ]]; then
+  untracked="$(git ls-files --others --directory | sed 's/^/?? /' | sort)"
+else
+  untracked="$(git ls-files --others --exclude-standard --directory | sed 's/^/?? /' | sort)"
+fi
+modified="$(git diff --name-only --diff-filter=M | sed 's/^/M  /' | sort)"
+
+# Untracked first in input = bottom of fzf default layout = closest to prompt.
+files="$(
+  [[ -n "$untracked" ]] && printf '%s\n' "$untracked"
+  [[ -n "$modified" ]] && printf '%s\n' "$modified"
+)"
+
+if [[ -z "$files" ]]; then
+  echo "nothing to remove"
+  exit 0
+fi
+
+# Preview runs in fzf's preview shell (sh on macOS) — keep POSIX, no bash fork.
+PREVIEW='line={}; case "$line" in
+  "?? "*) f=${line#?? }; case "$f" in
+    */) tree -L 2 -C -- "$f" 2>/dev/null || ls -la -- "$f" ;;
+    *)  batcat --style=numbers --color=always -- "$f" 2>/dev/null || cat -- "$f" ;;
+  esac ;;
+  "M  "*) f=${line#M  };
+    if command -v delta >/dev/null 2>&1; then
+      git diff --color=always -- "$f" | delta --width "$(tput cols)" --side-by-side
+    else
+      git diff --color=always -- "$f"
+    fi ;;
+esac'
+
+selected="$(printf '%s\n' "$files" | fzf -m --cycle --no-height \
+  --header="Select files to remove (?? rm -rf | M  git restore) — Ctrl-A: toggle all" \
+  --preview "$PREVIEW" \
+  --preview-window=right:60%:wrap \
+  --bind 'ctrl-a:toggle-all,ctrl-d:preview-page-down,ctrl-u:preview-page-up,ctrl-f:preview-page-down,ctrl-b:preview-page-up' \
+  || true)"
+
+[[ -z "$selected" ]] && exit 0
+
+count="$(printf '%s\n' "$selected" | wc -l | tr -d ' ')"
+printf '%s\n' "$selected"
+read -r -p "Remove $count item(s)? [y/N] " ans
+[[ "$ans" == "y" || "$ans" == "Y" ]] || { echo "aborted"; exit 0; }
+
+while IFS= read -r line; do
+  [[ -z "$line" ]] && continue
+  status="${line:0:2}"
+  file="${line:3}"
+  if [[ "$status" == "??" ]]; then
+    echo "rm -rf \"$file\""
+    rm -rf -- "$file"
+  elif [[ "$status" == "M " ]]; then
+    echo "git restore -- \"$file\""
+    git restore -- "$file"
+  fi
+done <<< "$selected"

@@ -1,0 +1,23 @@
+#!/bin/bash
+# window-title — compute @window_title for one tmux window from its cwd's git state.
+# Args: <window_id> <pane_current_path>
+
+window_id=$1
+path=$2
+
+# git-state lives in ~/.config/git/commands; ensure git can find it as a subcommand.
+PATH="$HOME/.config/git/commands:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
+export PATH
+
+[ -d "$path" ] && cd "$path" 2>/dev/null || {
+  tmux set-option -wq -t "$window_id" @window_title '#W' 2>/dev/null
+  exit 0
+}
+
+if top=$(git rev-parse --show-toplevel 2>/dev/null) && state=$(git state 2>/dev/null); then
+  title="$(basename "$top"):$state"
+else
+  title='#W'
+fi
+
+tmux set-option -wq -t "$window_id" @window_title "$title" 2>/dev/null

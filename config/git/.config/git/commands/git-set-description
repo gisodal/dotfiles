@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+
+if [[ "$BRANCH" == "HEAD" ]]; then
+  echo "error: detached HEAD; checkout a branch first" >&2
+  exit 1
+fi
+
+if [[ $# -gt 0 ]]; then
+  DESC="$*"
+else
+  command -v ticket-title >/dev/null || {
+    echo "error: no ticket-title on PATH; drop a hook script in your project's local/bin/" >&2
+    exit 1
+  }
+
+  ROOT="$BRANCH"
+  PREFIX=""
+  if [[ "$BRANCH" =~ ^(.*)-v([0-9]+)$ ]]; then
+    ROOT="${BASH_REMATCH[1]}"
+    PREFIX="V${BASH_REMATCH[2]}: "
+  fi
+
+  if ! TITLE="$(ticket-title "$ROOT")"; then
+    echo "error: ticket-title failed for $ROOT (exit $?)" >&2
+    exit 1
+  fi
+
+  TITLE="$(printf '%s' "$TITLE" | head -1)"
+
+  if [[ -z "$TITLE" ]]; then
+    echo "error: empty title for $ROOT" >&2
+    exit 1
+  fi
+
+  DESC="${PREFIX}${TITLE}"
+fi
+
+git config branch."$BRANCH".description "$DESC"
+printf '%s: %s\n' "$BRANCH" "$DESC"

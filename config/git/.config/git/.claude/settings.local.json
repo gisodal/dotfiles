@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(for i:*)",
+      "Bash(do /usr/bin/time zsh -i -c exit)",
+      "Bash(done)",
+      "Bash(zsh -i -c -x exit)",
+      "Bash(zsh -i -c exit)",
+      "Bash(ZPROF=1 zsh -i -c 'if \\(\\( $+functions[zprof] \\)\\); then zprof; else echo \"zprof not loaded\"; fi; exit' 2>&1)",
+      "Read(//Users/gisodal/.config/dotfiles/config/git/.config/git/**)",
+      "Bash(zsh -c 'source /tmp/zsh-profile-startup.zsh')",
+      "Bash(curl -s https://raw.githubusercontent.com/romkatv/zsh4humans/master/fn/-z4h-init)",
+      "Bash(curl:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:gist.github.com)",
+      "WebFetch(domain:htr3n.github.io)",
+      "WebFetch(domain:carlosbecker.com)",
+      "WebFetch(domain:blog.mattclemente.com)",
+      "WebFetch(domain:frederic-hemberger.de)",
+      "WebFetch(domain:notes.frederic-hemberger.de)",
+      "WebFetch(domain:discourse.brew.sh)",
+      "WebFetch(domain:www.reddit.com)",
+      "WebFetch(domain:wiki.archlinux.org)",
+      "WebFetch(domain:getantidote.github.io)",
+      "WebFetch(domain:www.dribin.org)"
+    ]
+  }
+}

@@ -1,0 +1,95 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SELF_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+RF="$SELF_DIR/git-remove-files"
+
+[[ -x "$RF" ]] || { echo "git-remove-files not found or not executable at $RF" >&2; exit 1; }
+
+TMP="$(mktemp -d)"; TMP="$(cd "$TMP" && pwd -P)"
+trap "rm -rf '$TMP'" EXIT
+
+echo "running git-remove-files smoke tests in $TMP"
+
+make_repo() {
+  local d="$1"
+  rm -rf "$d"; mkdir -p "$d"
+  git -C "$d" init -q -b main
+  git -C "$d" -c user.email=a@b -c user.name=a commit --allow-empty -q -m init
+  git -C "$d" branch -M main
+}
+
+BIN="$TMP/bin"; mkdir -p "$BIN"
+TEST_PATH="$BIN:/usr/bin:/bin:/usr/local/bin:/opt/homebrew/bin"
+
+write_fake_fzf() {
+  cat > "$BIN/fzf"
+  chmod +x "$BIN/fzf"
+}
+
+#--- test 1: no untracked files -> message, exit 0 -------------------------
+R="$TMP/repo1"; make_repo "$R"
+out="$( cd "$R" && "$RF" 2>&1 )" \
+  || { echo "❌ test 1 failed: should exit 0 on empty; got: $out" >&2; exit 1; }
+echo "$out" | grep -qi "nothing to remove" \
+  || { echo "❌ test 1 failed: expected 'nothing to remove'; got: $out" >&2; exit 1; }
+echo "✅ test 1: no untracked files prints message and exits 0"
+
+#--- test 2: mixed selection -> rm -rf untracked + git restore modified -----
+R="$TMP/repo2"; make_repo "$R"
+(
+  cd "$R"
+  echo "original" > tracked.txt
+  git add tracked.txt
+  git -c user.email=a@b -c user.name=a commit -q -m add-tracked
+  echo "modified" > tracked.txt
+  touch untracked.txt
+)
+
+write_fake_fzf <<'EOF'
+#!/bin/bash
+cat > /dev/null
+printf '%s\n' "?? untracked.txt" "M  tracked.txt"
+EOF
+
+out="$( cd "$R" && PATH="$TEST_PATH" "$RF" <<< "y" 2>&1 )" \
+  || { echo "❌ test 2 failed: non-zero exit; got: $out" >&2; exit 1; }
+[[ ! -e "$R/untracked.txt" ]] \
+  || { echo "❌ test 2 failed: untracked.txt should be removed" >&2; exit 1; }
+got="$(cat "$R/tracked.txt")"
+[[ "$got" == "original" ]] \
+  || { echo "❌ test 2 failed: tracked.txt content='$got' (expected 'original')" >&2; exit 1; }
+echo "$out" | grep -q 'rm -rf "untracked.txt"' \
+  || { echo "❌ test 2 failed: missing rm -rf trace; got: $out" >&2; exit 1; }
+echo "$out" | grep -q 'git restore -- "tracked.txt"' \
+  || { echo "❌ test 2 failed: missing git restore trace; got: $out" >&2; exit 1; }
+echo "✅ test 2: mixed selection dispatches rm -rf and git restore"
+
+#--- test 3: 'n' at prompt aborts, no changes made --------------------------
+R="$TMP/repo3"; make_repo "$R"
+(
+  cd "$R"
+  echo "original" > tracked.txt
+  git add tracked.txt
+  git -c user.email=a@b -c user.name=a commit -q -m add-tracked
+  echo "modified" > tracked.txt
+  touch untracked.txt
+)
+
+write_fake_fzf <<'EOF'
+#!/bin/bash
+cat > /dev/null
+printf '%s\n' "?? untracked.txt" "M  tracked.txt"
+EOF
+
+out="$( cd "$R" && PATH="$TEST_PATH" "$RF" <<< "n" 2>&1 )" \
+  || { echo "❌ test 3 failed: non-zero exit; got: $out" >&2; exit 1; }
+[[ -e "$R/untracked.txt" ]] \
+  || { echo "❌ test 3 failed: untracked.txt should still exist after abort" >&2; exit 1; }
+[[ "$(cat "$R/tracked.txt")" == "modified" ]] \
+  || { echo "❌ test 3 failed: tracked.txt should still be modified after abort" >&2; exit 1; }
+echo "$out" | grep -qi "aborted" \
+  || { echo "❌ test 3 failed: expected 'aborted' in output; got: $out" >&2; exit 1; }
+echo "✅ test 3: 'n' at prompt aborts without changes"
+
+echo "all tests passed"
